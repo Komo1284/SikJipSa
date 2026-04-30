@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="2048" viewBox="0 0 2048 2048">
+  <!-- Square splash. Expo resizeMode="contain" + matching backgroundColor
+       (#F5F1EA) letterboxes the rest of the screen seamlessly. -->
+  <rect width="2048" height="2048" fill="#F5F1EA"/>
+
+  <!-- Center the plant icon at the top half so the title sits below it. -->
+  <g transform="translate(512, 380)">
+    <!-- Soft inner halo for depth -->
+    <circle cx="512" cy="380" r="380" fill="#ECE3D1" opacity="0.55"/>
+
+    <!-- Pot (terracotta) -->
+    <path d="M 388 588 L 636 588 L 612 726 Q 608 748 586 748 L 438 748 Q 416 748 412 726 Z" fill="#A87650"/>
+    <rect x="376" y="558" width="272" height="46" rx="10" fill="#B98666"/>
+
+    <!-- Soil line -->
+    <ellipse cx="512" cy="578" rx="120" ry="10" fill="#5C4326" opacity="0.5"/>
+
+    <!-- Center stem -->
+    <path d="M 512 568 Q 512 408 512 228" stroke="#2D4A2B" stroke-width="16" fill="none" stroke-linecap="round"/>
+
+    <!-- Top center leaf -->
+    <path d="M 512 228
+             Q 470 138 420 88
+             Q 440 48 500 68
+             Q 560 108 540 188
+             Q 528 218 512 228 Z" fill="#2D4A2B"/>
+
+    <!-- Right leaf -->
+    <path d="M 512 338
+             Q 600 298 670 248
+             Q 700 278 660 338
+             Q 600 388 540 368
+             Q 518 358 512 338 Z" fill="#3A5C38"/>
+
+    <!-- Left leaf -->
+    <path d="M 512 448
+             Q 410 428 340 368
+             Q 320 408 370 458
+             Q 440 498 500 478
+             Q 510 468 512 448 Z" fill="#4A6E48"/>
+
+    <!-- Top-right sprout -->
+    <path d="M 540 148
+             Q 600 118 640 78
+             Q 660 108 630 148
+             Q 590 178 552 168
+             Q 540 164 540 148 Z" fill="#3A5C38" opacity="0.85"/>
+  </g>
+
+  <!-- App name -->
+  <text x="1024" y="1620"
+        font-family="'AppleGothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif"
+        font-size="160"
+        font-weight="700"
+        fill="#2D4A2B"
+        text-anchor="middle"
+        letter-spacing="10">식집사</text>
+
+  <!-- Tagline -->
+  <text x="1024" y="1740"
+        font-family="'AppleGothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif"
+        font-size="56"
+        fill="#5C7A5A"
+        text-anchor="middle"
+        letter-spacing="6">우리 집 식물 집사</text>
+</svg>

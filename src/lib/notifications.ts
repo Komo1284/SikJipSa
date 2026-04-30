@@ -1,0 +1,116 @@
+import type { Plant } from '@/types/plant';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+
+/** Top-of-file config — runs once on import. */
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
+let permissionChecked = false;
+let permissionGranted = false;
+
+export async function ensureNotificationPermission(): Promise<boolean> {
+  if (permissionChecked) return permissionGranted;
+  permissionChecked = true;
+
+  try {
+    const current = await Notifications.getPermissionsAsync();
+    if (current.granted) {
+      permissionGranted = true;
+      return true;
+    }
+    const req = await Notifications.requestPermissionsAsync();
+    permissionGranted = req.granted;
+
+    if (Platform.OS === 'android' && permissionGranted) {
+      await Notifications.setNotificationChannelAsync('water', {
+        name: '물주기 알림',
+        importance: Notifications.AndroidImportance.DEFAULT,
+        sound: 'default',
+      });
+    }
+    return permissionGranted;
+  } catch (e) {
+    console.warn('[notifications] permission error:', e);
+    return false;
+  }
+}
+
+const WATER_NOTIF_PREFIX = 'water-';
+
+function identifierFor(plantId: string) {
+  return `${WATER_NOTIF_PREFIX}${plantId}`;
+}
+
+/**
+ * Schedules a 09:00 local notification on the plant's next_water date.
+ * Past dates are skipped. Returns true if a notification was scheduled.
+ */
+export async function scheduleWaterReminder(plant: Plant): Promise<boolean> {
+  if (!(await ensureNotificationPermission())) return false;
+
+  // Cancel any previous reminder for this plant first.
+  await cancelWaterReminder(plant.id);
+
+  const target = new Date(plant.nextWater);
+  target.setHours(9, 0, 0, 0);
+  const now = new Date();
+  if (target.getTime() <= now.getTime()) return false;
+
+  try {
+    await Notifications.scheduleNotificationAsync({
+      identifier: identifierFor(plant.id),
+      content: {
+        title: `${plant.name} 물 줄 시간이에요`,
+        body: plant.location ? `${plant.location} · 오늘 한 번 살펴볼까요?` : '오늘 한 번 살펴볼까요?',
+        data: { plantId: plant.id, kind: 'water' },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: target,
+        channelId: Platform.OS === 'android' ? 'water' : undefined,
+      },
+    });
+    return true;
+  } catch (e) {
+    console.warn('[notifications] schedule failed:', e);
+    return false;
+  }
+}
+
+export async function cancelWaterReminder(plantId: string) {
+  try {
+    await Notifications.cancelScheduledNotificationAsync(identifierFor(plantId));
+  } catch {
+    // silent — no-op if identifier doesn't exist
+  }
+}
+
+/**
+ * Called on app start after plants load — drops all known scheduled reminders
+ * and re-schedules based on current state. Cheap and self-healing.
+ */
+export async function rescheduleAll(plants: Plant[]) {
+  if (!(await ensureNotificationPermission())) return;
+  try {
+    const existing = await Notifications.getAllScheduledNotificationsAsync();
+    const ids = existing
+      .map((n) => n.identifier)
+      .filter((id) => id.startsWith(WATER_NOTIF_PREFIX));
+    for (const id of ids) {
+      await Notifications.cancelScheduledNotificationAsync(id);
+    }
+    for (const p of plants) {
+      // eslint-disable-next-line no-await-in-loop
+      await scheduleWaterReminder(p);
+    }
+  } catch (e) {
+    console.warn('[notifications] rescheduleAll failed:', e);
+  }
+}

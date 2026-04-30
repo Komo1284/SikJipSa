@@ -1,0 +1,456 @@
+import { ThemedText } from '@/components/Typography';
+import { repos } from '@/repo';
+import { DesktopAddModal } from '@/screens/desktop/AddModal';
+import { useLocationStore } from '@/store/locations';
+import { usePlantStore } from '@/store/plants';
+import { useTheme } from '@/theme/ThemeProvider';
+import { useResponsive } from '@/theme/responsive';
+import type { Plant } from '@/types/plant';
+import { addDays, toISODate } from '@/utils/date';
+import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
+import { Check, ChevronLeft, Plus } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const STEPS = [
+  { n: 1, title: '어떤 식물인가요?', sub: '이름과 종류를 알려주세요.' },
+  { n: 2, title: '어디에 두었나요?', sub: '공간에 따라 환경이 달라요.' },
+  { n: 3, title: '돌보는 리듬은?',   sub: '물주기 주기를 정해주세요.' },
+];
+
+const CYCLES = [3, 5, 7, 10, 14, 21, 30];
+const LIGHTS = ['강한 직사광', '밝은 간접광', '반그늘', '약한 그늘'];
+const HUMIDITIES = ['매우 높음', '높음', '보통', '낮음'];
+
+export default function AddScreen() {
+  const { isDesktop } = useResponsive();
+  if (isDesktop) return <DesktopAddModal />;
+  return <AddMobile />;
+}
+
+function AddMobile() {
+  const { palette, radii, weights } = useTheme();
+  const insets = useSafeAreaInsets();
+  const addPlant = usePlantStore((s) => s.addPlant);
+  const locations = useLocationStore((s) => s.locations);
+
+  const [step, setStep] = useState(1);
+  const [name, setName] = useState('');
+  const [species, setSpecies] = useState('');
+  const [location, setLocation] = useState('');
+  const [cycle, setCycle] = useState(7);
+  const [light, setLight] = useState('');
+  const [humidity, setHumidity] = useState('보통');
+  const [note, setNote] = useState('');
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [lightPref, setLightPref] = useState(3);
+  const [humidityPref, setHumidityPref] = useState(3);
+  const [busy, setBusy] = useState(false);
+
+  const cur = STEPS[step - 1];
+
+  const pickPhoto = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('권한 필요', '사진첩 접근 권한을 허용해주세요.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setPhotoUri(result.assets[0].uri);
+    }
+  };
+
+  const submit = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const today = toISODate(new Date());
+      const tempId = `plant-${Date.now().toString(36)}`;
+
+      // Upload photo first if picked — we use tempId as the path prefix since
+      // the plant's real UUID isn't known yet.
+      let photoUrl: string | null = null;
+      if (photoUri) {
+        try {
+          const uploaded = await repos.storage.uploadPhoto(tempId, photoUri);
+          photoUrl = uploaded.publicUrl;
+        } catch (e) {
+          Alert.alert('사진 업로드 실패', (e as Error).message);
+          setBusy(false);
+          return;
+        }
+      }
+
+      const plant: Plant = {
+        id: tempId,
+        name: name || '이름 없는 식물',
+        species: species || '',
+        location: location || '거실',
+        light: light || '밝은 간접광',
+        humidity,
+        waterCycle: cycle,
+        fertCycle: 30,
+        lastWater: today,
+        lastFert: today,
+        nextWater: addDays(today, cycle),
+        note,
+        color: '#4a6a4a',
+        mood: 'tropical',
+        photoUrl,
+        speciesLightPref: lightPref,
+        speciesHumidityPref: humidityPref,
+      };
+      await addPlant(plant);
+      router.back();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const next = () => (step < 3 ? setStep(step + 1) : submit());
+
+  const inputStyle = {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: radii.sm,
+    backgroundColor: palette.surface,
+    borderWidth: 1,
+    borderColor: palette.line,
+    fontSize: 15,
+    fontFamily: weights.sansRegular,
+    color: palette.ink,
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: palette.bg }}>
+      <View style={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <Pressable
+          onPress={() => (step > 1 ? setStep(step - 1) : router.back())}
+          style={{
+            width: 36, height: 36, borderRadius: 10, backgroundColor: palette.surface,
+            alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <ChevronLeft size={16} color={palette.ink} strokeWidth={2} />
+        </Pressable>
+        <View style={{ flex: 1, flexDirection: 'row', gap: 4 }}>
+          {STEPS.map((s) => (
+            <View
+              key={s.n}
+              style={{
+                flex: 1, height: 3, borderRadius: 2,
+                backgroundColor: s.n <= step ? palette.green : palette.lineStrong,
+              }}
+            />
+          ))}
+        </View>
+      </View>
+
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 24, paddingBottom: 140 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 10, letterSpacing: 1.3 }}>
+          STEP {step}/3
+        </ThemedText>
+        <ThemedText family="serif" style={{ fontSize: 32, lineHeight: 36, fontFamily: weights.serifRegular, letterSpacing: -0.3 }}>
+          {cur.title}
+        </ThemedText>
+        <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 10, marginBottom: 28 }}>
+          {cur.sub}
+        </ThemedText>
+
+        {step === 1 ? (
+          <View style={{ gap: 16 }}>
+            <Field label="식물 이름">
+              <TextInput
+                value={name}
+                onChangeText={setName}
+                placeholder="예: 몬스테라"
+                placeholderTextColor={palette.ink3}
+                style={inputStyle}
+              />
+            </Field>
+            <Field label="학명 (선택)">
+              <TextInput
+                value={species}
+                onChangeText={setSpecies}
+                placeholder="Monstera deliciosa"
+                placeholderTextColor={palette.ink3}
+                style={inputStyle}
+              />
+            </Field>
+            <Pressable
+              onPress={pickPhoto}
+              style={{
+                height: 180,
+                borderWidth: photoUri ? 0 : 1.5,
+                borderStyle: 'dashed',
+                borderColor: palette.lineStrong,
+                borderRadius: radii.md,
+                backgroundColor: palette.surface,
+                overflow: 'hidden',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                marginTop: 8,
+              }}
+            >
+              {photoUri ? (
+                <Image source={{ uri: photoUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+              ) : (
+                <>
+                  <View
+                    style={{
+                      width: 44, height: 44, borderRadius: 22, backgroundColor: palette.greenBg,
+                      alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    <Plus size={22} color={palette.green} strokeWidth={2} />
+                  </View>
+                  <ThemedText variant="meta" weight="medium" color={palette.ink2}>사진 추가</ThemedText>
+                  <ThemedText variant="tiny" family="mono" color={palette.ink3}>권장 1:1</ThemedText>
+                </>
+              )}
+            </Pressable>
+            {photoUri ? (
+              <Pressable onPress={() => setPhotoUri(null)} style={{ alignSelf: 'center', marginTop: 8 }}>
+                <ThemedText variant="tiny" color={palette.ink3}>사진 제거</ThemedText>
+              </Pressable>
+            ) : null}
+          </View>
+        ) : null}
+
+        {step === 2 ? (
+          <View style={{ gap: 10 }}>
+            {locations.map((loc) => {
+              const active = location === loc.name;
+              const count = usePlantStore
+                .getState()
+                .plants.filter((p) => p.location === loc.name).length;
+              return (
+                <Pressable
+                  key={loc.id}
+                  onPress={() => setLocation(loc.name)}
+                  style={{
+                    padding: 16,
+                    backgroundColor: active ? palette.green : palette.surface,
+                    borderRadius: radii.md,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <View>
+                    <ThemedText variant="body" weight="semibold" color={active ? palette.bg : palette.ink}>
+                      {loc.name}
+                    </ThemedText>
+                    <ThemedText variant="meta" color={active ? palette.bg : palette.ink3} style={{ marginTop: 3, opacity: active ? 0.8 : 1 }}>
+                      식물 {count}개
+                    </ThemedText>
+                  </View>
+                  {active ? <Check size={18} color={palette.bg} strokeWidth={2.2} /> : null}
+                </Pressable>
+              );
+            })}
+            {locations.length === 0 ? (
+              <ThemedText variant="meta" color={palette.ink3}>
+                공간이 없어요. 설정 탭에서 추가해주세요.
+              </ThemedText>
+            ) : null}
+          </View>
+        ) : null}
+
+        {step === 3 ? (
+          <View>
+            <Field label="물주기 주기">
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                {CYCLES.map((d) => {
+                  const active = cycle === d;
+                  return (
+                    <Pressable
+                      key={d}
+                      onPress={() => setCycle(d)}
+                      style={{
+                        paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12,
+                        backgroundColor: active ? palette.ink : palette.surface,
+                      }}
+                    >
+                      <ThemedText variant="meta" weight="medium" color={active ? palette.bg : palette.ink}>
+                        {d}일
+                      </ThemedText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Field>
+
+            <Field label="광량" style={{ marginTop: 22 }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                {LIGHTS.map((l) => {
+                  const active = light === l;
+                  return (
+                    <Pressable
+                      key={l}
+                      onPress={() => setLight(l)}
+                      style={{
+                        paddingHorizontal: 14, paddingVertical: 14, borderRadius: 12,
+                        backgroundColor: active ? palette.greenBg : palette.surface,
+                        borderWidth: 1.5,
+                        borderColor: active ? palette.green : 'transparent',
+                        width: '48%',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <ThemedText variant="meta" weight={active ? 'semibold' : 'medium'}>
+                        {l}
+                      </ThemedText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Field>
+
+            <Field label="습도" style={{ marginTop: 22 }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                {HUMIDITIES.map((h) => {
+                  const active = humidity === h;
+                  return (
+                    <Pressable
+                      key={h}
+                      onPress={() => setHumidity(h)}
+                      style={{
+                        paddingHorizontal: 14, paddingVertical: 14, borderRadius: 12,
+                        backgroundColor: active ? palette.greenBg : palette.surface,
+                        borderWidth: 1.5,
+                        borderColor: active ? palette.green : 'transparent',
+                        width: '48%',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <ThemedText variant="meta" weight={active ? 'semibold' : 'medium'}>
+                        {h}
+                      </ThemedText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Field>
+
+            <Field label="이 식물이 좋아하는 빛 (1~5)" style={{ marginTop: 22 }}>
+              <View style={{ flexDirection: 'row', gap: 6, marginTop: 4 }}>
+                {[1, 2, 3, 4, 5].map((n) => {
+                  const active = lightPref === n;
+                  return (
+                    <Pressable
+                      key={n}
+                      onPress={() => setLightPref(n)}
+                      style={{
+                        flex: 1, paddingVertical: 14, borderRadius: 10,
+                        backgroundColor: active ? palette.green : palette.surface,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <ThemedText variant="meta" weight={active ? 'semibold' : 'medium'} color={active ? palette.bg : palette.ink}>
+                        {n}
+                      </ThemedText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Field>
+
+            <Field label="이 식물이 좋아하는 습도 (1~5)" style={{ marginTop: 22 }}>
+              <View style={{ flexDirection: 'row', gap: 6, marginTop: 4 }}>
+                {[1, 2, 3, 4, 5].map((n) => {
+                  const active = humidityPref === n;
+                  return (
+                    <Pressable
+                      key={n}
+                      onPress={() => setHumidityPref(n)}
+                      style={{
+                        flex: 1, paddingVertical: 14, borderRadius: 10,
+                        backgroundColor: active ? palette.green : palette.surface,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <ThemedText variant="meta" weight={active ? 'semibold' : 'medium'} color={active ? palette.bg : palette.ink}>
+                        {n}
+                      </ThemedText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Field>
+
+            <Field label="메모 (선택)" style={{ marginTop: 22 }}>
+              <TextInput
+                value={note}
+                onChangeText={setNote}
+                placeholder="이 식물에 대한 관찰이나 주의사항"
+                placeholderTextColor={palette.ink3}
+                multiline
+                style={{
+                  ...inputStyle,
+                  minHeight: 80,
+                  textAlignVertical: 'top',
+                }}
+              />
+            </Field>
+          </View>
+        ) : null}
+      </ScrollView>
+
+      <View
+        style={{
+          position: 'absolute', left: 0, right: 0, bottom: 0,
+          paddingHorizontal: 20,
+          paddingTop: 12,
+          paddingBottom: Math.max(insets.bottom, 14) + 10,
+          backgroundColor: palette.bg,
+        }}
+      >
+        <Pressable
+          onPress={next}
+          disabled={busy}
+          style={{
+            paddingVertical: 16,
+            borderRadius: 999,
+            backgroundColor: palette.ink,
+            alignItems: 'center',
+            opacity: busy ? 0.6 : 1,
+          }}
+        >
+          {busy ? (
+            <ActivityIndicator color={palette.bg} />
+          ) : (
+            <ThemedText variant="body" weight="semibold" color={palette.bg} style={{ fontSize: 15 }}>
+              {step < 3 ? '다음' : '식물 추가하기'}
+            </ThemedText>
+          )}
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+function Field({ label, children, style }: { label: string; children: React.ReactNode; style?: object }) {
+  const { palette } = useTheme();
+  return (
+    <View style={style}>
+      <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 8, letterSpacing: 1 }}>
+        {label}
+      </ThemedText>
+      {children}
+    </View>
+  );
+}

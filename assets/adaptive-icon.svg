@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!--
+    Android adaptive icon foreground.
+    The OS clips this with a circle/squircle/etc, keep all art inside the
+    inner 66 percent safe zone (centered 672 by 672 box at offset 176, 176).
+    Background is supplied by app.json (#F5F1EA), so this layer is the
+    plant motif only, with no background fill.
+  -->
+
+  <!-- Pot (terracotta) — sits in lower portion of safe zone -->
+  <path d="M 432 668 L 592 668 L 576 770 Q 572 786 558 786 L 466 786 Q 452 786 448 770 Z" fill="#A87650"/>
+  <rect x="424" y="650" width="176" height="32" rx="8" fill="#B98666"/>
+
+  <!-- Soil line -->
+  <ellipse cx="512" cy="664" rx="78" ry="6" fill="#5C4326" opacity="0.5"/>
+
+  <!-- Center stem -->
+  <path d="M 512 656 Q 512 540 512 410" stroke="#2D4A2B" stroke-width="14" fill="none" stroke-linecap="round"/>
+
+  <!-- Top leaf -->
+  <path d="M 512 410
+           Q 478 340 438 300
+           Q 456 270 504 286
+           Q 552 318 536 380
+           Q 526 404 512 410 Z" fill="#2D4A2B"/>
+
+  <!-- Right leaf -->
+  <path d="M 512 500
+           Q 588 470 642 430
+           Q 666 454 632 502
+           Q 584 542 536 526
+           Q 518 518 512 500 Z" fill="#3A5C38"/>
+
+  <!-- Left leaf -->
+  <path d="M 512 588
+           Q 432 572 380 524
+           Q 364 558 404 596
+           Q 460 628 504 612
+           Q 510 604 512 588 Z" fill="#4A6E48"/>
+</svg>
