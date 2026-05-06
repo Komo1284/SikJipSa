@@ -1,9 +1,23 @@
 import type { AuthRepo } from '@/repo/contracts';
 import type { AuthChangeEvent, OAuthProvider, Session, Unsubscribe } from '@/repo/types';
+import {
+  GoogleSignin,
+  isSuccessResponse,
+} from '@react-native-google-signin/google-signin';
+import { login as kakaoLogin } from '@react-native-seoul/kakao-login';
 import type { Session as SupabaseSession, User } from '@supabase/supabase-js';
-import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { hasSupabase, supabase } from './client';
+
+const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+
+if (GOOGLE_WEB_CLIENT_ID) {
+  GoogleSignin.configure({
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    iosClientId: GOOGLE_IOS_CLIENT_ID,
+  });
+}
 
 const toSession = (s: SupabaseSession | null): Session | null => {
   if (!s) return null;
@@ -20,110 +34,87 @@ const toSession = (s: SupabaseSession | null): Session | null => {
   };
 };
 
-const GOOGLE_DISCOVERY = {
-  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-  tokenEndpoint: 'https://oauth2.googleapis.com/token',
-  revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
-};
-
 /**
- * Google Web OAuth client ID — from Google Cloud Console → 사용자 인증 정보.
- * Also reused as the "audience" for Supabase's signInWithIdToken call.
- */
-const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
-
-/**
- * We run the Google consent screen ourselves via expo-auth-session, grab an
- * id_token, and hand it to supabase.auth.signInWithIdToken. This bypasses
- * Supabase's OAuth redirect flow entirely — no state cookies to validate,
- * no Site URL fallback, no "localhost" dead-end.
- */
-/**
- * Kakao OAuth via Supabase's hosted redirect flow.
- * Kakao doesn't issue an id_token by default, so we can't reuse the Google
- * ID-token shortcut. Instead: ask Supabase for the Kakao authorize URL, open
- * it in an in-app browser, and let Supabase's callback bounce back to the
- * app's `sikjipsa://` scheme with tokens in the URL fragment (implicit flow).
+ * Kakao Sign-In via the native SDK + a custom Edge Function bridge.
  *
- * Prereqs:
- *  - Supabase dashboard → Authentication → Providers → Kakao enabled with
- *    REST API key + Client Secret from Kakao developers console.
- *  - Supabase dashboard → Authentication → URL Configuration → Redirect URLs
- *    must include `sikjipsa://**` so the bounce-back lands on the app.
- *  - Kakao developers → 플랫폼 키 → REST API 키 → 리다이렉트 URI must include
- *    `https://<project>.supabase.co/auth/v1/callback`.
+ * We bypass Supabase's built-in Kakao provider because GoTrue hardcodes
+ * `account_email` into the requested scopes, and our Kakao app can't enable
+ * that consent item without 비즈 앱 (biz-app) registration. Instead:
+ *
+ *   1. Native Kakao SDK opens the KakaoTalk app (or web fallback) and returns
+ *      an access_token. Scopes are controlled by what's enabled in the Kakao
+ *      developer console — we have only profile_nickname / profile_image on.
+ *   2. We POST that access_token to the `kakao-auth` Edge Function, which
+ *      verifies the token, looks up or creates a Supabase user keyed off a
+ *      phantom email (kakao_<id>@sikjipsa.local), and mints a magic-link
+ *      token_hash.
+ *   3. We exchange the token_hash for a real Supabase session via verifyOtp.
  */
 async function performKakaoFlow(): Promise<Session> {
   if (!supabase) throw new Error('Supabase client not configured');
 
-  const redirectTo = AuthSession.makeRedirectUri({ scheme: 'sikjipsa' });
+  const tokens = await kakaoLogin();
+  if (!tokens?.accessToken) throw new Error('카카오 액세스 토큰을 받지 못했어요');
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'kakao',
-    options: { redirectTo, skipBrowserRedirect: true },
+  const { data: bridge, error: bridgeErr } = await supabase.functions.invoke<{
+    email: string;
+    tokenHash: string;
+  }>('kakao-auth', {
+    body: { kakaoAccessToken: tokens.accessToken },
   });
-  if (error) throw error;
-  if (!data?.url) throw new Error('Kakao OAuth URL 을 받지 못했어요');
-
-  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-  console.log('[authRepo] Kakao auth result.type =', result.type);
-
-  if (result.type !== 'success' || !result.url) {
-    throw new Error(`Kakao 로그인 취소 (${result.type})`);
+  if (bridgeErr) throw bridgeErr;
+  if (!bridge?.email || !bridge?.tokenHash) {
+    throw new Error('카카오 인증 브릿지 응답 형식이 올바르지 않아요');
   }
 
-  // Implicit flow: tokens are in the URL fragment (#access_token=…&refresh_token=…).
-  const fragment = result.url.split('#')[1] ?? '';
-  const params = new URLSearchParams(fragment);
-  const accessToken = params.get('access_token');
-  const refreshToken = params.get('refresh_token');
-  if (!accessToken || !refreshToken) {
-    throw new Error('Kakao 토큰을 받지 못했어요');
-  }
-
-  const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-    access_token: accessToken,
-    refresh_token: refreshToken,
+  const { data: sessionData, error: verifyErr } = await supabase.auth.verifyOtp({
+    type: 'magiclink',
+    token_hash: bridge.tokenHash,
   });
-  if (sessionError) throw sessionError;
+  if (verifyErr) throw verifyErr;
 
   const session = toSession(sessionData.session);
   if (!session) throw new Error('세션 생성 실패');
   return session;
 }
 
-async function performGoogleIdTokenFlow(): Promise<Session> {
+/**
+ * Google Sign-In via the native SDK (@react-native-google-signin/google-signin).
+ *
+ * Web Client IDs aren't allowed for native iOS/Android apps under Google's
+ * OAuth 2.0 policy, so we use the iOS Client ID for the native consent screen,
+ * grab the id_token (whose audience is the Web Client ID via webClientId), and
+ * hand it to supabase.auth.signInWithIdToken.
+ *
+ * Prereqs:
+ *  - Supabase dashboard → Authentication → Providers → Google → Client IDs
+ *    must include both Web and iOS client IDs (comma-separated).
+ *  - Supabase dashboard → Google provider → "Skip nonce check" must be ON
+ *    (the native SDK doesn't surface a nonce we can pre-set).
+ *  - app.json plugin "@react-native-google-signin/google-signin" with iosUrlScheme
+ *    set to the reversed iOS client ID.
+ */
+async function performGoogleNativeFlow(): Promise<Session> {
   if (!supabase) throw new Error('Supabase client not configured');
   if (!GOOGLE_WEB_CLIENT_ID) {
     throw new Error(
-      'Missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID in .env — add the OAuth Web client ID from Google Cloud Console',
+      'Missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID — add the Web OAuth client ID from Google Cloud Console',
     );
   }
 
-  const redirectUri = AuthSession.makeRedirectUri();
+  await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: false });
+  const response = await GoogleSignin.signIn();
 
-  const request = new AuthSession.AuthRequest({
-    clientId: GOOGLE_WEB_CLIENT_ID,
-    scopes: ['openid', 'profile', 'email'],
-    redirectUri,
-    responseType: AuthSession.ResponseType.IdToken,
-    extraParams: { nonce: 'sikjipsa-nonce' },
-  });
-
-  const result = await request.promptAsync(GOOGLE_DISCOVERY);
-  console.log('[authRepo] Google auth result.type =', result.type);
-
-  if (result.type !== 'success') {
-    throw new Error(`Google 로그인 취소 (${result.type})`);
+  if (!isSuccessResponse(response)) {
+    throw new Error(`Google 로그인 취소 (${response.type})`);
   }
 
-  const idToken = result.params.id_token;
+  const idToken = response.data.idToken;
   if (!idToken) throw new Error('id_token 을 받지 못했어요');
 
   const { data, error } = await supabase.auth.signInWithIdToken({
     provider: 'google',
     token: idToken,
-    nonce: 'sikjipsa-nonce',
   });
   if (error) throw error;
   const session = toSession(data.session);
@@ -144,7 +135,7 @@ export const supabaseAuthRepo: AuthRepo = {
         'Supabase not configured. Set EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY.',
       );
     }
-    if (provider === 'google') return performGoogleIdTokenFlow();
+    if (provider === 'google') return performGoogleNativeFlow();
     if (provider === 'kakao') return performKakaoFlow();
     throw new Error(`${provider} 로그인은 지원하지 않아요`);
   },
