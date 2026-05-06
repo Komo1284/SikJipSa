@@ -124,9 +124,7 @@ begin
   on conflict (id) do nothing;
 
   insert into public.locations (owner_id, name, sort_order) values
-    (new.id, '거실',   0),
-    (new.id, '침실',   1),
-    (new.id, '베란다', 2);
+    (new.id, '거실', 0);
 
   return new;
 end $$;

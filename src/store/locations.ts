@@ -20,10 +20,7 @@ type LocationStore = {
 const initial: UserLocation[] = hasSupabase
   ? []
   : [
-      { id: '거실',   name: '거실',   sortOrder: 0, lightScore: 4, airflowScore: 4, weatherWeight: 0.4 },
-      { id: '침실',   name: '침실',   sortOrder: 1, lightScore: 2, airflowScore: 3, weatherWeight: 0.3 },
-      { id: '베란다', name: '베란다', sortOrder: 2, lightScore: 5, airflowScore: 5, weatherWeight: 0.9 },
-      { id: '온실장', name: '온실장', sortOrder: 3, lightScore: 3, airflowScore: 1, weatherWeight: 0.1 },
+      { id: '거실', name: '거실', sortOrder: 0, lightScore: 4, airflowScore: 4, weatherWeight: 0.4 },
     ];
 
 export const useLocationStore = create<LocationStore>((set, get) => ({
