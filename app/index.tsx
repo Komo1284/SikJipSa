@@ -2,92 +2,40 @@ import { ThemedText } from '@/components/Typography';
 import { useAuthStore } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
-  TextInput,
   View,
 } from 'react-native';
-import Svg, { Defs, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
-
-type Step = 'email' | 'code';
+import Svg, { Defs, G, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 export default function Onboarding() {
   const { palette, shadows, weights } = useTheme();
   const router = useRouter();
   const { width, height } = Dimensions.get('window');
-  const sendEmailOtp = useAuthStore((s) => s.sendEmailOtp);
-  const verifyEmailOtp = useAuthStore((s) => s.verifyEmailOtp);
   const signIn = useAuthStore((s) => s.signIn);
   const session = useAuthStore((s) => s.session);
 
-  const [step, setStep] = useState<Step>('email');
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [busy, setBusy] = useState(false);
-  const codeInputRef = useRef<TextInput>(null);
+  const [busy, setBusy] = useState<null | 'kakao' | 'google'>(null);
 
   useEffect(() => {
     if (session) router.replace('/(tabs)/home');
   }, [session, router]);
 
-  const requestCode = async () => {
-    const trimmed = email.trim().toLowerCase();
-    if (!trimmed || !trimmed.includes('@')) {
-      Alert.alert('이메일 확인', '올바른 이메일 주소를 입력해주세요.');
-      return;
-    }
+  const signInWithProvider = async (provider: 'kakao' | 'google') => {
     try {
-      setBusy(true);
-      await sendEmailOtp(trimmed);
-      setEmail(trimmed);
-      setStep('code');
-      setTimeout(() => codeInputRef.current?.focus(), 250);
-    } catch (e) {
-      Alert.alert('전송 실패', (e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const verifyCode = async () => {
-    const cleanCode = code.replace(/\s/g, '');
-    if (cleanCode.length < 6) {
-      Alert.alert('코드 확인', '이메일로 받은 인증 코드를 입력해주세요.');
-      return;
-    }
-    try {
-      setBusy(true);
-      await verifyEmailOtp(email, cleanCode);
-    } catch (e) {
-      Alert.alert('인증 실패', (e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const goBack = () => {
-    setStep('email');
-    setCode('');
-  };
-
-  const signInWithProvider = async (provider: 'google' | 'kakao') => {
-    try {
-      setBusy(true);
+      setBusy(provider);
       await signIn(provider);
     } catch (e) {
       const msg = (e as Error).message;
-      // Don't pop an alert when the user just dismissed the OAuth sheet.
       if (!/cancel|dismiss/i.test(msg)) {
         Alert.alert('로그인 실패', msg);
       }
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
 
@@ -96,7 +44,7 @@ export default function Onboarding() {
       <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
         <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMin slice">
           <Defs>
-            <RadialGradient id="halo" cx="50%" cy="30%" rx="80%" ry="80%" fx="50%" fy="30%">
+            <RadialGradient id="halo" cx="50%" cy="28%" rx="80%" ry="80%" fx="50%" fy="28%">
               <Stop offset="0" stopColor={palette.greenSoft} stopOpacity="0.55" />
               <Stop offset="1" stopColor={palette.bg} stopOpacity="0" />
             </RadialGradient>
@@ -123,206 +71,146 @@ export default function Onboarding() {
         </Svg>
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}
-      >
-        <View style={{ flex: 1, justifyContent: 'flex-end', paddingHorizontal: 28, paddingBottom: 48 }}>
-          <ThemedText
-            variant="tiny"
-            family="mono"
-            color={palette.ink3}
-            uppercase
-            style={{ marginBottom: 14, letterSpacing: 1.3 }}
-          >
-            SikJipSa · v1.0
+      <View style={{ flex: 1, justifyContent: 'flex-end', paddingHorizontal: 28, paddingBottom: 56 }}>
+        <ThemedText
+          variant="tiny"
+          family="mono"
+          color={palette.ink3}
+          uppercase
+          style={{ marginBottom: 14, letterSpacing: 1.4 }}
+        >
+          SikJipSa · v1.0
+        </ThemedText>
+
+        <ThemedText
+          family="serif"
+          style={{ fontSize: 52, lineHeight: 64, fontFamily: weights.serifRegular, color: palette.ink, letterSpacing: -1 }}
+        >
+          <ThemedText family="serif" italic style={{ fontSize: 52, lineHeight: 64, color: palette.green, fontFamily: weights.serifItalic }}>
+            SikJipSa
           </ThemedText>
+          {'\n'}식물과 함께 자라는{'\n'}작은 기록.
+        </ThemedText>
 
-          <ThemedText
-            family="serif"
-            style={{ fontSize: 52, lineHeight: 64, fontFamily: weights.serifRegular, color: palette.ink, letterSpacing: -1 }}
-          >
-            <ThemedText family="serif" italic style={{ fontSize: 52, lineHeight: 64, color: palette.green, fontFamily: weights.serifItalic }}>
-              SikJipSa
-            </ThemedText>
-            {'\n'}식물과 함께 자라는{'\n'}작은 기록.
-          </ThemedText>
+        <ThemedText variant="body" color={palette.ink2} style={{ marginTop: 22, marginBottom: 36, maxWidth: 320 }}>
+          물주기·비료·분갈이까지 — 내 공간의{'\n'}식물 한 그루 한 그루를 잊지 않도록.
+        </ThemedText>
 
-          <ThemedText variant="body" color={palette.ink2} style={{ marginTop: 22, marginBottom: 28, maxWidth: 320 }}>
-            물주기·비료·분갈이까지 — 내 공간의{'\n'}식물 한 그루 한 그루를 잊지 않도록.
-          </ThemedText>
-
-          {step === 'email' ? (
-            <>
-              <TextInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder="이메일 주소"
-                placeholderTextColor={palette.ink3}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="email"
-                inputMode="email"
-                returnKeyType="go"
-                onSubmitEditing={requestCode}
-                editable={!busy}
-                style={{
-                  paddingVertical: 16,
-                  paddingHorizontal: 18,
-                  borderRadius: 14,
-                  backgroundColor: palette.surfaceRaised,
-                  borderWidth: 1,
-                  borderColor: palette.lineStrong,
-                  fontSize: 16,
-                  fontFamily: weights.sansRegular,
-                  color: palette.ink,
-                  marginBottom: 12,
-                }}
-              />
-
-              <Pressable
-                onPress={requestCode}
-                disabled={busy}
-                style={{
-                  borderRadius: 999,
-                  backgroundColor: palette.ink,
-                  paddingVertical: 18,
-                  alignItems: 'center',
-                  opacity: busy ? 0.6 : 1,
-                  ...shadows.md,
-                }}
-              >
-                {busy ? (
-                  <ActivityIndicator color={palette.bg} />
-                ) : (
-                  <ThemedText variant="body" weight="semibold" color={palette.bg} style={{ fontSize: 16 }}>
-                    인증 코드 받기
-                  </ThemedText>
-                )}
-              </Pressable>
-
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 22, marginBottom: 16 }}>
-                <View style={{ flex: 1, height: 1, backgroundColor: palette.line }} />
-                <ThemedText variant="tiny" color={palette.ink3} style={{ marginHorizontal: 12, letterSpacing: 1 }} uppercase>
-                  또는
-                </ThemedText>
-                <View style={{ flex: 1, height: 1, backgroundColor: palette.line }} />
-              </View>
-
-              <Pressable
-                onPress={() => signInWithProvider('kakao')}
-                disabled={busy}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 999,
-                  backgroundColor: '#FEE500',
-                  paddingVertical: 16,
-                  marginBottom: 10,
-                  opacity: busy ? 0.6 : 1,
-                  ...shadows.xs,
-                }}
-              >
-                <ThemedText variant="body" weight="semibold" color="#191600" style={{ fontSize: 15 }}>
-                  카카오로 시작하기
-                </ThemedText>
-              </Pressable>
-
-              <Pressable
-                onPress={() => signInWithProvider('google')}
-                disabled={busy}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 999,
-                  backgroundColor: palette.surfaceRaised,
-                  borderWidth: 1,
-                  borderColor: palette.lineStrong,
-                  paddingVertical: 16,
-                  opacity: busy ? 0.6 : 1,
-                  ...shadows.xs,
-                }}
-              >
-                <ThemedText variant="body" weight="semibold" color={palette.ink} style={{ fontSize: 15 }}>
-                  Google로 시작하기
-                </ThemedText>
-              </Pressable>
-
-              <View style={{ alignItems: 'center', marginTop: 18 }}>
-                <ThemedText variant="tiny" color={palette.ink3} style={{ lineHeight: 16, textAlign: 'center' }}>
-                  이메일은 인증 코드 방식이라 비밀번호가 필요 없어요.{'\n'}소셜 로그인은 한 번 누르면 끝.
-                </ThemedText>
-              </View>
-            </>
+        <Pressable
+          onPress={() => signInWithProvider('kakao')}
+          disabled={busy !== null}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 14,
+            backgroundColor: '#FEE500',
+            paddingVertical: 16,
+            paddingHorizontal: 18,
+            marginBottom: 12,
+            opacity: busy && busy !== 'kakao' ? 0.45 : 1,
+            ...shadows.xs,
+          }}
+        >
+          {busy === 'kakao' ? (
+            <ActivityIndicator color="#191600" />
           ) : (
             <>
-              <ThemedText variant="meta" color={palette.ink2} style={{ marginBottom: 10 }}>
-                <ThemedText variant="meta" weight="semibold">
-                  {email}
-                </ThemedText>
-                {' '}로 전송된 인증 코드를 입력해주세요.
+              <KakaoLogo />
+              <ThemedText weight="semibold" color="#191600" style={{ fontSize: 16, marginLeft: 10 }}>
+                카카오로 시작하기
               </ThemedText>
-
-              <TextInput
-                ref={codeInputRef}
-                value={code}
-                onChangeText={(v) => setCode(v.replace(/\D/g, '').slice(0, 10))}
-                placeholder="인증 코드"
-                placeholderTextColor={palette.ink3}
-                keyboardType="number-pad"
-                returnKeyType="go"
-                onSubmitEditing={verifyCode}
-                editable={!busy}
-                maxLength={10}
-                style={{
-                  paddingVertical: 16,
-                  paddingHorizontal: 18,
-                  borderRadius: 14,
-                  backgroundColor: palette.surfaceRaised,
-                  borderWidth: 1,
-                  borderColor: palette.lineStrong,
-                  fontSize: 22,
-                  letterSpacing: 4,
-                  textAlign: 'center',
-                  fontFamily: weights.monoMedium,
-                  color: palette.ink,
-                  marginBottom: 12,
-                }}
-              />
-
-              <Pressable
-                onPress={verifyCode}
-                disabled={busy}
-                style={{
-                  borderRadius: 999,
-                  backgroundColor: palette.ink,
-                  paddingVertical: 18,
-                  alignItems: 'center',
-                  opacity: busy ? 0.6 : 1,
-                  ...shadows.md,
-                }}
-              >
-                {busy ? (
-                  <ActivityIndicator color={palette.bg} />
-                ) : (
-                  <ThemedText variant="body" weight="semibold" color={palette.bg} style={{ fontSize: 16 }}>
-                    확인하고 시작하기
-                  </ThemedText>
-                )}
-              </Pressable>
-
-              <Pressable onPress={goBack} style={{ alignItems: 'center', marginTop: 14 }}>
-                <ThemedText variant="meta" color={palette.ink3}>
-                  다른 이메일 사용하기
-                </ThemedText>
-              </Pressable>
             </>
           )}
+        </Pressable>
+
+        <Pressable
+          onPress={() => signInWithProvider('google')}
+          disabled={busy !== null}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 14,
+            backgroundColor: palette.surfaceRaised,
+            borderWidth: 1,
+            borderColor: palette.lineStrong,
+            paddingVertical: 16,
+            paddingHorizontal: 18,
+            opacity: busy && busy !== 'google' ? 0.45 : 1,
+            ...shadows.xs,
+          }}
+        >
+          {busy === 'google' ? (
+            <ActivityIndicator color={palette.ink} />
+          ) : (
+            <>
+              <GoogleLogo />
+              <ThemedText weight="semibold" color={palette.ink} style={{ fontSize: 16, marginLeft: 10 }}>
+                Google로 시작하기
+              </ThemedText>
+            </>
+          )}
+        </Pressable>
+
+        <View style={{ alignItems: 'center', marginTop: 20 }}>
+          <ThemedText variant="tiny" color={palette.ink3} style={{ lineHeight: 18, textAlign: 'center' }}>
+            로그인하면{' '}
+            <ThemedText variant="tiny" color={palette.ink2} weight="medium">
+              서비스 이용약관
+            </ThemedText>
+            {' '}및{' '}
+            <ThemedText variant="tiny" color={palette.ink2} weight="medium">
+              개인정보 처리방침
+            </ThemedText>
+            에{'\n'}동의하는 것으로 간주돼요.
+          </ThemedText>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </View>
+  );
+}
+
+/**
+ * Kakao "talk bubble" mark — 24×24, designed to sit on the Kakao yellow
+ * (#FEE500). The dark glyph color (#191600) matches the official guideline.
+ */
+function KakaoLogo() {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24">
+      <Path
+        d="M12 4C6.477 4 2 7.582 2 12c0 2.825 1.83 5.31 4.6 6.74L5.4 22.5c-.07.22.18.4.37.27l4.5-3.07c.56.07 1.13.1 1.73.1 5.523 0 10-3.582 10-8s-4.477-7.8-10-7.8z"
+        fill="#191600"
+      />
+    </Svg>
+  );
+}
+
+/**
+ * Google four-color "G" — official identity colors.
+ * Drawn at 24×24 viewBox for crisp rendering at 20px display size.
+ */
+function GoogleLogo() {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 48 48">
+      <G>
+        <Path
+          fill="#FFC107"
+          d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+        />
+        <Path
+          fill="#FF3D00"
+          d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"
+        />
+        <Path
+          fill="#4CAF50"
+          d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
+        />
+        <Path
+          fill="#1976D2"
+          d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571.001-.001.002-.001.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
+        />
+      </G>
+    </Svg>
   );
 }
