@@ -32,7 +32,7 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -169,11 +169,19 @@ export default function RootLayout() {
     NanumMyeongjo_700Bold,
   });
 
+  // Hold the splash for at least ~1.8s even when fonts load instantly,
+  // otherwise it flashes for a few hundred ms on fast devices and feels broken.
+  const [minDelayPassed, setMinDelayPassed] = useState(false);
   useEffect(() => {
-    if (loaded) SplashScreen.hideAsync().catch(() => {});
-  }, [loaded]);
+    const t = setTimeout(() => setMinDelayPassed(true), 1800);
+    return () => clearTimeout(t);
+  }, []);
 
-  if (!loaded) return null;
+  useEffect(() => {
+    if (loaded && minDelayPassed) SplashScreen.hideAsync().catch(() => {});
+  }, [loaded, minDelayPassed]);
+
+  if (!loaded || !minDelayPassed) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

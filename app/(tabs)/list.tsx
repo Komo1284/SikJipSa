@@ -8,7 +8,7 @@ import { useUIStore } from '@/store/ui';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useResponsive } from '@/theme/responsive';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { LayoutGrid, List as ListIcon, Search } from 'lucide-react-native';
+import { LayoutGrid, List as ListIcon, Plus, Search, Sprout } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -62,6 +62,56 @@ function ListMobile() {
       );
     });
   }, [plants, filter, query]);
+
+  if (plants.length === 0) {
+    return (
+      <View style={{ flex: 1, backgroundColor: palette.bg, paddingHorizontal: 24 }}>
+        <View style={{ paddingTop: insets.top + 14 }}>
+          <ThemedText variant="screenTitle" family="serif">
+            내 식물
+          </ThemedText>
+        </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 80 }}>
+          <View
+            style={{
+              width: 88,
+              height: 88,
+              borderRadius: 44,
+              backgroundColor: palette.surface,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 20,
+            }}
+          >
+            <Sprout size={40} color={palette.green} strokeWidth={1.6} />
+          </View>
+          <ThemedText variant="subsection" weight="semibold" style={{ marginBottom: 8 }}>
+            아직 등록된 식물이 없어요
+          </ThemedText>
+          <ThemedText variant="meta" color={palette.ink3} style={{ textAlign: 'center', marginBottom: 24 }}>
+            식물을 추가하여{'\n'}나만의 관리를 시작해보세요!
+          </ThemedText>
+          <Pressable
+            onPress={() => router.push('/add')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 6,
+              paddingVertical: 12,
+              paddingHorizontal: 22,
+              borderRadius: 999,
+              backgroundColor: palette.ink,
+            }}
+          >
+            <Plus size={16} color={palette.bg} strokeWidth={2.2} />
+            <ThemedText variant="meta" weight="semibold" color={palette.bg}>
+              식물 추가하기
+            </ThemedText>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
 
   const header = (
     <View style={{ paddingTop: insets.top + 14, paddingBottom: 10 }}>

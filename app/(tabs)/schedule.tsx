@@ -4,8 +4,9 @@ import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
 import { TODAY, daysBetween, formatMD } from '@/utils/date';
 import { useRouter } from 'expo-router';
+import { CalendarDays, Plus } from 'lucide-react-native';
 import React, { useMemo } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /**
@@ -29,6 +30,56 @@ export default function ScheduleScreen() {
     }
     return Array.from(map.entries()).sort(([a], [b]) => a - b);
   }, [plants]);
+
+  if (plants.length === 0) {
+    return (
+      <View style={{ flex: 1, backgroundColor: palette.bg, paddingHorizontal: 24 }}>
+        <View style={{ paddingTop: insets.top + 14 }}>
+          <ThemedText variant="screenTitle" family="serif">
+            일정
+          </ThemedText>
+        </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 80 }}>
+          <View
+            style={{
+              width: 88,
+              height: 88,
+              borderRadius: 44,
+              backgroundColor: palette.surface,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 20,
+            }}
+          >
+            <CalendarDays size={40} color={palette.green} strokeWidth={1.6} />
+          </View>
+          <ThemedText variant="subsection" weight="semibold" style={{ marginBottom: 8 }}>
+            예정된 일정이 없어요
+          </ThemedText>
+          <ThemedText variant="meta" color={palette.ink3} style={{ textAlign: 'center', marginBottom: 24 }}>
+            식물을 추가하면{'\n'}물주기 일정이 여기에 표시돼요.
+          </ThemedText>
+          <Pressable
+            onPress={() => router.push('/add')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 6,
+              paddingVertical: 12,
+              paddingHorizontal: 22,
+              borderRadius: 999,
+              backgroundColor: palette.ink,
+            }}
+          >
+            <Plus size={16} color={palette.bg} strokeWidth={2.2} />
+            <ThemedText variant="meta" weight="semibold" color={palette.bg}>
+              식물 추가하기
+            </ThemedText>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
