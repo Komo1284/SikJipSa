@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Dark mode icon: deep ink background, lighter leaf tones for contrast -->
+  <rect width="1024" height="1024" fill="#15181A"/>
+
+  <!-- Subtle inner glow -->
+  <circle cx="512" cy="512" r="380" fill="#1F2426" opacity="0.65"/>
+
+  <!-- Pot (warm terracotta on dark) -->
+  <path d="M 388 720 L 636 720 L 612 858 Q 608 880 586 880 L 438 880 Q 416 880 412 858 Z" fill="#C9A57A"/>
+  <rect x="376" y="690" width="272" height="46" rx="10" fill="#DBB98C"/>
+
+  <!-- Soil line -->
+  <ellipse cx="512" cy="710" rx="120" ry="10" fill="#3A2D1E" opacity="0.85"/>
+
+  <!-- Center stem -->
+  <path d="M 512 700 Q 512 540 512 360" stroke="#8AB48A" stroke-width="16" fill="none" stroke-linecap="round"/>
+
+  <!-- Top center leaf -->
+  <path d="M 512 360
+           Q 470 270 420 220
+           Q 440 180 500 200
+           Q 560 240 540 320
+           Q 528 350 512 360 Z" fill="#A8C7A0"/>
+  <path d="M 512 360 Q 490 300 470 250" stroke="#5E7A5E" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Right leaf -->
+  <path d="M 512 470
+           Q 600 430 670 380
+           Q 700 410 660 470
+           Q 600 520 540 500
+           Q 518 490 512 470 Z" fill="#8AB48A"/>
+  <path d="M 530 482 Q 590 460 650 420" stroke="#5E7A5E" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Left leaf -->
+  <path d="M 512 580
+           Q 410 560 340 500
+           Q 320 540 370 590
+           Q 440 630 500 610
+           Q 510 600 512 580 Z" fill="#6E9A6E"/>
+  <path d="M 498 596 Q 430 584 370 550" stroke="#3F5A3F" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Top-right sprout -->
+  <path d="M 540 280
+           Q 600 250 640 210
+           Q 660 240 630 280
+           Q 590 310 552 300
+           Q 540 296 540 280 Z" fill="#8AB48A" opacity="0.9"/>
+</svg>
