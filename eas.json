@@ -12,7 +12,10 @@
       },
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://slvizrcylcrdealuasua.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsdml6cmN5bGNyZGVhbHVhc3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MjM1MjgsImV4cCI6MjA5MjQ5OTUyOH0.9ZqRwO2aZv9oWBH8w8FUeyUdUbl6EUXEy3Ig3DxmH6Y"
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsdml6cmN5bGNyZGVhbHVhc3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MjM1MjgsImV4cCI6MjA5MjQ5OTUyOH0.9ZqRwO2aZv9oWBH8w8FUeyUdUbl6EUXEy3Ig3DxmH6Y",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1094704094747-qegtg4k9svvjapqv31jbdb880icme73t.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "1094704094747-in0ll3499v83v8o8apstf0oghmb0l7jp.apps.googleusercontent.com",
+        "EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY": "c4a67adeae4c366973ccba084ba425e1"
       }
     },
     "internal": {
@@ -26,7 +29,10 @@
       },
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://slvizrcylcrdealuasua.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsdml6cmN5bGNyZGVhbHVhc3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MjM1MjgsImV4cCI6MjA5MjQ5OTUyOH0.9ZqRwO2aZv9oWBH8w8FUeyUdUbl6EUXEy3Ig3DxmH6Y"
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsdml6cmN5bGNyZGVhbHVhc3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MjM1MjgsImV4cCI6MjA5MjQ5OTUyOH0.9ZqRwO2aZv9oWBH8w8FUeyUdUbl6EUXEy3Ig3DxmH6Y",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1094704094747-qegtg4k9svvjapqv31jbdb880icme73t.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "1094704094747-in0ll3499v83v8o8apstf0oghmb0l7jp.apps.googleusercontent.com",
+        "EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY": "c4a67adeae4c366973ccba084ba425e1"
       }
     },
     "production": {
@@ -37,7 +43,10 @@
       },
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://slvizrcylcrdealuasua.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsdml6cmN5bGNyZGVhbHVhc3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MjM1MjgsImV4cCI6MjA5MjQ5OTUyOH0.9ZqRwO2aZv9oWBH8w8FUeyUdUbl6EUXEy3Ig3DxmH6Y"
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsdml6cmN5bGNyZGVhbHVhc3VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MjM1MjgsImV4cCI6MjA5MjQ5OTUyOH0.9ZqRwO2aZv9oWBH8w8FUeyUdUbl6EUXEy3Ig3DxmH6Y",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1094704094747-qegtg4k9svvjapqv31jbdb880icme73t.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "1094704094747-in0ll3499v83v8o8apstf0oghmb0l7jp.apps.googleusercontent.com",
+        "EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY": "c4a67adeae4c366973ccba084ba425e1"
       }
     }
   },

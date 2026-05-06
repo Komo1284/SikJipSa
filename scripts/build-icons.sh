@@ -39,11 +39,17 @@ render_square() {
 echo "→ icon.png (1024×1024)"
 render_square assets/icon.svg          assets/icon.png          1024
 
+echo "→ icon-dark.png (1024×1024)"
+render_square assets/icon-dark.svg     assets/icon-dark.png     1024
+
 echo "→ adaptive-icon.png (1024×1024)"
 render_square assets/adaptive-icon.svg assets/adaptive-icon.png 1024
 
 echo "→ splash.png (2048×2048)"
 render_square assets/splash.svg        assets/splash.png        2048
+
+echo "→ splash-dark.png (2048×2048)"
+render_square assets/splash-dark.svg   assets/splash-dark.png   2048
 
 echo
 echo "✅  done. Generated:"
