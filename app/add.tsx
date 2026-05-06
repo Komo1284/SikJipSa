@@ -21,8 +21,6 @@ const STEPS = [
 ];
 
 const CYCLES = [3, 5, 7, 10, 14, 21, 30];
-const LIGHTS = ['강한 직사광', '밝은 간접광', '반그늘', '약한 그늘'];
-const HUMIDITIES = ['매우 높음', '높음', '보통', '낮음'];
 
 export default function AddScreen() {
   const { isDesktop } = useResponsive();
@@ -31,7 +29,7 @@ export default function AddScreen() {
 }
 
 function AddMobile() {
-  const { palette, radii, weights } = useTheme();
+  const { palette, radii, weights, resolved: themeMode } = useTheme();
   const insets = useSafeAreaInsets();
   const addPlant = usePlantStore((s) => s.addPlant);
   const locations = useLocationStore((s) => s.locations);
@@ -41,8 +39,6 @@ function AddMobile() {
   const [species, setSpecies] = useState('');
   const [location, setLocation] = useState('');
   const [cycle, setCycle] = useState(7);
-  const [light, setLight] = useState('');
-  const [humidity, setHumidity] = useState('보통');
   const [note, setNote] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [lightPref, setLightPref] = useState(3);
@@ -94,8 +90,10 @@ function AddMobile() {
         name: name || '이름 없는 식물',
         species: species || '',
         location: location || '거실',
-        light: light || '밝은 간접광',
-        humidity,
+        // 광량/습도(현재 환경)는 location 의 lightScore/airflowScore 로 대체했고
+        // 식물 단위 입력은 더 이상 받지 않는다 — 빈 문자열로 저장.
+        light: '',
+        humidity: '',
         waterCycle: cycle,
         fertCycle: 30,
         lastWater: today,
@@ -294,58 +292,6 @@ function AddMobile() {
               </View>
             </Field>
 
-            <Field label="광량" style={{ marginTop: 22 }}>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
-                {LIGHTS.map((l) => {
-                  const active = light === l;
-                  return (
-                    <Pressable
-                      key={l}
-                      onPress={() => setLight(l)}
-                      style={{
-                        paddingHorizontal: 14, paddingVertical: 14, borderRadius: 12,
-                        backgroundColor: active ? palette.greenBg : palette.surface,
-                        borderWidth: 1.5,
-                        borderColor: active ? palette.green : 'transparent',
-                        width: '48%',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <ThemedText variant="meta" weight={active ? 'semibold' : 'medium'}>
-                        {l}
-                      </ThemedText>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </Field>
-
-            <Field label="습도" style={{ marginTop: 22 }}>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
-                {HUMIDITIES.map((h) => {
-                  const active = humidity === h;
-                  return (
-                    <Pressable
-                      key={h}
-                      onPress={() => setHumidity(h)}
-                      style={{
-                        paddingHorizontal: 14, paddingVertical: 14, borderRadius: 12,
-                        backgroundColor: active ? palette.greenBg : palette.surface,
-                        borderWidth: 1.5,
-                        borderColor: active ? palette.green : 'transparent',
-                        width: '48%',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <ThemedText variant="meta" weight={active ? 'semibold' : 'medium'}>
-                        {h}
-                      </ThemedText>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </Field>
-
             <Field label="이 식물이 좋아하는 빛 (1~5)" style={{ marginTop: 22 }}>
               <View style={{ flexDirection: 'row', gap: 6, marginTop: 4 }}>
                 {[1, 2, 3, 4, 5].map((n) => {
@@ -425,7 +371,10 @@ function AddMobile() {
           style={{
             paddingVertical: 16,
             borderRadius: 999,
-            backgroundColor: palette.ink,
+            // In dark mode palette.ink is near-white, which produced an
+            // unnaturally bright "white" CTA on a dark screen. Use the accent
+            // green instead — both modes end up with comfortable contrast.
+            backgroundColor: themeMode === 'dark' ? palette.green : palette.ink,
             alignItems: 'center',
             opacity: busy ? 0.6 : 1,
           }}

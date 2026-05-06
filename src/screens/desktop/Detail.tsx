@@ -71,11 +71,13 @@ export function DesktopDetail({ plant }: { plant: Plant }) {
     } catch { return '—'; }
   })();
 
+  // 광량/습도(현재 환경)는 신규 식물에서 더 이상 입력받지 않으므로 값이 있는
+  // 기존 식물만 stat 으로 노출한다.
   const stats: { k: string; v: string; color?: string }[] = [
     { k: '다음 물', v: nextActionLabel(plant), color: palette.drop },
     { k: '다음 비료', v: fertNext, color: palette.bloom },
-    { k: '광량', v: plant.light },
-    { k: '습도', v: plant.humidity },
+    ...(plant.light ? [{ k: '광량', v: plant.light }] : []),
+    ...(plant.humidity ? [{ k: '습도', v: plant.humidity }] : []),
   ];
 
   return (

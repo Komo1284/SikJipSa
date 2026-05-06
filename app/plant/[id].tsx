@@ -527,8 +527,10 @@ function CareTab({ plant }: { plant: import('@/types/plant').Plant }) {
         `마지막: ${formatMD(plant.lastWater)} · 다음(추천): ${formatMD(plant.recommendedNextWater ?? plant.nextWater)}`,
       )}
       {row(<Flower2 size={18} color={palette.bloom} strokeWidth={1.8} />, '비료', `${plant.fertCycle}일마다`, `마지막: ${formatMD(plant.lastFert)}`)}
-      {row(<Sun size={18} color={palette.earth} strokeWidth={1.8} />, '광량', plant.light)}
-      {row(<Droplet size={18} color={palette.ink3} strokeWidth={1.8} />, '습도', plant.humidity)}
+      {/* 광량/습도(현재 환경)는 공간 설정의 lightScore/airflowScore 가 source of truth.
+          기존 데이터에 값이 남아있는 식물만 표시한다. */}
+      {plant.light ? row(<Sun size={18} color={palette.earth} strokeWidth={1.8} />, '광량', plant.light) : null}
+      {plant.humidity ? row(<Droplet size={18} color={palette.ink3} strokeWidth={1.8} />, '습도', plant.humidity) : null}
 
       {plant.note ? (
         <View style={{ backgroundColor: palette.greenBg, padding: 16, borderRadius: radii.md, marginTop: 6 }}>
@@ -546,23 +548,28 @@ function CareTab({ plant }: { plant: import('@/types/plant').Plant }) {
 
 function EnvTab({ plant }: { plant: import('@/types/plant').Plant }) {
   const { palette, radii } = useTheme();
-  const bars = [
-    {
+  // 광량/습도 카테고리 문자열은 더 이상 입력받지 않으므로 값이 있는 식물만 막대를
+  // 그린다. 신규 식물은 "물 요구" 한 줄만 보이는 게 정상.
+  const bars: { label: string; value: number; detail: string }[] = [];
+  if (plant.light) {
+    bars.push({
       label: '광량',
       value: plant.light.includes('강한') ? 0.95 : plant.light.includes('직사') ? 0.8 : plant.light.includes('밝은') ? 0.6 : 0.35,
       detail: plant.light,
-    },
-    {
+    });
+  }
+  if (plant.humidity) {
+    bars.push({
       label: '습도',
       value: plant.humidity.includes('매우 높음') ? 0.9 : plant.humidity.includes('높음') ? 0.75 : plant.humidity.includes('보통') ? 0.5 : 0.2,
       detail: plant.humidity,
-    },
-    {
-      label: '물 요구',
-      value: 1 - Math.min(plant.waterCycle / 30, 1),
-      detail: `${plant.waterCycle}일 주기`,
-    },
-  ];
+    });
+  }
+  bars.push({
+    label: '물 요구',
+    value: 1 - Math.min(plant.waterCycle / 30, 1),
+    detail: `${plant.waterCycle}일 주기`,
+  });
   return (
     <View style={{ backgroundColor: palette.surface, padding: 20, borderRadius: radii.lg, gap: 18 }}>
       {bars.map((b) => (

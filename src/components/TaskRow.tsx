@@ -43,7 +43,7 @@ export function TaskRow({
           {plant.name}
         </ThemedText>
         <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 2 }}>
-          {plant.location} · {plant.light}
+          {plant.light ? `${plant.location} · ${plant.light}` : plant.location}
         </ThemedText>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 }}>
           <Chip tone={tone}>{`물주기 · ${nextActionLabel(plant)}`}</Chip>

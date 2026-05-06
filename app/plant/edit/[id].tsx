@@ -1,16 +1,20 @@
+import { BottomSheet } from '@/components/BottomSheet';
+import { CalendarPicker } from '@/components/CalendarPicker';
 import { ThemedText } from '@/components/Typography';
 import { useLocationStore } from '@/store/locations';
 import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
+import { toISODate } from '@/utils/date';
 import { router, useLocalSearchParams } from 'expo-router';
+import { CalendarDays } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CYCLES = [3, 5, 7, 10, 14, 21, 30];
-const FERT_CYCLES = [7, 14, 21, 30, 45, 60, 90];
-const LIGHTS = ['강한 직사광', '밝은 간접광', '반그늘', '약한 그늘'];
-const HUMIDITIES = ['매우 높음', '높음', '보통', '낮음'];
+// 30일까지는 일 단위, 그 이후는 1~6달을 한 달 간격으로 노출.
+const FERT_CYCLES = [7, 14, 21, 30, 60, 90, 120, 150, 180];
+const fertCycleLabel = (d: number) => (d < 30 ? `${d}일` : `${d / 30}달`);
 
 export default function PlantEditScreen() {
   const { palette, radii, weights } = useTheme();
@@ -27,12 +31,12 @@ export default function PlantEditScreen() {
   const [fertCycle, setFertCycle] = useState(plant?.fertCycle ?? 30);
   const [lastWater, setLastWater] = useState(plant?.lastWater ?? '');
   const [lastFert, setLastFert] = useState(plant?.lastFert ?? '');
-  const [light, setLight] = useState(plant?.light ?? '밝은 간접광');
-  const [humidity, setHumidity] = useState(plant?.humidity ?? '보통');
   const [note, setNote] = useState(plant?.note ?? '');
   const [lightPref, setLightPref] = useState<number>(plant?.speciesLightPref ?? 3);
   const [humidityPref, setHumidityPref] = useState<number>(plant?.speciesHumidityPref ?? 3);
   const [busy, setBusy] = useState(false);
+  const [pickerFor, setPickerFor] = useState<null | 'water' | 'fert'>(null);
+  const today = toISODate(new Date());
 
   if (!plant) {
     return (
@@ -54,8 +58,6 @@ export default function PlantEditScreen() {
         fertCycle,
         lastWater: lastWater || plant.lastWater,
         lastFert: lastFert || plant.lastFert,
-        light,
-        humidity,
         note,
         speciesLightPref: lightPref,
         speciesHumidityPref: humidityPref,
@@ -198,7 +200,7 @@ export default function PlantEditScreen() {
                   }}
                 >
                   <ThemedText variant="meta" weight="medium" color={active ? palette.bg : palette.ink}>
-                    {d}일
+                    {fertCycleLabel(d)}
                   </ThemedText>
                 </Pressable>
               );
@@ -207,75 +209,17 @@ export default function PlantEditScreen() {
         </Field>
 
         <Field label="마지막 물 준 날">
-          <TextInput
+          <DatePickerField
             value={lastWater}
-            onChangeText={setLastWater}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={palette.ink3}
-            style={{ ...inputStyle, fontFamily: weights.monoMedium }}
+            onPress={() => setPickerFor('water')}
           />
         </Field>
 
         <Field label="마지막 비료 준 날">
-          <TextInput
+          <DatePickerField
             value={lastFert}
-            onChangeText={setLastFert}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={palette.ink3}
-            style={{ ...inputStyle, fontFamily: weights.monoMedium }}
+            onPress={() => setPickerFor('fert')}
           />
-        </Field>
-
-        <Field label="광량">
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            {LIGHTS.map((l) => {
-              const active = light === l;
-              return (
-                <Pressable
-                  key={l}
-                  onPress={() => setLight(l)}
-                  style={{
-                    paddingHorizontal: 14, paddingVertical: 14, borderRadius: 12,
-                    backgroundColor: active ? palette.greenBg : palette.surface,
-                    borderWidth: 1.5,
-                    borderColor: active ? palette.green : 'transparent',
-                    width: '48%',
-                    alignItems: 'center',
-                  }}
-                >
-                  <ThemedText variant="meta" weight={active ? 'semibold' : 'medium'}>
-                    {l}
-                  </ThemedText>
-                </Pressable>
-              );
-            })}
-          </View>
-        </Field>
-
-        <Field label="습도">
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            {HUMIDITIES.map((h) => {
-              const active = humidity === h;
-              return (
-                <Pressable
-                  key={h}
-                  onPress={() => setHumidity(h)}
-                  style={{
-                    paddingHorizontal: 14, paddingVertical: 14, borderRadius: 12,
-                    backgroundColor: active ? palette.greenBg : palette.surface,
-                    borderWidth: 1.5,
-                    borderColor: active ? palette.green : 'transparent',
-                    width: '48%',
-                    alignItems: 'center',
-                  }}
-                >
-                  <ThemedText variant="meta" weight={active ? 'semibold' : 'medium'}>
-                    {h}
-                  </ThemedText>
-                </Pressable>
-              );
-            })}
-          </View>
         </Field>
 
         <Field label="이 식물이 좋아하는 빛 (1~5)">
@@ -339,7 +283,60 @@ export default function PlantEditScreen() {
           />
         </Field>
       </ScrollView>
+
+      <BottomSheet visible={pickerFor !== null} onClose={() => setPickerFor(null)} maxHeight={0.7}>
+        <View style={{ paddingHorizontal: 20, paddingBottom: 28, paddingTop: 4 }}>
+          <ThemedText
+            variant="tiny"
+            family="mono"
+            uppercase
+            color={palette.ink3}
+            style={{ marginBottom: 12, letterSpacing: 1 }}
+          >
+            {pickerFor === 'fert' ? '마지막 비료 준 날' : '마지막 물 준 날'}
+          </ThemedText>
+          <CalendarPicker
+            value={
+              (pickerFor === 'fert' ? lastFert : lastWater) || today
+            }
+            onChange={(iso) => {
+              if (pickerFor === 'fert') setLastFert(iso);
+              else setLastWater(iso);
+              setPickerFor(null);
+            }}
+          />
+        </View>
+      </BottomSheet>
     </View>
+  );
+}
+
+function DatePickerField({ value, onPress }: { value: string; onPress: () => void }) {
+  const { palette, radii, weights } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        borderRadius: radii.sm,
+        backgroundColor: palette.surface,
+        borderWidth: 1,
+        borderColor: palette.line,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      <ThemedText
+        variant="body"
+        color={value ? palette.ink : palette.ink3}
+        style={{ fontFamily: weights.monoMedium, fontSize: 15 }}
+      >
+        {value || '날짜 선택'}
+      </ThemedText>
+      <CalendarDays size={16} color={palette.ink3} strokeWidth={1.8} />
+    </Pressable>
   );
 }
 
