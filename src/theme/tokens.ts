@@ -151,24 +151,23 @@ export const shadows = {
   },
 } as const;
 
-export const fontFamilies: Record<FontKey, { sans: string; serif: string; mono: string }> = {
-  pretendard: {
-    sans: 'NotoSansKR_500Medium',
-    serif: 'InstrumentSerif_400Regular',
-    mono: 'JetBrainsMono_500Medium',
-  },
-  gowun: {
-    // 단정한 손글씨 톤 — 식물·일기 같은 따뜻한 앱에 잘 맞음
-    sans: 'GowunDodum_400Regular',
-    serif: 'InstrumentSerif_400Regular',
-    mono: 'JetBrainsMono_500Medium',
-  },
-  myeongjo: {
-    // 세리프 한글 — 차분하고 클래식한 느낌
-    sans: 'NanumMyeongjo_400Regular',
-    serif: 'NanumMyeongjo_700Bold',
-    mono: 'JetBrainsMono_500Medium',
-  },
+/**
+ * 모든 텍스트는 Pretendard(=NotoSansKR) 한 가족만 사용한다. 한글·영어·숫자
+ * 모두 동일 폰트로 렌더링되어 화면이 통일감 있게 보임. serif/mono 키는
+ * 호환성을 위해 남겨뒀지만 실제로는 sans 굵기 베리언트로 alias 됨 —
+ * 인라인에서 `weights.serifRegular` 같은 코드를 일일이 고치지 않아도 자동
+ * 으로 같은 폰트가 적용된다. 디자인상 강조는 굵기/이탤릭/색상으로 표현.
+ */
+const PRETENDARD = {
+  sans: 'NotoSansKR_500Medium',
+  serif: 'NotoSansKR_500Medium',
+  mono: 'NotoSansKR_500Medium',
+};
+
+export const fontFamilies: Record<FontKey, typeof PRETENDARD> = {
+  pretendard: PRETENDARD,
+  gowun: PRETENDARD,
+  myeongjo: PRETENDARD,
 };
 
 export const fontWeights = {
@@ -176,10 +175,12 @@ export const fontWeights = {
   sansMedium: 'NotoSansKR_500Medium',
   sansSemibold: 'NotoSansKR_600SemiBold',
   sansBold: 'NotoSansKR_700Bold',
-  serifRegular: 'InstrumentSerif_400Regular',
-  serifItalic: 'InstrumentSerif_400Regular_Italic',
-  monoRegular: 'JetBrainsMono_400Regular',
-  monoMedium: 'JetBrainsMono_500Medium',
+  // serif/mono 키는 의도적으로 NotoSansKR 로 매핑 — 이전 호출처 유지하면서
+  // 화면 폰트 단일화. italic 필요한 곳은 fontStyle: 'italic' 으로.
+  serifRegular: 'NotoSansKR_500Medium',
+  serifItalic: 'NotoSansKR_500Medium',
+  monoRegular: 'NotoSansKR_400Regular',
+  monoMedium: 'NotoSansKR_500Medium',
 } as const;
 
 /** Typography scale — see README §Design Tokens. */

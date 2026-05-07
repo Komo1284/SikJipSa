@@ -9,19 +9,6 @@ import { usePlantStore } from '@/store/plants';
 import { useWeatherStore } from '@/store/weather';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { useResponsive } from '@/theme/responsive';
-import { GowunDodum_400Regular } from '@expo-google-fonts/gowun-dodum';
-import {
-  InstrumentSerif_400Regular,
-  InstrumentSerif_400Regular_Italic,
-} from '@expo-google-fonts/instrument-serif';
-import {
-  JetBrainsMono_400Regular,
-  JetBrainsMono_500Medium,
-} from '@expo-google-fonts/jetbrains-mono';
-import {
-  NanumMyeongjo_400Regular,
-  NanumMyeongjo_700Bold,
-} from '@expo-google-fonts/nanum-myeongjo';
 import {
   NotoSansKR_400Regular,
   NotoSansKR_500Medium,
@@ -155,18 +142,14 @@ function RootStack() {
 }
 
 export default function RootLayout() {
+  // 모든 텍스트는 Pretendard(NotoSansKR) 한 가족만 사용 — 한글·영어·숫자
+  // 통일. 이전에 로드하던 InstrumentSerif/JetBrainsMono/Gowun/Myeongjo 는
+  // tokens.ts 에서 별칭만 남기고 실제 로드는 제거해 번들 크기를 줄임.
   const [loaded] = useFonts({
     NotoSansKR_400Regular,
     NotoSansKR_500Medium,
     NotoSansKR_600SemiBold,
     NotoSansKR_700Bold,
-    InstrumentSerif_400Regular,
-    InstrumentSerif_400Regular_Italic,
-    JetBrainsMono_400Regular,
-    JetBrainsMono_500Medium,
-    GowunDodum_400Regular,
-    NanumMyeongjo_400Regular,
-    NanumMyeongjo_700Bold,
   });
 
   // Hold the splash for at least ~1.8s even when fonts load instantly,

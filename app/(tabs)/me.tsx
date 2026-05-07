@@ -5,7 +5,7 @@ import { useLocationStore } from '@/store/locations';
 import { usePlantStore } from '@/store/plants';
 import { useWeatherStore } from '@/store/weather';
 import { useTheme } from '@/theme/ThemeProvider';
-import type { AccentKey, FontKey, ThemeMode } from '@/theme/tokens';
+import type { AccentKey, ThemeMode } from '@/theme/tokens';
 import type { UserLocation } from '@/types/plant';
 import { CloudRain, Droplet as DropletIcon, MapPin, Pencil, Plus, RefreshCw, Sun, Thermometer, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -25,14 +25,8 @@ const MODES: { key: ThemeMode | 'system'; label: string }[] = [
   { key: 'system', label: '시스템' },
 ];
 
-const FONTS: { key: FontKey; label: string }[] = [
-  { key: 'pretendard', label: '기본' },
-  { key: 'gowun',      label: '고운돋움' },
-  { key: 'myeongjo',   label: '명조' },
-];
-
 export default function MeScreen() {
-  const { palette, mode, accent, font, radii, setMode, setAccent, setFont } = useTheme();
+  const { palette, mode, accent, radii, setMode, setAccent } = useTheme();
   const insets = useSafeAreaInsets();
 
   const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -111,10 +105,6 @@ export default function MeScreen() {
 
       <Section title="테마">
         <Seg items={MODES} value={mode} onChange={setMode} />
-      </Section>
-
-      <Section title="폰트">
-        <Seg items={FONTS} value={font} onChange={setFont} />
       </Section>
 
       <PlaceSection />
