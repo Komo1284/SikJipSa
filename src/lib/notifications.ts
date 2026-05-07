@@ -1,4 +1,5 @@
 import type { Plant } from '@/types/plant';
+import { parseISODate } from '@/utils/date';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
@@ -58,7 +59,9 @@ export async function scheduleWaterReminder(plant: Plant): Promise<boolean> {
   // Cancel any previous reminder for this plant first.
   await cancelWaterReminder(plant.id);
 
-  const target = new Date(plant.nextWater);
+  // Anchor to local midnight first so setHours(9) lands on the user's
+  // wall-clock 9 AM regardless of timezone drift from `new Date('YYYY-MM-DD')`.
+  const target = parseISODate(plant.nextWater);
   target.setHours(9, 0, 0, 0);
   const now = new Date();
   if (target.getTime() <= now.getTime()) return false;

@@ -1,6 +1,7 @@
 import { SEED_LOG } from '@/data/plants';
 import type { LogRepo } from '@/repo/contracts';
 import type { LogEntry } from '@/types/plant';
+import { parseISODate } from '@/utils/date';
 import { hasSupabase, supabase } from './client';
 
 type LogRow = {
@@ -64,7 +65,11 @@ export const supabaseLogRepo: LogRepo = {
       .insert({
         plant_id: entry.plantId,
         action: entry.action,
-        occurred_at: new Date(entry.date).toISOString(),
+        // entry.date is a "YYYY-MM-DD" calendar day. Anchor it to local
+        // midnight before serializing — `new Date('YYYY-MM-DD')` treats the
+        // string as UTC midnight, which lands the timestamptz on +09:00 of the
+        // intended day in KST and on the wrong day in some timezones.
+        occurred_at: parseISODate(entry.date).toISOString(),
         note: entry.note ?? '',
         photo_url: entry.photoUrl ?? null,
       })

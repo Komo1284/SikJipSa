@@ -9,7 +9,7 @@ import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useResponsive } from '@/theme/responsive';
 import type { LogEntry, Plant } from '@/types/plant';
-import { TODAY, daysBetween, formatMD } from '@/utils/date';
+import { TODAY, daysBetween, formatMD, parseISODate, toISODate } from '@/utils/date';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Camera, ChevronLeft, Droplet, Flower2, MoreHorizontal, Pencil, Scissors, Sprout, Sun, Trash2 } from 'lucide-react-native';
@@ -74,9 +74,9 @@ function DetailMobile({ plant }: { plant: Plant }) {
   // Next fertilizer = last_fert + fert_cycle. Show D-day relative to today.
   const fertNextDate = (() => {
     try {
-      const d = new Date(plant.lastFert);
+      const d = parseISODate(plant.lastFert);
       d.setDate(d.getDate() + plant.fertCycle);
-      return d.toISOString().slice(0, 10);
+      return toISODate(d);
     } catch { return plant.lastFert; }
   })();
   const fDays = daysBetween(TODAY, fertNextDate);

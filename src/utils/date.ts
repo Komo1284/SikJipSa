@@ -8,14 +8,28 @@ import type { Plant } from '@/types/plant';
  */
 export const TODAY = new Date();
 
+/**
+ * Parse a "YYYY-MM-DD" calendar string as **local midnight**, never UTC.
+ *
+ * `new Date('2026-05-07')` is specified by ECMA to mean UTC midnight, so in
+ * KST (+09:00) it lands on 09:00 the same day — close enough that
+ * `daysBetween` rounds inconsistently (±1 day depending on time of day).
+ * Using the multi-arg constructor sidesteps the spec entirely and makes the
+ * Date represent the calendar day the user actually picked.
+ */
+export function parseISODate(iso: string): Date {
+  const [y, m, d] = iso.split('-').map((n) => parseInt(n, 10));
+  return new Date(y, (m || 1) - 1, d || 1);
+}
+
 export function daysBetween(a: Date | string, b: Date | string): number {
-  const da = typeof a === 'string' ? new Date(a) : a;
-  const db = typeof b === 'string' ? new Date(b) : b;
+  const da = typeof a === 'string' ? parseISODate(a) : a;
+  const db = typeof b === 'string' ? parseISODate(b) : b;
   return Math.round((db.getTime() - da.getTime()) / 86_400_000);
 }
 
 export function formatMD(date: string | Date): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const d = typeof date === 'string' ? parseISODate(date) : date;
   return `${d.getMonth() + 1}월 ${d.getDate()}일`;
 }
 
@@ -67,13 +81,22 @@ export const todayList = (plants: Plant[]) =>
 export const soonList = (plants: Plant[]) =>
   plants.filter((p) => plantStatusRecommended(p) === 'soon');
 
-/** ISO yyyy-mm-dd for a JS Date. */
+/**
+ * "YYYY-MM-DD" for a JS Date, expressed in the user's **local** calendar.
+ *
+ * `toISOString().slice(0,10)` would silently use UTC, so a `new Date()` at
+ * 02:00 KST returns the previous day's date string — the bug behind
+ * "오늘 선택했는데 어제로 저장됨" reports before 09:00 KST.
+ */
 export function toISODate(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
 }
 
 export function addDays(iso: string, days: number): string {
-  const d = new Date(iso);
+  const d = parseISODate(iso);
   d.setDate(d.getDate() + days);
   return toISODate(d);
 }

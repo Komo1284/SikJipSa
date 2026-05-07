@@ -6,7 +6,7 @@ import { repos } from '@/repo';
 import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
 import type { Plant } from '@/types/plant';
-import { formatMD, nextActionLabel } from '@/utils/date';
+import { formatMD, nextActionLabel, parseISODate, toISODate } from '@/utils/date';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { Camera, Droplet, Flower2, Pencil, Scissors, Sprout, Trash2 } from 'lucide-react-native';
@@ -60,11 +60,14 @@ export function DesktopDetail({ plant }: { plant: Plant }) {
   };
 
   // Compute next-fert D-day (last_fert + fert_cycle).
+  // Both ends are anchored to local midnight so the round() doesn't drift by a
+  // day depending on what time the screen is opened.
   const fertNext = (() => {
     try {
-      const d = new Date(plant.lastFert);
+      const d = parseISODate(plant.lastFert);
       d.setDate(d.getDate() + plant.fertCycle);
-      const days = Math.round((d.getTime() - Date.now()) / 86_400_000);
+      const today = parseISODate(toISODate(new Date()));
+      const days = Math.round((d.getTime() - today.getTime()) / 86_400_000);
       if (days < 0) return `${-days}일 지남`;
       if (days === 0) return '오늘';
       return `${days}일 뒤`;
