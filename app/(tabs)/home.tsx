@@ -1,8 +1,10 @@
 import { MiniPlantCard } from '@/components/MiniPlantCard';
+import { NotificationsSheet } from '@/components/NotificationsSheet';
 import { PlantThumb } from '@/components/PlantThumb';
 import { SectionHeader } from '@/components/SectionHeader';
 import { TaskRow } from '@/components/TaskRow';
 import { ThemedText } from '@/components/Typography';
+import { getFertReminders, getRepotReminders, getWaterReminders } from '@/lib/reminders';
 import { useLocationStore } from '@/store/locations';
 import { useUIStore } from '@/store/ui';
 import { DesktopHome } from '@/screens/desktop/Home';
@@ -12,7 +14,7 @@ import { useResponsive } from '@/theme/responsive';
 import { formatKickerShort, plantStatus, soonList, todayList } from '@/utils/date';
 import { useRouter } from 'expo-router';
 import { Bell, ChevronRight, Leaf } from 'lucide-react-native';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -27,6 +29,7 @@ function HomeMobile() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
+  const repotByPlant = usePlantStore((s) => s.repotByPlant);
   const waterPlant = usePlantStore((s) => s.waterPlant);
   const locations = useLocationStore((s) => s.locations);
   const setSpaceFilter = useUIStore((s) => s.setSpaceFilter);
@@ -38,9 +41,22 @@ function HomeMobile() {
 
   const todays = todayList(plants);
   const soon = soonList(plants);
-  const overdueCount = plants.filter((p) => plantStatus(p) === 'overdue').length;
+
+  // Bell badge — show whenever any reminder type has at least one entry,
+  // not just water-overdue. Uses the same selectors as the sheet so the
+  // dot and the sheet contents agree.
+  const reminderCount = useMemo(
+    () =>
+      getWaterReminders(plants).length +
+      getFertReminders(plants).length +
+      getRepotReminders(plants, repotByPlant).length,
+    [plants, repotByPlant],
+  );
+
+  const [notifOpen, setNotifOpen] = useState(false);
 
   return (
+    <>
     <ScrollView
       style={{ flex: 1, backgroundColor: palette.bg }}
       contentContainerStyle={{ paddingTop: insets.top + 10, paddingBottom: 120 }}
@@ -51,9 +67,9 @@ function HomeMobile() {
           <ThemedText variant="tiny" family="mono" color={palette.ink3} uppercase>
             {formatKickerShort()}
           </ThemedText>
-          <Pressable hitSlop={8} style={{ padding: 6 }}>
+          <Pressable hitSlop={8} style={{ padding: 6 }} onPress={() => setNotifOpen(true)}>
             <Bell size={22} color={palette.ink2} strokeWidth={1.6} />
-            {overdueCount > 0 ? (
+            {reminderCount > 0 ? (
               <View
                 style={{
                   position: 'absolute',
@@ -226,5 +242,7 @@ function HomeMobile() {
         })}
       </View>
     </ScrollView>
+    <NotificationsSheet visible={notifOpen} onClose={() => setNotifOpen(false)} />
+    </>
   );
 }
