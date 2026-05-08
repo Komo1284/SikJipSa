@@ -21,6 +21,11 @@ function isLikelyNetworkError(e: unknown): boolean {
 type PlantStore = {
   plants: Plant[];
   log: LogEntry[];
+  /**
+   * `plantId → 가장 최근 분갈이 ISO 날짜`. 분갈이는 1년 이상 텀이 흔해서
+   * `log` (60일 윈도우) 만으론 못 잡고, 별도 인덱스로 관리.
+   */
+  repotByPlant: Record<string, string>;
   loading: boolean;
   error: string | null;
   loaded: boolean;
@@ -49,9 +54,20 @@ type PlantStore = {
 const initialPlants = hasSupabase ? [] : SEED_PLANTS;
 const initialLog = hasSupabase ? [] : SEED_LOG;
 
+const buildRepotIndex = (logs: LogEntry[]): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const l of logs) {
+    if (l.action !== 'repot') continue;
+    const cur = out[l.plantId];
+    if (!cur || l.date > cur) out[l.plantId] = l.date;
+  }
+  return out;
+};
+
 export const usePlantStore = create<PlantStore>((set, get) => ({
   plants: initialPlants,
   log: initialLog,
+  repotByPlant: hasSupabase ? {} : buildRepotIndex(initialLog),
   loading: false,
   error: null,
   loaded: !hasSupabase,
@@ -59,11 +75,12 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
   async load() {
     set({ loading: true, error: null });
     try {
-      const [plants, log] = await Promise.all([
+      const [plants, log, repotByPlant] = await Promise.all([
         repos.plants.list(),
         repos.logs.listRecent(60),
+        repos.logs.listLatestRepots(),
       ]);
-      set({ plants, log, loading: false, loaded: true });
+      set({ plants, log, repotByPlant, loading: false, loaded: true });
       rescheduleAll(plants).catch(() => {}); // fire-and-forget
     } catch (e) {
       const msg = (e as Error).message;
@@ -74,7 +91,7 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
   },
 
   clear() {
-    set({ plants: [], log: [], loaded: false, error: null });
+    set({ plants: [], log: [], repotByPlant: {}, loaded: false, error: null });
   },
 
   async waterPlant(id, opts = {}) {
@@ -215,7 +232,14 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
         (x) => x.plantId === l.plantId && x.date === l.date && x.action === l.action,
       );
       if (dup) return {};
-      return { log: [l, ...s.log] };
+      const next: Partial<PlantStore> = { log: [l, ...s.log] };
+      if (l.action === 'repot') {
+        const prev = s.repotByPlant[l.plantId];
+        if (!prev || l.date > prev) {
+          next.repotByPlant = { ...s.repotByPlant, [l.plantId]: l.date };
+        }
+      }
+      return next;
     });
   },
 
@@ -265,7 +289,16 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
     const date = opts.date ?? toISODate(new Date());
     const note = opts.note ?? '';
     const entry: LogEntry = { plantId, action, date, note };
-    set((s) => ({ log: [entry, ...s.log] }));
+    set((s) => {
+      const next: Partial<PlantStore> = { log: [entry, ...s.log] };
+      if (action === 'repot') {
+        const prev = s.repotByPlant[plantId];
+        if (!prev || date > prev) {
+          next.repotByPlant = { ...s.repotByPlant, [plantId]: date };
+        }
+      }
+      return next;
+    });
     try {
       await repos.logs.insert(entry);
       const labels: Record<typeof action, string> = { prune: '가지치기', repot: '분갈이', note: '메모' };
@@ -276,6 +309,9 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       set((s) => ({
         log: s.log.filter((l) => !(l.plantId === plantId && l.date === date && l.action === action)),
       }));
+      // The repot index is rebuilt from `log` on next load anyway, so we don't
+      // need to undo it explicitly. The optimistic write is harmless if the
+      // user retries.
     }
   },
 

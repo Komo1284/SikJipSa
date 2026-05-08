@@ -1,12 +1,16 @@
 import type { Plant } from '@/types/plant';
 
 /**
- * Real "today" for D-day math. Evaluated at module import, so the entire app
- * session sees the same date even if the user crosses midnight mid-session —
- * good enough for MVP. If a long-running background session becomes a concern,
- * switch callers to `new Date()` at each call site.
+ * Real "today" for D-day math. Anchored to **local midnight** (not the moment
+ * of import) so `daysBetween(TODAY, isoString)` returns a clean integer day
+ * count regardless of what time the user opened the app. Without this, opening
+ * the app at 14:00 and at 23:00 produced different D-day buckets for the same
+ * plant (round() drifted ±1).
  */
-export const TODAY = new Date();
+export const TODAY: Date = (() => {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+})();
 
 /**
  * Parse a "YYYY-MM-DD" calendar string as **local midnight**, never UTC.

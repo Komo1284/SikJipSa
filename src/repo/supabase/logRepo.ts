@@ -53,6 +53,32 @@ export const supabaseLogRepo: LogRepo = {
     return (data as LogRow[]).map(rowToLog);
   },
 
+  async listLatestRepots() {
+    if (!hasSupabase || !supabase) {
+      const out: Record<string, string> = {};
+      for (const l of seedStore.log) {
+        if (l.action !== 'repot') continue;
+        const cur = out[l.plantId];
+        if (!cur || l.date > cur) out[l.plantId] = l.date;
+      }
+      return out;
+    }
+    // PostgREST has no SQL-level GROUP BY, so fetch every repot row ordered
+    // newest-first and de-dupe client-side. Repot is rare (~1×/year/plant),
+    // so the row count stays small.
+    const { data, error } = await supabase
+      .from('plant_logs')
+      .select('plant_id, occurred_at')
+      .eq('action', 'repot')
+      .order('occurred_at', { ascending: false });
+    if (error) throw error;
+    const out: Record<string, string> = {};
+    for (const r of data as { plant_id: string; occurred_at: string }[]) {
+      if (!out[r.plant_id]) out[r.plant_id] = r.occurred_at.slice(0, 10);
+    }
+    return out;
+  },
+
   async insert(entry) {
     if (!hasSupabase || !supabase) {
       const full: LogEntry = { ...entry };

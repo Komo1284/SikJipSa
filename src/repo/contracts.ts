@@ -27,6 +27,12 @@ export interface LogRepo {
   listForPlant(plantId: string, limit?: number): Promise<LogEntry[]>;
   listRecent(days: number): Promise<LogEntry[]>;
   insert(entry: Omit<LogEntry, 'id'>): Promise<LogEntry>;
+  /**
+   * Index of {plantId → latest repot ISO date} across all time. The
+   * "분갈이 임박" reminder needs this because repotting happens on a
+   * 1+ year cadence — the rolling 60-day `listRecent` window can't see it.
+   */
+  listLatestRepots(): Promise<Record<string, string>>;
 }
 
 /** Locations (spaces) */
