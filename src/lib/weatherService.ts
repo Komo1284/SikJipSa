@@ -28,6 +28,11 @@ export async function detectLocation(): Promise<UserPlace> {
   }
 
   // 2) IP fallback
+  return detectIpLocation();
+}
+
+/** GPS 를 건너뛰고 IP 기반(도시 단위)으로만 추정 — 권한 다이얼로그가 뜨지 않는다. */
+export async function detectIpLocation(): Promise<UserPlace> {
   try {
     const r = await fetch('https://ipapi.co/json/');
     if (r.ok) {

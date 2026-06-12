@@ -13,33 +13,54 @@ Notifications.setNotificationHandler({
   }),
 });
 
-let permissionChecked = false;
+let promptShown = false;
 let permissionGranted = false;
 
+async function ensureAndroidChannel() {
+  if (Platform.OS !== 'android') return;
+  await Notifications.setNotificationChannelAsync('water', {
+    name: '물주기 알림',
+    importance: Notifications.AndroidImportance.DEFAULT,
+    sound: 'default',
+  });
+}
+
 export async function ensureNotificationPermission(): Promise<boolean> {
-  if (permissionChecked) return permissionGranted;
-  permissionChecked = true;
+  // 긍정 결과만 캐시한다. 예전엔 첫 확인 결과를 통째로 캐시해서, 사용자가
+  // 기기 설정에서 알림을 켜고 돌아와도 세션이 끝날 때까지 거부 상태로
+  // 취급되는 버그가 있었다.
+  if (permissionGranted) return true;
 
   try {
     const current = await Notifications.getPermissionsAsync();
     if (current.granted) {
       permissionGranted = true;
+      await ensureAndroidChannel();
       return true;
     }
+    // OS 권한 팝업은 세션당 한 번만 — 호출처마다 반복해서 띄우지 않는다.
+    if (promptShown) return false;
+    promptShown = true;
     const req = await Notifications.requestPermissionsAsync();
     permissionGranted = req.granted;
-
-    if (Platform.OS === 'android' && permissionGranted) {
-      await Notifications.setNotificationChannelAsync('water', {
-        name: '물주기 알림',
-        importance: Notifications.AndroidImportance.DEFAULT,
-        sound: 'default',
-      });
-    }
+    if (permissionGranted) await ensureAndroidChannel();
     return permissionGranted;
   } catch (e) {
     console.warn('[notifications] permission error:', e);
     return false;
+  }
+}
+
+export type NotificationPermissionStatus = 'granted' | 'denied' | 'undetermined';
+
+/** Me 탭 알림 섹션용 — 현재 권한 상태를 조용히(팝업 없이) 조회. */
+export async function getNotificationPermissionStatus(): Promise<NotificationPermissionStatus> {
+  try {
+    const p = await Notifications.getPermissionsAsync();
+    if (p.granted) return 'granted';
+    return p.canAskAgain ? 'undetermined' : 'denied';
+  } catch {
+    return 'undetermined';
   }
 }
 

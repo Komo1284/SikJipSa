@@ -1,5 +1,11 @@
 import { LocationFormModal } from '@/components/LocationFormModal';
 import { ThemedText } from '@/components/Typography';
+import {
+  ensureNotificationPermission,
+  getNotificationPermissionStatus,
+  rescheduleAll,
+  type NotificationPermissionStatus,
+} from '@/lib/notifications';
 import { useAuthStore } from '@/store/auth';
 import { useLocationStore } from '@/store/locations';
 import { usePlantStore } from '@/store/plants';
@@ -7,9 +13,10 @@ import { useWeatherStore } from '@/store/weather';
 import { useTheme } from '@/theme/ThemeProvider';
 import type { AccentKey, ThemeMode } from '@/theme/tokens';
 import type { UserLocation } from '@/types/plant';
-import { CloudRain, Droplet as DropletIcon, MapPin, Pencil, Plus, RefreshCw, Sun, Thermometer, Trash2 } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { Bell, BellOff, CloudRain, Droplet as DropletIcon, MapPin, Pencil, Plus, RefreshCw, Sun, Thermometer, Trash2 } from 'lucide-react-native';
+import React, { useCallback, useState } from 'react';
+import { Alert, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ACCENTS: { key: AccentKey; label: string; color: string }[] = [
@@ -109,10 +116,83 @@ export default function MeScreen() {
 
       <PlaceSection />
 
+      <NotificationSection />
+
       <LocationsSection />
 
       <AccountSection />
     </ScrollView>
+  );
+}
+
+function NotificationSection() {
+  const { palette, radii } = useTheme();
+  const plants = usePlantStore((s) => s.plants);
+  const [status, setStatus] = useState<NotificationPermissionStatus | null>(null);
+
+  const refresh = useCallback(() => {
+    if (Platform.OS === 'web') return;
+    getNotificationPermissionStatus().then(setStatus);
+  }, []);
+
+  // 기기 설정에서 알림을 켜고 돌아왔을 때 바로 반영되도록 포커스마다 재조회.
+  useFocusEffect(refresh);
+
+  if (Platform.OS === 'web' || status === null) return null;
+
+  const enable = async () => {
+    const ok = await ensureNotificationPermission();
+    if (ok) rescheduleAll(plants).catch(() => {});
+    refresh();
+  };
+
+  const granted = status === 'granted';
+  const Icon = granted ? Bell : BellOff;
+
+  return (
+    <View style={{ marginBottom: 26 }}>
+      <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 10, letterSpacing: 1 }}>
+        알림
+      </ThemedText>
+      <View style={{ backgroundColor: palette.surface, borderRadius: radii.md, padding: 16, gap: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <View
+            style={{
+              width: 40, height: 40, borderRadius: 20,
+              backgroundColor: granted ? palette.greenBg : palette.bg2,
+              alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Icon size={18} color={granted ? palette.greenDeep : palette.ink3} strokeWidth={1.8} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <ThemedText variant="body" weight="medium">물주기 알림</ThemedText>
+            <ThemedText variant="tiny" color={palette.ink3} style={{ marginTop: 2 }}>
+              {granted
+                ? '켜짐 · 물주기 날 아침 9시에 알려드려요'
+                : status === 'denied'
+                  ? '꺼짐 · 기기 설정에서 허용해야 받을 수 있어요'
+                  : '꺼짐 · 허용하면 물주기 날을 놓치지 않아요'}
+            </ThemedText>
+          </View>
+        </View>
+        {!granted ? (
+          <Pressable
+            onPress={status === 'denied' ? () => Linking.openSettings() : enable}
+            style={{
+              paddingVertical: 12,
+              borderRadius: 10,
+              backgroundColor: palette.bg2,
+              alignItems: 'center',
+            }}
+          >
+            <ThemedText variant="meta" weight="medium" color={palette.green}>
+              {status === 'denied' ? '기기 설정 열기' : '알림 허용하기'}
+            </ThemedText>
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
   );
 }
 
