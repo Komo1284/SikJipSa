@@ -21,3 +21,5 @@ supabase/.temp/
 
 expo-env.d.ts
 # @end expo-cli
+# gstack local artifacts (security reports, etc.) — keep local
+.gstack/
