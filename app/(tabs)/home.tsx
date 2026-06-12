@@ -12,7 +12,7 @@ import { useUIStore } from '@/store/ui';
 import { DesktopHome } from '@/screens/desktop/Home';
 import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useResponsive } from '@/theme/responsive';
+import { useResponsive, useTabletContentCap } from '@/theme/responsive';
 import { formatKickerShort, plantStatus, soonList, todayList } from '@/utils/date';
 import { useRouter } from 'expo-router';
 import { Bell, ChevronRight, Leaf, Sprout } from 'lucide-react-native';
@@ -29,6 +29,7 @@ export default function HomeScreen() {
 function HomeMobile() {
   const { palette, radii, shadows, weights, typography } = useTheme();
   const insets = useSafeAreaInsets();
+  const tabletCap = useTabletContentCap();
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
   const repotByPlant = usePlantStore((s) => s.repotByPlant);
@@ -61,7 +62,7 @@ function HomeMobile() {
     <>
     <ScrollView
       style={{ flex: 1, backgroundColor: palette.bg }}
-      contentContainerStyle={{ paddingTop: insets.top + 10, paddingBottom: 120 }}
+      contentContainerStyle={[{ paddingTop: insets.top + 10, paddingBottom: 120 }, tabletCap]}
       showsVerticalScrollIndicator={false}
     >
       <View style={{ paddingHorizontal: 24, paddingTop: 6 }}>

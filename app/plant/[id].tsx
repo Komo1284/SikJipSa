@@ -9,7 +9,7 @@ import { repos } from '@/repo';
 import { DesktopDetail } from '@/screens/desktop/Detail';
 import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useResponsive } from '@/theme/responsive';
+import { useResponsive, useTabletContentCap } from '@/theme/responsive';
 import type { LogEntry, Plant } from '@/types/plant';
 import { TODAY, daysBetween, formatMD, parseISODate, toISODate } from '@/utils/date';
 import * as ImagePicker from 'expo-image-picker';
@@ -30,8 +30,13 @@ export default function PlantDetail() {
 
   if (!plant) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.bg }}>
-        <ThemedText color={palette.ink3}>찾을 수 없는 식물이에요.</ThemedText>
+      <View style={{ flex: 1, backgroundColor: palette.bg }}>
+        <EmptyState
+          title="찾을 수 없는 식물이에요"
+          description={'삭제되었거나 다른 계정의 식물일 수 있어요.'}
+          actionLabel="돌아가기"
+          onAction={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'))}
+        />
       </View>
     );
   }
@@ -42,6 +47,7 @@ export default function PlantDetail() {
 function DetailMobile({ plant }: { plant: Plant }) {
   const { palette, radii, shadows, weights, resolved } = useTheme();
   const insets = useSafeAreaInsets();
+  const tabletCap = useTabletContentCap(680);
 
   // Floating buttons sit on top of a dark-gradient hero image — we want a
   // subtle contrast-aware pill: white-translucent in light mode, dark-translucent in dark.
@@ -163,7 +169,7 @@ function DetailMobile({ plant }: { plant: Plant }) {
     <View style={{ flex: 1, backgroundColor: palette.bg }}>
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={[{ paddingBottom: 40 }, tabletCap]}
         showsVerticalScrollIndicator={false}
       >
       <View style={{ height: 340, position: 'relative' }}>

@@ -12,6 +12,7 @@ import { useLocationStore } from '@/store/locations';
 import { usePlantStore } from '@/store/plants';
 import { useWeatherStore } from '@/store/weather';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useTabletContentCap } from '@/theme/responsive';
 import type { AccentKey, ThemeMode } from '@/theme/tokens';
 import type { UserLocation } from '@/types/plant';
 import { useFocusEffect } from 'expo-router';
@@ -36,6 +37,7 @@ const MODES: { key: ThemeMode | 'system'; label: string }[] = [
 export default function MeScreen() {
   const { palette, mode, accent, radii, setMode, setAccent } = useTheme();
   const insets = useSafeAreaInsets();
+  const tabletCap = useTabletContentCap();
 
   const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <View style={{ marginBottom: 26 }}>
@@ -82,7 +84,7 @@ export default function MeScreen() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: palette.bg }}
-      contentContainerStyle={{ paddingTop: insets.top + 14, paddingBottom: 120, paddingHorizontal: 24 }}
+      contentContainerStyle={[{ paddingTop: insets.top + 14, paddingBottom: 120, paddingHorizontal: 24 }, tabletCap]}
     >
       <ThemedText variant="screenTitle" family="serif">나</ThemedText>
       <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 8, marginBottom: 24 }}>

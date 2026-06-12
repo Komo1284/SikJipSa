@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/Typography';
 import { useLocationStore } from '@/store/locations';
 import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useResponsive } from '@/theme/responsive';
+import { useTabletContentCap } from '@/theme/responsive';
 import { toISODate } from '@/utils/date';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CalendarDays } from 'lucide-react-native';
@@ -21,7 +21,6 @@ const fertCycleLabel = (d: number) => (d < 30 ? `${d}일` : `${d / 30}달`);
 export default function PlantEditScreen() {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
-  const { isTablet } = useResponsive();
   const { id } = useLocalSearchParams<{ id: string }>();
   const plant = usePlantStore((s) => s.plants.find((p) => p.id === id));
   const updatePlant = usePlantStore((s) => s.updatePlant);
@@ -71,10 +70,7 @@ export default function PlantEditScreen() {
     }
   };
 
-  // 태블릿에서는 모바일 모달이 전체 폭으로 늘어지므로 폼 폭을 묶는다.
-  const formWidthCap = isTablet
-    ? ({ maxWidth: 560, width: '100%', alignSelf: 'center' } as const)
-    : null;
+  const formWidthCap = useTabletContentCap(560);
 
   return (
     <KeyboardAvoidingView

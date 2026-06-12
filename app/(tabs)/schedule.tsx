@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/Typography';
 import { getRepotSchedule } from '@/lib/reminders';
 import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useTabletContentCap } from '@/theme/responsive';
 import type { Plant } from '@/types/plant';
 import { TODAY, daysBetween, formatMD, parseISODate, toISODate } from '@/utils/date';
 import { useRouter } from 'expo-router';
@@ -31,6 +32,7 @@ export default function ScheduleScreen() {
   const waterPlant = usePlantStore((s) => s.waterPlant);
 
   const [tab, setTab] = useState<Tab>('water');
+  const tabletCap = useTabletContentCap();
 
   if (plants.length === 0) {
     return (
@@ -53,7 +55,7 @@ export default function ScheduleScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.bg }}>
-      <View style={{ paddingTop: insets.top + 14, paddingHorizontal: 24 }}>
+      <View style={[{ paddingTop: insets.top + 14, paddingHorizontal: 24 }, tabletCap]}>
         <ThemedText variant="screenTitle" family="serif">
           일정
         </ThemedText>
@@ -100,7 +102,7 @@ export default function ScheduleScreen() {
 
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
+        contentContainerStyle={[{ paddingHorizontal: 24, paddingBottom: 120 }, tabletCap]}
       >
         {tab === 'water' ? (
           <WaterTab plants={plants} onOpen={(id) => router.push(`/plant/${id}`)} onWater={waterPlant} />

@@ -6,7 +6,7 @@ import { DesktopAddModal } from '@/screens/desktop/AddModal';
 import { useLocationStore } from '@/store/locations';
 import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useResponsive } from '@/theme/responsive';
+import { useResponsive, useTabletContentCap } from '@/theme/responsive';
 import type { Plant } from '@/types/plant';
 import { addDays, toISODate } from '@/utils/date';
 import * as ImagePicker from 'expo-image-picker';
@@ -33,7 +33,6 @@ export default function AddScreen() {
 function AddMobile() {
   const { palette, radii, weights, resolved: themeMode } = useTheme();
   const insets = useSafeAreaInsets();
-  const { isTablet } = useResponsive();
   const addPlant = usePlantStore((s) => s.addPlant);
   const locations = useLocationStore((s) => s.locations);
 
@@ -50,11 +49,7 @@ function AddMobile() {
   const [stepError, setStepError] = useState<string | null>(null);
 
   const cur = STEPS[step - 1];
-  // 태블릿(768–1023px)에서는 모바일 레이아웃이 그대로 쓰이므로, 폼이
-  // 화면 전체 폭으로 늘어지지 않게 콘텐츠 폭을 묶고 중앙 정렬한다.
-  const formWidthCap = isTablet
-    ? ({ maxWidth: 560, width: '100%', alignSelf: 'center' } as const)
-    : null;
+  const formWidthCap = useTabletContentCap(560);
 
   const pickPhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
