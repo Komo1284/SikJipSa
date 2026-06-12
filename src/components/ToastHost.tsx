@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/Typography';
 import { useToastStore } from '@/store/toast';
+import { durations } from '@/theme/animation';
 import { useTheme } from '@/theme/ThemeProvider';
 import { AlertCircle, CheckCircle2, Info } from 'lucide-react-native';
 import React from 'react';
@@ -34,7 +35,7 @@ export function ToastHost() {
                                  { bg: palette.surfaceRaised, fg: palette.ink2, Icon: Info };
         const Icon = tone.Icon;
         return (
-          <Animated.View key={t.id} entering={FadeInUp.duration(260)} exiting={FadeOutUp.duration(220)}>
+          <Animated.View key={t.id} entering={FadeInUp.duration(durations.enter)} exiting={FadeOutUp.duration(durations.exit)}>
             <Pressable
               onPress={() => dismiss(t.id)}
               style={{

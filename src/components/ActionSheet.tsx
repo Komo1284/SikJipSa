@@ -1,6 +1,7 @@
 import { BottomSheet } from '@/components/BottomSheet';
 import { Tap } from '@/components/Tap';
 import { ThemedText } from '@/components/Typography';
+import { SHEET_CLOSE_DELAY } from '@/theme/animation';
 import { useTheme } from '@/theme/ThemeProvider';
 import React from 'react';
 import { View } from 'react-native';
@@ -28,7 +29,7 @@ export function ActionSheet({ visible, onClose, title, actions }: Props) {
   const handle = (a: ActionItem) => {
     onClose();
     // Defer so the sheet closes cleanly before any further navigation.
-    setTimeout(() => a.onPress(), 200);
+    setTimeout(() => a.onPress(), SHEET_CLOSE_DELAY);
   };
 
   return (

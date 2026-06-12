@@ -103,7 +103,7 @@ export function DesktopAddModal() {
     <View
       style={{
         flex: 1,
-        backgroundColor: 'rgba(15,18,15,0.45)',
+        backgroundColor: palette.backdrop,
         alignItems: 'center',
         justifyContent: 'center',
         padding: 32,

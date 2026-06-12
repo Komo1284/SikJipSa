@@ -1,3 +1,4 @@
+import { durations } from '@/theme/animation';
 import { Tap } from '@/components/Tap';
 import { ThemedText } from '@/components/Typography';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -95,8 +96,8 @@ function TabButton({
   const pillOpacity = useSharedValue(active ? 1 : 0);
   const pillScale = useSharedValue(active ? 1 : 0.6);
   React.useEffect(() => {
-    pillOpacity.value = withTiming(active ? 1 : 0, { duration: 200, easing: Easing.out(Easing.cubic) });
-    pillScale.value   = withTiming(active ? 1 : 0.6, { duration: 220, easing: Easing.out(Easing.cubic) });
+    pillOpacity.value = withTiming(active ? 1 : 0, { duration: durations.small, easing: Easing.out(Easing.cubic) });
+    pillScale.value   = withTiming(active ? 1 : 0.6, { duration: durations.small, easing: Easing.out(Easing.cubic) });
   }, [active, pillOpacity, pillScale]);
   const pillStyle = useAnimatedStyle(() => ({
     opacity: pillOpacity.value,

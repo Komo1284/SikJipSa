@@ -18,6 +18,8 @@ export type Palette = {
   ink4: string;
   line: string;
   lineStrong: string;
+  /** 시트/모달 뒤를 덮는 반투명 막 — 모드별로 농도가 다르다. */
+  backdrop: string;
 
   green: string;
   greenDeep: string;
@@ -48,6 +50,7 @@ const LIGHT: Palette = {
   ink4: '#C2BFB4',
   line: 'rgba(31,31,29,0.08)',
   lineStrong: 'rgba(31,31,29,0.16)',
+  backdrop: 'rgba(15,18,15,0.45)',
 
   green: '#2D4A2B',
   greenDeep: '#1E3220',
@@ -78,6 +81,7 @@ const DARK: Palette = {
   ink4: '#4F4D46',
   line: 'rgba(239,235,226,0.08)',
   lineStrong: 'rgba(239,235,226,0.14)',
+  backdrop: 'rgba(0,0,0,0.6)',
 
   green: '#8ABF6A',
   greenDeep: '#6BA04A',

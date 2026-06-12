@@ -1,3 +1,4 @@
+import { durations } from '@/theme/animation';
 import React from 'react';
 import { Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
 import Animated, {
@@ -30,15 +31,15 @@ export function Tap({ style, noFeedback, pressedScale = 0.96, onPressIn, onPress
 
   const handleIn = (e: Parameters<NonNullable<PressableProps['onPressIn']>>[0]) => {
     if (!noFeedback) {
-      scale.value = withTiming(pressedScale, { duration: 90, easing: Easing.out(Easing.quad) });
-      opacity.value = withTiming(0.85, { duration: 90 });
+      scale.value = withTiming(pressedScale, { duration: durations.pressIn, easing: Easing.out(Easing.quad) });
+      opacity.value = withTiming(0.85, { duration: durations.pressIn });
     }
     onPressIn?.(e);
   };
   const handleOut = (e: Parameters<NonNullable<PressableProps['onPressOut']>>[0]) => {
     if (!noFeedback) {
-      scale.value = withTiming(1, { duration: 140, easing: Easing.out(Easing.cubic) });
-      opacity.value = withTiming(1, { duration: 140 });
+      scale.value = withTiming(1, { duration: durations.pressOut, easing: Easing.out(Easing.cubic) });
+      opacity.value = withTiming(1, { duration: durations.pressOut });
     }
     onPressOut?.(e);
   };

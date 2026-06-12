@@ -67,7 +67,7 @@ export function LocationFormModal({ visible, editing, onClose }: Props) {
       <View
         style={{
           flex: 1,
-          backgroundColor: 'rgba(15,18,15,0.45)',
+          backgroundColor: palette.backdrop,
           justifyContent: 'center',
           alignItems: 'center',
           padding: 20,

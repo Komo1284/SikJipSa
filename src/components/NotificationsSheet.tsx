@@ -1,3 +1,4 @@
+import { SHEET_CLOSE_DELAY } from '@/theme/animation';
 import { BottomSheet } from '@/components/BottomSheet';
 import { ThemedText } from '@/components/Typography';
 import { getFertReminders, getRepotReminders, getWaterReminders } from '@/lib/reminders';
@@ -56,7 +57,7 @@ export function NotificationsSheet({ visible, onClose }: Props) {
   // (~240ms) a chance to finish before the next screen transition starts.
   const goPlant = (id: string) => {
     onClose();
-    setTimeout(() => router.push(`/plant/${id}`), 220);
+    setTimeout(() => router.push(`/plant/${id}`), SHEET_CLOSE_DELAY);
   };
 
   return (

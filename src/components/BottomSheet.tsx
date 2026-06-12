@@ -1,3 +1,4 @@
+import { durations } from '@/theme/animation';
 import { useTheme } from '@/theme/ThemeProvider';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
@@ -30,8 +31,8 @@ export function BottomSheet({ visible, onClose, maxHeight = 0.9, children }: Pro
     if (visible) setMounted(true);
   }, [visible]);
 
-  const ENTER = { duration: 300, easing: Easing.out(Easing.cubic) };
-  const EXIT  = { duration: 240, easing: Easing.in(Easing.cubic) };
+  const ENTER = { duration: durations.sheetEnter, easing: Easing.out(Easing.cubic) };
+  const EXIT  = { duration: durations.sheetExit, easing: Easing.in(Easing.cubic) };
 
   // Animate in/out when `visible` flips.
   useEffect(() => {
@@ -71,7 +72,7 @@ export function BottomSheet({ visible, onClose, maxHeight = 0.9, children }: Pro
       <View style={{ flex: 1 }}>
         <Animated.View
           style={[
-            { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15,18,15,0.45)' },
+            { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: palette.backdrop },
             backdropStyle,
           ]}
         />
