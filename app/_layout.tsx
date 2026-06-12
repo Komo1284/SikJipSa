@@ -21,7 +21,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef, useState } from 'react';
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -67,10 +67,16 @@ function useAuthGuard() {
   }, [session, initialized, plantsLoaded, loadPlants, clearPlants, loadLocations, clearLocations]);
 
   // Bootstrap location + weather once plants/locations are loaded.
-  // This handles first-login (detects + saves place) and the daily recompute.
+  // This handles first-login (detects + saves place) and the 12h recompute.
+  // 포그라운드 복귀 시에도 다시 돌린다 — bootstrap 내부의 12시간 가드가
+  // 과한 재계산을 막아주므로 호출 자체는 저렴하다.
   useEffect(() => {
     if (!session || !plantsLoaded) return;
     useWeatherStore.getState().bootstrap();
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') useWeatherStore.getState().bootstrap();
+    });
+    return () => sub.remove();
   }, [session?.userId, plantsLoaded]);
 
   // Realtime: keep the store in sync when another device edits the same user's data.

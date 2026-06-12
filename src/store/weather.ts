@@ -6,12 +6,12 @@ import { useLocationStore } from '@/store/locations';
 import { usePlantStore } from '@/store/plants';
 import { toast } from '@/store/toast';
 import type { UserPlace, WeatherDay } from '@/types/plant';
-import { toISODate } from '@/utils/date';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert, Platform } from 'react-native';
 import { create } from 'zustand';
 
-const LAST_RECOMPUTE_KEY = 'sikjipsa.recompute.lastDay.v1';
+const LAST_RECOMPUTE_KEY = 'sikjipsa.recompute.lastTs.v2';
+const RECOMPUTE_INTERVAL_MS = 12 * 60 * 60 * 1000; // 하루 1회 → 12시간마다
 const LOCATION_PROMPT_DISMISSED_KEY = 'sikjipsa.locationPrompt.dismissed.v1';
 
 /**
@@ -40,6 +40,8 @@ type WeatherStore = {
   place: UserPlace | null;
   weather: WeatherDay[];
   loading: boolean;
+  /** 마지막으로 날씨를 가져온 시각(ms) — Me 탭 신선도 표시용. */
+  lastUpdated: number | null;
   /** Has the daily recompute already run for today? */
   recomputedToday: boolean;
 
@@ -62,10 +64,11 @@ export const useWeatherStore = create<WeatherStore>((set, get) => ({
   place: null,
   weather: [],
   loading: false,
+  lastUpdated: null,
   recomputedToday: false,
 
   clear() {
-    set({ place: null, weather: [], loading: false, recomputedToday: false });
+    set({ place: null, weather: [], loading: false, lastUpdated: null, recomputedToday: false });
   },
 
   async bootstrap() {
@@ -104,14 +107,14 @@ export const useWeatherStore = create<WeatherStore>((set, get) => ({
 
       // 2) Fetch / read cached weather
       const weather = await getRecentWeather(place);
-      set({ weather });
+      set({ weather, lastUpdated: weather.length > 0 ? Date.now() : get().lastUpdated });
 
-      // 3) Recompute once per calendar day
-      const last = await AsyncStorage.getItem(LAST_RECOMPUTE_KEY);
-      const today = toISODate(new Date());
-      if (last !== today) {
+      // 3) Recompute every 12h — 하루 1회였을 땐 오후에 날씨가 급변해도
+      //    다음 날까지 추천이 낡은 채로 남았다.
+      const last = Number(await AsyncStorage.getItem(LAST_RECOMPUTE_KEY)) || 0;
+      if (Date.now() - last > RECOMPUTE_INTERVAL_MS) {
         await get().recompute();
-        await AsyncStorage.setItem(LAST_RECOMPUTE_KEY, today);
+        await AsyncStorage.setItem(LAST_RECOMPUTE_KEY, String(Date.now()));
       }
       set({ recomputedToday: true, loading: false });
     } catch (e) {
@@ -141,7 +144,7 @@ export const useWeatherStore = create<WeatherStore>((set, get) => ({
       await savePlace(next);
       set({ place: next });
       const weather = await getRecentWeather(next);
-      set({ weather });
+      set({ weather, lastUpdated: weather.length > 0 ? Date.now() : get().lastUpdated });
       await get().recompute();
       toast.success(next.label ? `위치를 ${next.label} 으로 변경했어요` : '위치 변경됨');
     } catch (e) {

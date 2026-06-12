@@ -204,9 +204,18 @@ function PlaceSection() {
   const place = useWeatherStore((s) => s.place);
   const weather = useWeatherStore((s) => s.weather);
   const loading = useWeatherStore((s) => s.loading);
+  const lastUpdated = useWeatherStore((s) => s.lastUpdated);
   const relocate = useWeatherStore((s) => s.relocate);
 
   const today = weather[weather.length - 1];
+  const freshness = (() => {
+    if (!lastUpdated) return null;
+    const mins = Math.floor((Date.now() - lastUpdated) / 60000);
+    if (mins < 60) return '방금 업데이트';
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}시간 전 업데이트`;
+    return `${Math.floor(hours / 24)}일 전 업데이트 — 새로고침을 눌러주세요`;
+  })();
 
   const updateLocation = () => {
     Alert.alert(
@@ -268,6 +277,15 @@ function PlaceSection() {
             <WeatherStat icon={<CloudRain size={14} color={palette.ink3} strokeWidth={1.8} />} value={today.rainMm != null ? `${today.rainMm.toFixed(0)}mm` : '—'} sub="강수" />
             <WeatherStat icon={<Sun size={14} color={palette.ink3} strokeWidth={1.8} />} value={today.tempHigh != null ? `${today.tempHigh.toFixed(0)}℃` : '—'} sub="최고" />
           </View>
+        ) : place?.lat != null ? (
+          <ThemedText variant="tiny" color={palette.ink3} style={{ borderTopWidth: 1, borderColor: palette.line, paddingTop: 12 }}>
+            날씨 데이터를 아직 가져오지 못했어요. 새로고침을 눌러주세요.
+          </ThemedText>
+        ) : null}
+        {today && freshness ? (
+          <ThemedText variant="tiny" color={palette.ink4} style={{ marginTop: -6 }}>
+            {freshness}
+          </ThemedText>
         ) : null}
       </View>
     </View>
