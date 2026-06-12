@@ -16,8 +16,8 @@ import { useResponsive, useTabletContentCap } from '@/theme/responsive';
 import { formatKickerShort, plantStatus, soonList, todayList } from '@/utils/date';
 import { useRouter } from 'expo-router';
 import { Bell, ChevronRight, Leaf, Sprout } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
@@ -34,8 +34,19 @@ function HomeMobile() {
   const plants = usePlantStore((s) => s.plants);
   const repotByPlant = usePlantStore((s) => s.repotByPlant);
   const waterPlant = usePlantStore((s) => s.waterPlant);
+  const loadPlants = usePlantStore((s) => s.load);
   const locations = useLocationStore((s) => s.locations);
   const setSpaceFilter = useUIStore((s) => s.setSpaceFilter);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await loadPlants();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadPlants]);
 
   const openSpace = (locationName: string) => {
     setSpaceFilter(locationName);
@@ -64,6 +75,9 @@ function HomeMobile() {
       style={{ flex: 1, backgroundColor: palette.bg }}
       contentContainerStyle={[{ paddingTop: insets.top + 10, paddingBottom: 120 }, tabletCap]}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.ink3} />
+      }
     >
       <View style={{ paddingHorizontal: 24, paddingTop: 6 }}>
         <SyncBanner />

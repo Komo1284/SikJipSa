@@ -11,7 +11,7 @@ import { useResponsive } from '@/theme/responsive';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { LayoutGrid, List as ListIcon, Search, SearchX, Sprout } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Layout = 'grid' | 'list';
@@ -29,6 +29,7 @@ function ListMobile() {
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
   const waterPlant = usePlantStore((s) => s.waterPlant);
+  const loadPlants = usePlantStore((s) => s.load);
   const locations = useLocationStore((s) => s.locations);
   const spaceFilter = useUIStore((s) => s.spaceFilter);
   const setSpaceFilter = useUIStore((s) => s.setSpaceFilter);
@@ -49,6 +50,15 @@ function ListMobile() {
   };
 
   const [query, setQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await loadPlants();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadPlants]);
   const [searchFocused, setSearchFocused] = useState(false);
   const [layout, setLayout] = useState<Layout>('grid');
   // 태블릿에서는 카드가 2열로는 과하게 커져서 3열로 늘린다.
@@ -224,6 +234,9 @@ function ListMobile() {
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListHeaderComponent={header}
         ListEmptyComponent={noResults}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.ink3} />
+        }
         renderItem={({ item }) => (
           <View style={{ flex: 1, maxWidth: `${100 / gridCols}%` }}>
             <GridCard plant={item} onClick={() => router.push(`/plant/${item.id}`)} />
@@ -243,6 +256,9 @@ function ListMobile() {
       ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
       ListHeaderComponent={header}
       ListEmptyComponent={noResults}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.ink3} />
+      }
       renderItem={({ item }) => (
         <TaskRow
           plant={item}

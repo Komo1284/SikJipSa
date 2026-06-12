@@ -11,8 +11,8 @@ import type { Plant } from '@/types/plant';
 import { TODAY, daysBetween, formatMD, parseISODate, toISODate } from '@/utils/date';
 import { useRouter } from 'expo-router';
 import { CalendarDays } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Tab = 'water' | 'fert' | 'repot';
@@ -33,6 +33,16 @@ export default function ScheduleScreen() {
 
   const [tab, setTab] = useState<Tab>('water');
   const tabletCap = useTabletContentCap();
+  const loadPlants = usePlantStore((s) => s.load);
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await loadPlants();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadPlants]);
 
   if (plants.length === 0) {
     return (
@@ -103,6 +113,9 @@ export default function ScheduleScreen() {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[{ paddingHorizontal: 24, paddingBottom: 120 }, tabletCap]}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.ink3} />
+        }
       >
         {tab === 'water' ? (
           <WaterTab plants={plants} onOpen={(id) => router.push(`/plant/${id}`)} onWater={waterPlant} />

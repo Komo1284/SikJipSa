@@ -85,7 +85,10 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       rescheduleAll(plants).catch(() => {}); // fire-and-forget
     } catch (e) {
       console.warn('[plantStore] load failed:', e);
-      toast.error(`식물 불러오기 실패: ${humanizeError(e)}`);
+      toast.error(`식물 불러오기 실패: ${humanizeError(e)}`, undefined, {
+        label: '다시 시도',
+        onPress: () => get().load(),
+      });
       set({ loading: false, error: (e as Error).message });
     }
   },

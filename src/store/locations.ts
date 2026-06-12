@@ -34,7 +34,10 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
       set({ locations, loaded: true });
     } catch (e) {
       console.warn('[locationStore] load failed:', e);
-      toast.error(`공간 불러오기 실패: ${humanizeError(e)}`);
+      toast.error(`공간 불러오기 실패: ${humanizeError(e)}`, undefined, {
+        label: '다시 시도',
+        onPress: () => get().load(),
+      });
     }
   },
 

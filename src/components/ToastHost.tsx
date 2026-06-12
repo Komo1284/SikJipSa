@@ -60,6 +60,27 @@ export function ToastHost() {
               >
                 {t.message}
               </ThemedText>
+              {t.action ? (
+                <Pressable
+                  onPress={() => {
+                    dismiss(t.id);
+                    t.action!.onPress();
+                  }}
+                  hitSlop={8}
+                  style={{
+                    paddingVertical: 6,
+                    paddingHorizontal: 12,
+                    borderRadius: radii.sm,
+                    backgroundColor: palette.surfaceRaised,
+                    borderWidth: 1,
+                    borderColor: palette.line,
+                  }}
+                >
+                  <ThemedText variant="meta" weight="semibold" color={tone.fg}>
+                    {t.action.label}
+                  </ThemedText>
+                </Pressable>
+              ) : null}
             </Pressable>
           </Animated.View>
         );
