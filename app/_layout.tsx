@@ -16,10 +16,12 @@ import {
   NotoSansKR_700Bold,
 } from '@expo-google-fonts/noto-sans-kr';
 import { useFonts } from 'expo-font';
+import * as Notifications from 'expo-notifications';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -84,6 +86,33 @@ function useAuthGuard() {
   }, [session?.userId]);
 }
 
+/**
+ * Routes notification taps (water reminders) to the plant detail screen.
+ * Covers cold start (notification launched the app) and warm taps alike via
+ * useLastNotificationResponse. Navigation waits for auth + plant data so the
+ * detail screen never opens against an empty store.
+ */
+function useNotificationDeepLink() {
+  const router = useRouter();
+  const { session, initialized } = useAuthStore();
+  const plantsLoaded = usePlantStore((s) => s.loaded);
+  const response = Notifications.useLastNotificationResponse();
+  // Dedupe by object identity — the hook returns the same object until a new
+  // tap arrives, and request identifiers repeat across days for one plant.
+  const handled = useRef<Notifications.NotificationResponse | null>(null);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    if (!response || !initialized || !session || !plantsLoaded) return;
+    if (handled.current === response) return;
+    const data = response.notification.request.content.data;
+    const plantId = typeof data?.plantId === 'string' ? data.plantId : null;
+    if (!plantId) return;
+    handled.current = response;
+    router.push(`/plant/${plantId}`);
+  }, [response, initialized, session, plantsLoaded, router]);
+}
+
 function RootStack() {
   const { palette, resolved, syncFromServer } = useTheme();
   const { isDesktop } = useResponsive();
@@ -93,6 +122,7 @@ function RootStack() {
 
   useEffect(() => { initAuth(); }, [initAuth]);
   useAuthGuard();
+  useNotificationDeepLink();
 
   // Pull theme prefs from the server once the user signs in. Local wins during
   // the brief window before the remote row arrives.
