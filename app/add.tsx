@@ -1,4 +1,5 @@
 import { humanizeError } from '@/lib/errors';
+import { FormInput } from '@/components/FormInput';
 import { ThemedText } from '@/components/Typography';
 import { repos } from '@/repo';
 import { DesktopAddModal } from '@/screens/desktop/AddModal';
@@ -12,7 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { Check, ChevronLeft, Plus } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const STEPS = [
@@ -32,6 +33,7 @@ export default function AddScreen() {
 function AddMobile() {
   const { palette, radii, weights, resolved: themeMode } = useTheme();
   const insets = useSafeAreaInsets();
+  const { isTablet } = useResponsive();
   const addPlant = usePlantStore((s) => s.addPlant);
   const locations = useLocationStore((s) => s.locations);
 
@@ -45,8 +47,14 @@ function AddMobile() {
   const [lightPref, setLightPref] = useState(3);
   const [humidityPref, setHumidityPref] = useState(3);
   const [busy, setBusy] = useState(false);
+  const [stepError, setStepError] = useState<string | null>(null);
 
   const cur = STEPS[step - 1];
+  // 태블릿(768–1023px)에서는 모바일 레이아웃이 그대로 쓰이므로, 폼이
+  // 화면 전체 폭으로 늘어지지 않게 콘텐츠 폭을 묶고 중앙 정렬한다.
+  const formWidthCap = isTablet
+    ? ({ maxWidth: 560, width: '100%', alignSelf: 'center' } as const)
+    : null;
 
   const pickPhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -114,22 +122,28 @@ function AddMobile() {
     }
   };
 
-  const next = () => (step < 3 ? setStep(step + 1) : submit());
-
-  const inputStyle = {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: radii.sm,
-    backgroundColor: palette.surface,
-    borderWidth: 1,
-    borderColor: palette.line,
-    fontSize: 15,
-    fontFamily: weights.sansRegular,
-    color: palette.ink,
+  const next = () => {
+    if (step === 1 && !name.trim()) {
+      setStepError('식물 이름을 입력해주세요.');
+      return;
+    }
+    // 공간이 하나라도 있으면 명시적으로 고르게 한다 — 예전엔 말없이
+    // '거실'로 저장돼 사용자가 눈치채지 못했다. 공간이 0개인 신규
+    // 계정만 기본값으로 통과시켜 진행이 막히지 않게 한다.
+    if (step === 2 && locations.length > 0 && !location) {
+      setStepError('식물을 둘 공간을 선택해주세요.');
+      return;
+    }
+    setStepError(null);
+    if (step < 3) setStep(step + 1);
+    else submit();
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: palette.bg }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: palette.bg }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <View style={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <Pressable
           onPress={() => (step > 1 ? setStep(step - 1) : router.back())}
@@ -155,7 +169,7 @@ function AddMobile() {
 
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 24, paddingBottom: 140 }}
+        contentContainerStyle={[{ padding: 24, paddingBottom: 40 }, formWidthCap]}
         keyboardShouldPersistTaps="handled"
       >
         <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 10, letterSpacing: 1.3 }}>
@@ -171,21 +185,27 @@ function AddMobile() {
         {step === 1 ? (
           <View style={{ gap: 16 }}>
             <Field label="식물 이름">
-              <TextInput
+              <FormInput
                 value={name}
-                onChangeText={setName}
+                onChangeText={(t) => {
+                  setName(t);
+                  if (stepError) setStepError(null);
+                }}
                 placeholder="예: 몬스테라"
-                placeholderTextColor={palette.ink3}
-                style={inputStyle}
+                autoFocus
+                returnKeyType="next"
               />
+              {stepError && step === 1 ? (
+                <ThemedText variant="tiny" color={palette.warn} style={{ marginTop: 6 }}>
+                  {stepError}
+                </ThemedText>
+              ) : null}
             </Field>
             <Field label="학명 (선택)">
-              <TextInput
+              <FormInput
                 value={species}
                 onChangeText={setSpecies}
                 placeholder="Monstera deliciosa"
-                placeholderTextColor={palette.ink3}
-                style={inputStyle}
               />
             </Field>
             <Pressable
@@ -239,7 +259,10 @@ function AddMobile() {
               return (
                 <Pressable
                   key={loc.id}
-                  onPress={() => setLocation(loc.name)}
+                  onPress={() => {
+                    setLocation(loc.name);
+                    setStepError(null);
+                  }}
                   style={{
                     padding: 16,
                     backgroundColor: active ? palette.green : palette.surface,
@@ -264,6 +287,11 @@ function AddMobile() {
             {locations.length === 0 ? (
               <ThemedText variant="meta" color={palette.ink3}>
                 공간이 없어요. 설정 탭에서 추가해주세요.
+              </ThemedText>
+            ) : null}
+            {stepError && step === 2 ? (
+              <ThemedText variant="tiny" color={palette.warn} style={{ marginTop: 2 }}>
+                {stepError}
               </ThemedText>
             ) : null}
           </View>
@@ -340,17 +368,12 @@ function AddMobile() {
             </Field>
 
             <Field label="메모 (선택)" style={{ marginTop: 22 }}>
-              <TextInput
+              <FormInput
                 value={note}
                 onChangeText={setNote}
                 placeholder="이 식물에 대한 관찰이나 주의사항"
-                placeholderTextColor={palette.ink3}
                 multiline
-                style={{
-                  ...inputStyle,
-                  minHeight: 80,
-                  textAlignVertical: 'top',
-                }}
+                style={{ minHeight: 80, textAlignVertical: 'top' }}
               />
             </Field>
           </View>
@@ -359,7 +382,6 @@ function AddMobile() {
 
       <View
         style={{
-          position: 'absolute', left: 0, right: 0, bottom: 0,
           paddingHorizontal: 20,
           paddingTop: 12,
           paddingBottom: Math.max(insets.bottom, 14) + 10,
@@ -369,19 +391,27 @@ function AddMobile() {
         <Pressable
           onPress={next}
           disabled={busy}
-          style={{
-            paddingVertical: 16,
-            borderRadius: 999,
-            // In dark mode palette.ink is near-white, which produced an
-            // unnaturally bright "white" CTA on a dark screen. Use the accent
-            // green instead — both modes end up with comfortable contrast.
-            backgroundColor: themeMode === 'dark' ? palette.green : palette.ink,
-            alignItems: 'center',
-            opacity: busy ? 0.6 : 1,
-          }}
+          style={[
+            {
+              paddingVertical: 16,
+              borderRadius: 999,
+              // In dark mode palette.ink is near-white, which produced an
+              // unnaturally bright "white" CTA on a dark screen. Use the accent
+              // green instead — both modes end up with comfortable contrast.
+              backgroundColor: themeMode === 'dark' ? palette.green : palette.ink,
+              alignItems: 'center',
+              opacity: busy ? 0.6 : 1,
+            },
+            formWidthCap,
+          ]}
         >
           {busy ? (
-            <ActivityIndicator color={palette.bg} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <ActivityIndicator color={palette.bg} />
+              <ThemedText variant="body" weight="semibold" color={palette.bg} style={{ fontSize: 15 }}>
+                저장 중…
+              </ThemedText>
+            </View>
           ) : (
             <ThemedText variant="body" weight="semibold" color={palette.bg} style={{ fontSize: 15 }}>
               {step < 3 ? '다음' : '식물 추가하기'}
@@ -389,7 +419,7 @@ function AddMobile() {
           )}
         </Pressable>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

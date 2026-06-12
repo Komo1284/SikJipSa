@@ -1,14 +1,16 @@
 import { BottomSheet } from '@/components/BottomSheet';
 import { CalendarPicker } from '@/components/CalendarPicker';
+import { FormInput } from '@/components/FormInput';
 import { ThemedText } from '@/components/Typography';
 import { useLocationStore } from '@/store/locations';
 import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useResponsive } from '@/theme/responsive';
 import { toISODate } from '@/utils/date';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CalendarDays } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CYCLES = [3, 5, 7, 10, 14, 21, 30];
@@ -17,8 +19,9 @@ const FERT_CYCLES = [7, 14, 21, 30, 60, 90, 120, 150, 180];
 const fertCycleLabel = (d: number) => (d < 30 ? `${d}일` : `${d / 30}달`);
 
 export default function PlantEditScreen() {
-  const { palette, radii, weights } = useTheme();
+  const { palette } = useTheme();
   const insets = useSafeAreaInsets();
+  const { isTablet } = useResponsive();
   const { id } = useLocalSearchParams<{ id: string }>();
   const plant = usePlantStore((s) => s.plants.find((p) => p.id === id));
   const updatePlant = usePlantStore((s) => s.updatePlant);
@@ -68,20 +71,16 @@ export default function PlantEditScreen() {
     }
   };
 
-  const inputStyle = {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: radii.sm,
-    backgroundColor: palette.surface,
-    borderWidth: 1,
-    borderColor: palette.line,
-    fontSize: 15,
-    fontFamily: weights.sansRegular,
-    color: palette.ink,
-  };
+  // 태블릿에서는 모바일 모달이 전체 폭으로 늘어지므로 폼 폭을 묶는다.
+  const formWidthCap = isTablet
+    ? ({ maxWidth: 560, width: '100%', alignSelf: 'center' } as const)
+    : null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: palette.bg }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: palette.bg }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <View
         style={{
           // iOS modal presentation already adds the rounded grabber area at
@@ -116,27 +115,15 @@ export default function PlantEditScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 24, paddingBottom: 48, gap: 18 }}
+        contentContainerStyle={[{ padding: 24, paddingBottom: 48, gap: 18 }, formWidthCap]}
         keyboardShouldPersistTaps="handled"
       >
         <Field label="이름">
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="애칭"
-            placeholderTextColor={palette.ink3}
-            style={inputStyle}
-          />
+          <FormInput value={name} onChangeText={setName} placeholder="애칭" />
         </Field>
 
         <Field label="학명 (선택)">
-          <TextInput
-            value={species}
-            onChangeText={setSpecies}
-            placeholder="Monstera deliciosa"
-            placeholderTextColor={palette.ink3}
-            style={inputStyle}
-          />
+          <FormInput value={species} onChangeText={setSpecies} placeholder="Monstera deliciosa" />
         </Field>
 
         <Field label="공간">
@@ -269,17 +256,12 @@ export default function PlantEditScreen() {
         </Field>
 
         <Field label="메모">
-          <TextInput
+          <FormInput
             value={note}
             onChangeText={setNote}
             placeholder="관찰이나 돌봄 메모"
-            placeholderTextColor={palette.ink3}
             multiline
-            style={{
-              ...inputStyle,
-              minHeight: 100,
-              textAlignVertical: 'top',
-            }}
+            style={{ minHeight: 100, textAlignVertical: 'top' }}
           />
         </Field>
       </ScrollView>
@@ -307,7 +289,7 @@ export default function PlantEditScreen() {
           />
         </View>
       </BottomSheet>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

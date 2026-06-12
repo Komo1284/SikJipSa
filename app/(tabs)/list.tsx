@@ -8,7 +8,7 @@ import { useUIStore } from '@/store/ui';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useResponsive } from '@/theme/responsive';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { LayoutGrid, List as ListIcon, Plus, Search, Sprout } from 'lucide-react-native';
+import { LayoutGrid, List as ListIcon, Plus, Search, SearchX, Sprout } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,8 +22,9 @@ export default function ListScreen() {
 }
 
 function ListMobile() {
-  const { palette, radii, weights } = useTheme();
+  const { palette, weights } = useTheme();
   const insets = useSafeAreaInsets();
+  const { isTablet } = useResponsive();
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
   const waterPlant = usePlantStore((s) => s.waterPlant);
@@ -47,7 +48,10 @@ function ListMobile() {
   };
 
   const [query, setQuery] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
   const [layout, setLayout] = useState<Layout>('grid');
+  // 태블릿에서는 카드가 2열로는 과하게 커져서 3열로 늘린다.
+  const gridCols = isTablet ? 3 : 2;
 
   const filters = useMemo(() => ['전체', ...locations.map((l) => l.name)], [locations]);
 
@@ -158,14 +162,19 @@ function ListMobile() {
           backgroundColor: palette.surface,
           paddingHorizontal: 14,
           borderRadius: 12,
+          borderWidth: 1,
+          borderColor: searchFocused ? palette.green : 'transparent',
         }}
       >
-        <Search size={16} color={palette.ink3} strokeWidth={1.8} />
+        <Search size={16} color={searchFocused ? palette.green : palette.ink3} strokeWidth={1.8} />
         <TextInput
           value={query}
           onChangeText={setQuery}
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
           placeholder="식물 이름 또는 종 검색"
           placeholderTextColor={palette.ink3}
+          returnKeyType="search"
           style={{
             flex: 1,
             paddingVertical: 12,
@@ -216,19 +225,36 @@ function ListMobile() {
     </View>
   );
 
+  // 검색어/필터 결과가 0개일 때 — 아무 피드백 없이 빈 영역만 남던 부분.
+  const noResults = (
+    <View style={{ alignItems: 'center', paddingTop: 64, paddingBottom: 40, gap: 10 }}>
+      <SearchX size={32} color={palette.ink3} strokeWidth={1.6} />
+      <ThemedText variant="meta" weight="medium" color={palette.ink2}>
+        검색 결과가 없어요
+      </ThemedText>
+      <ThemedText variant="tiny" color={palette.ink3} style={{ textAlign: 'center' }}>
+        {query.trim()
+          ? '다른 이름이나 학명으로 검색해보세요.'
+          : '이 공간에는 아직 식물이 없어요.'}
+      </ThemedText>
+    </View>
+  );
+
   if (layout === 'grid') {
     return (
       <FlatList
+        key={`grid-${gridCols}`}
         style={{ flex: 1, backgroundColor: palette.bg }}
         data={filtered}
         keyExtractor={(p) => p.id}
-        numColumns={2}
+        numColumns={gridCols}
         contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
         columnWrapperStyle={{ gap: 12 }}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListHeaderComponent={header}
+        ListEmptyComponent={noResults}
         renderItem={({ item }) => (
-          <View style={{ flex: 1, maxWidth: '50%' }}>
+          <View style={{ flex: 1, maxWidth: `${100 / gridCols}%` }}>
             <GridCard plant={item} onClick={() => router.push(`/plant/${item.id}`)} />
           </View>
         )}
@@ -238,12 +264,14 @@ function ListMobile() {
 
   return (
     <FlatList
+      key="list"
       style={{ flex: 1, backgroundColor: palette.bg }}
       data={filtered}
       keyExtractor={(p) => p.id}
       contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
       ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
       ListHeaderComponent={header}
+      ListEmptyComponent={noResults}
       renderItem={({ item }) => (
         <TaskRow
           plant={item}
