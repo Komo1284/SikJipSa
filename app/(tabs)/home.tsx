@@ -1,6 +1,7 @@
 import { EmptyState } from '@/components/EmptyState';
 import { MiniPlantCard } from '@/components/MiniPlantCard';
 import { NotificationsSheet } from '@/components/NotificationsSheet';
+import { SyncBanner } from '@/components/SyncBanner';
 import { PlantThumb } from '@/components/PlantThumb';
 import { SectionHeader } from '@/components/SectionHeader';
 import { TaskRow } from '@/components/TaskRow';
@@ -64,6 +65,7 @@ function HomeMobile() {
       showsVerticalScrollIndicator={false}
     >
       <View style={{ paddingHorizontal: 24, paddingTop: 6 }}>
+        <SyncBanner />
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <ThemedText variant="tiny" family="mono" color={palette.ink3} uppercase>
             {formatKickerShort()}

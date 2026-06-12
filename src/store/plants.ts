@@ -159,8 +159,21 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       ]);
     } catch (e) {
       console.warn('[plantStore] fertilizePlant failed:', e);
-      toast.error(`비료 기록 실패: ${humanizeError(e)}`);
-      set({ error: (e as Error).message });
+      if (!isOnline() || isLikelyNetworkError(e)) {
+        // 물주기와 동일하게 큐로 보존 — 예전엔 오프라인이면 그대로 유실됐다.
+        enqueue({ kind: 'plant.update', id, patch: { lastFert: date } });
+        enqueue({ kind: 'log.insert', entry });
+        toast.info('오프라인 — 연결되면 자동 동기화돼요');
+      } else {
+        toast.error(`비료 기록 실패: ${humanizeError(e)}`);
+        set((s) => ({
+          plants: s.plants.map((p) => (p.id === id ? plant : p)),
+          log: s.log.filter(
+            (l) => !(l.date === entry.date && l.plantId === id && l.action === 'fert'),
+          ),
+          error: (e as Error).message,
+        }));
+      }
     }
   },
 
@@ -300,6 +313,11 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       toast.success(`${labels[action]} 기록됨`);
     } catch (e) {
       console.warn('[plantStore] logAction failed:', e);
+      if (!isOnline() || isLikelyNetworkError(e)) {
+        enqueue({ kind: 'log.insert', entry });
+        toast.info('오프라인 — 연결되면 자동 동기화돼요');
+        return;
+      }
       toast.error(`기록 실패: ${humanizeError(e)}`);
       set((s) => ({
         log: s.log.filter((l) => !(l.plantId === plantId && l.date === date && l.action === action)),
