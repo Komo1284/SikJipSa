@@ -1,3 +1,4 @@
+import { haptics } from '@/lib/haptics';
 import { useTheme } from '@/theme/ThemeProvider';
 import type { Plant } from '@/types/plant';
 import { TODAY, daysBetween } from '@/utils/date';
@@ -31,6 +32,7 @@ export function WaterButton({ plant, onDone, size = 44 }: Props) {
 
   const press = () => {
     if (done) return;
+    haptics.success();
     scale.value = withSequence(withTiming(0.9, { duration: 80 }), withTiming(1.05, { duration: 120 }), withTiming(1, { duration: 80 }));
     rippleOpacity.value = 0.55;
     rippleScale.value = 1;

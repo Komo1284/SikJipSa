@@ -1,4 +1,5 @@
 import { humanizeError } from '@/lib/errors';
+import { haptics } from '@/lib/haptics';
 import { EmptyState } from '@/components/EmptyState';
 import { ActionSheet, type ActionItem } from '@/components/ActionSheet';
 import { BottomSheet } from '@/components/BottomSheet';
@@ -119,6 +120,7 @@ function DetailMobile({ plant }: { plant: Plant }) {
       {
         text: '삭제', style: 'destructive',
         onPress: async () => {
+          haptics.heavy();
           await deletePlant(plant.id);
           router.back();
         },

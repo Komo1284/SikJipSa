@@ -1,6 +1,7 @@
 import { BottomSheet } from '@/components/BottomSheet';
 import { CalendarPicker } from '@/components/CalendarPicker';
 import { FormInput } from '@/components/FormInput';
+import { haptics } from '@/lib/haptics';
 import { ThemedText } from '@/components/Typography';
 import { useTheme } from '@/theme/ThemeProvider';
 import { addDays, formatMD, toISODate } from '@/utils/date';
@@ -51,6 +52,7 @@ export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Pr
   const isPresetActive = (iso: string) => presets.some((p) => p.iso === iso);
 
   const submit = () => {
+    haptics.success();
     onSubmit(date, note);
     onClose();
   };

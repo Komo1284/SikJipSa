@@ -1,4 +1,5 @@
 import { humanizeError } from '@/lib/errors';
+import { haptics } from '@/lib/haptics';
 import { FormInput } from '@/components/FormInput';
 import { ThemedText } from '@/components/Typography';
 import { repos } from '@/repo';
@@ -111,6 +112,7 @@ function AddMobile() {
         speciesHumidityPref: humidityPref,
       };
       await addPlant(plant);
+      haptics.success();
       router.back();
     } finally {
       setBusy(false);
@@ -119,6 +121,7 @@ function AddMobile() {
 
   const next = () => {
     if (step === 1 && !name.trim()) {
+      haptics.error();
       setStepError('식물 이름을 입력해주세요.');
       return;
     }
@@ -126,6 +129,7 @@ function AddMobile() {
     // '거실'로 저장돼 사용자가 눈치채지 못했다. 공간이 0개인 신규
     // 계정만 기본값으로 통과시켜 진행이 막히지 않게 한다.
     if (step === 2 && locations.length > 0 && !location) {
+      haptics.error();
       setStepError('식물을 둘 공간을 선택해주세요.');
       return;
     }
