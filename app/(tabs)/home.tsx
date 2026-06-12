@@ -18,7 +18,7 @@ import { formatKickerShort, plantStatus, soonList, todayList } from '@/utils/dat
 import { useRouter } from 'expo-router';
 import { Bell, ChevronRight, Leaf, Sprout } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
@@ -72,16 +72,10 @@ function HomeMobile() {
 
   const [notifOpen, setNotifOpen] = useState(false);
 
-  return (
+  // 오늘 할 일이 식물 수만큼 길어질 수 있는 유일한 구간이라 FlatList 로
+  // 가상화한다. 나머지 섹션은 header/footer 로 옮겨 구조는 그대로 유지.
+  const listHeader = (
     <>
-    <ScrollView
-      style={{ flex: 1, backgroundColor: palette.bg }}
-      contentContainerStyle={[{ paddingTop: insets.top + 10, paddingBottom: 120 }, tabletCap]}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.ink3} />
-      }
-    >
       <View style={{ paddingHorizontal: 24, paddingTop: 6 }}>
         <SyncBanner />
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -175,13 +169,13 @@ function HomeMobile() {
       </View>
 
       <SectionHeader title="오늘 할 일" trailing={`${todays.length}개`} />
-      <View style={{ paddingHorizontal: 20, gap: 10 }}>
-        {plantsLoading && !plantsLoaded ? (
-          <>
-            <SkeletonTaskRow />
-            <SkeletonTaskRow />
-          </>
-        ) : todays.length === 0 ? (
+      {plantsLoading && !plantsLoaded ? (
+        <View style={{ paddingHorizontal: 20, gap: 10 }}>
+          <SkeletonTaskRow />
+          <SkeletonTaskRow />
+        </View>
+      ) : todays.length === 0 ? (
+        <View style={{ paddingHorizontal: 20 }}>
           <EmptyState
             compact
             icon={<Sprout size={28} color={palette.green} strokeWidth={1.6} />}
@@ -190,18 +184,13 @@ function HomeMobile() {
             actionLabel="내 식물 보러 가기"
             onAction={() => router.push('/(tabs)/list')}
           />
-        ) : (
-          todays.map((p) => (
-            <TaskRow
-              key={p.id}
-              plant={p}
-              onOpen={() => router.push(`/plant/${p.id}`)}
-              onWater={() => waterPlant(p.id)}
-            />
-          ))
-        )}
-      </View>
+        </View>
+      ) : null}
+    </>
+  );
 
+  const listFooter = (
+    <>
       <SectionHeader title="곧 돌봐야 할 식물" trailing="전체 보기" onTrailing={() => router.push('/(tabs)/list')} />
       <ScrollView
         horizontal
@@ -262,7 +251,33 @@ function HomeMobile() {
           );
         })}
       </View>
-    </ScrollView>
+    </>
+  );
+
+  return (
+    <>
+    <FlatList
+      style={{ flex: 1, backgroundColor: palette.bg }}
+      contentContainerStyle={[{ paddingTop: insets.top + 10, paddingBottom: 120 }, tabletCap]}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.ink3} />
+      }
+      data={plantsLoading && !plantsLoaded ? [] : todays}
+      keyExtractor={(p) => p.id}
+      ListHeaderComponent={listHeader}
+      ListFooterComponent={listFooter}
+      ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+      renderItem={({ item }) => (
+        <View style={{ paddingHorizontal: 20 }}>
+          <TaskRow
+            plant={item}
+            onOpen={() => router.push(`/plant/${item.id}`)}
+            onWater={() => waterPlant(item.id)}
+          />
+        </View>
+      )}
+    />
     <NotificationsSheet visible={notifOpen} onClose={() => setNotifOpen(false)} />
     </>
   );
