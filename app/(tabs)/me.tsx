@@ -1,5 +1,6 @@
 import { LocationFormModal } from '@/components/LocationFormModal';
 import { ThemedText } from '@/components/Typography';
+import { DesktopHeader } from '@/components/web/DesktopHeader';
 import { humanizeError } from '@/lib/errors';
 import {
   ensureNotificationPermission,
@@ -14,7 +15,7 @@ import { useLocationStore } from '@/store/locations';
 import { usePlantStore } from '@/store/plants';
 import { useWeatherStore } from '@/store/weather';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useTabletContentCap } from '@/theme/responsive';
+import { useResponsive, useTabletContentCap } from '@/theme/responsive';
 import type { AccentKey, ThemeMode } from '@/theme/tokens';
 import type { UserLocation } from '@/types/plant';
 import { useFocusEffect } from 'expo-router';
@@ -40,6 +41,7 @@ export default function MeScreen() {
   const { palette, mode, accent, radii, setMode, setAccent } = useTheme();
   const insets = useSafeAreaInsets();
   const tabletCap = useTabletContentCap();
+  const { isDesktop } = useResponsive();
 
   const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <View style={{ marginBottom: 26 }}>
@@ -83,16 +85,8 @@ export default function MeScreen() {
     </View>
   );
 
-  return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: palette.bg }}
-      contentContainerStyle={[{ paddingTop: insets.top + 14, paddingBottom: 120, paddingHorizontal: 24 }, tabletCap]}
-    >
-      <ThemedText variant="screenTitle" family="serif">나</ThemedText>
-      <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 8, marginBottom: 24 }}>
-        앱의 생김새와 리듬을 바꿀 수 있어요.
-      </ThemedText>
-
+  const sections = (
+    <>
       <Section title="포인트 컬러">
         <View style={{ flexDirection: 'row', gap: 10 }}>
           {ACCENTS.map((a) => {
@@ -126,6 +120,29 @@ export default function MeScreen() {
       <LocationsSection />
 
       <AccountSection />
+    </>
+  );
+
+  // 데스크톱: 사이드바 셸 폭에 맞춰 헤더 + 640px 컬럼.
+  if (isDesktop) {
+    return (
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
+        <DesktopHeader title="나" showSearch={false} />
+        <View style={{ maxWidth: 640, width: '100%' }}>{sections}</View>
+      </ScrollView>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: palette.bg }}
+      contentContainerStyle={[{ paddingTop: insets.top + 14, paddingBottom: 120, paddingHorizontal: 24 }, tabletCap]}
+    >
+      <ThemedText variant="screenTitle" family="serif">나</ThemedText>
+      <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 8, marginBottom: 24 }}>
+        앱의 생김새와 리듬을 바꿀 수 있어요.
+      </ThemedText>
+      {sections}
     </ScrollView>
   );
 }

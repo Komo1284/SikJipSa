@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/Typography';
 import { useLocationStore } from '@/store/locations';
 import { usePlantStore } from '@/store/plants';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useTabletContentCap } from '@/theme/responsive';
+import { useResponsive, useTabletContentCap } from '@/theme/responsive';
 import { toISODate } from '@/utils/date';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CalendarDays } from 'lucide-react-native';
@@ -19,8 +19,9 @@ const FERT_CYCLES = [7, 14, 21, 30, 60, 90, 120, 150, 180];
 const fertCycleLabel = (d: number) => (d < 30 ? `${d}일` : `${d / 30}달`);
 
 export default function PlantEditScreen() {
-  const { palette } = useTheme();
+  const { palette, radii } = useTheme();
   const insets = useSafeAreaInsets();
+  const { isDesktop } = useResponsive();
   const { id } = useLocalSearchParams<{ id: string }>();
   const plant = usePlantStore((s) => s.plants.find((p) => p.id === id));
   const updatePlant = usePlantStore((s) => s.updatePlant);
@@ -71,12 +72,28 @@ export default function PlantEditScreen() {
   };
 
   const formWidthCap = useTabletContentCap(560);
+  // 데스크톱: 모달 화면이 풀폭으로 늘어지지 않게 중앙 카드로 감싼다.
+  const desktopCard = isDesktop
+    ? ({
+        flex: 1,
+        maxWidth: 680,
+        width: '100%',
+        alignSelf: 'center',
+        marginVertical: 28,
+        borderWidth: 1,
+        borderColor: palette.line,
+        borderRadius: radii.lg,
+        overflow: 'hidden',
+        backgroundColor: palette.bg,
+      } as const)
+    : ({ flex: 1 } as const);
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: palette.bg }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+    <View style={desktopCard}>
       <View
         style={{
           // iOS modal presentation already adds the rounded grabber area at
@@ -285,6 +302,7 @@ export default function PlantEditScreen() {
           />
         </View>
       </BottomSheet>
+    </View>
     </KeyboardAvoidingView>
   );
 }

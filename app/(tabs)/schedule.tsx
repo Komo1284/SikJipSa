@@ -5,8 +5,9 @@ import { TaskRow } from '@/components/TaskRow';
 import { ThemedText } from '@/components/Typography';
 import { getRepotSchedule } from '@/lib/reminders';
 import { usePlantStore } from '@/store/plants';
+import { DesktopHeader } from '@/components/web/DesktopHeader';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useTabletContentCap } from '@/theme/responsive';
+import { useResponsive, useTabletContentCap } from '@/theme/responsive';
 import type { Plant } from '@/types/plant';
 import { TODAY, daysBetween, formatMD, parseISODate, toISODate } from '@/utils/date';
 import { useRouter } from 'expo-router';
@@ -33,6 +34,8 @@ export default function ScheduleScreen() {
 
   const [tab, setTab] = useState<Tab>('water');
   const tabletCap = useTabletContentCap();
+  const { isDesktop } = useResponsive();
+  const plantsLoading = usePlantStore((s) => s.loading);
   const loadPlants = usePlantStore((s) => s.load);
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(async () => {
@@ -63,6 +66,67 @@ export default function ScheduleScreen() {
     );
   }
 
+  const tabBar = (
+    <View
+      style={{
+        flexDirection: 'row',
+        backgroundColor: palette.surface,
+        borderRadius: 12,
+        padding: 4,
+        gap: 4,
+        marginBottom: 18,
+      }}
+    >
+      {TABS.map((t) => {
+        const active = tab === t.key;
+        return (
+          <Pressable
+            key={t.key}
+            onPress={() => setTab(t.key)}
+            style={{
+              flex: 1,
+              paddingVertical: 10,
+              alignItems: 'center',
+              borderRadius: 9,
+              backgroundColor: active ? palette.surfaceRaised : 'transparent',
+            }}
+          >
+            <ThemedText
+              variant="meta"
+              weight={active ? 'semibold' : 'regular'}
+              color={active ? palette.ink : palette.ink2}
+            >
+              {t.label}
+            </ThemedText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+
+  const tabContent =
+    tab === 'water' ? (
+      <WaterTab plants={plants} onOpen={(id) => router.push(`/plant/${id}`)} onWater={waterPlant} />
+    ) : tab === 'fert' ? (
+      <FertTab plants={plants} onOpen={(id) => router.push(`/plant/${id}`)} />
+    ) : (
+      <RepotTab plants={plants} repotByPlant={repotByPlant} onOpen={(id) => router.push(`/plant/${id}`)} />
+    );
+
+  // 데스크톱: 사이드바 셸 안에서 모바일 화면이 풀폭으로 늘어지던 것을
+  // DesktopHeader + 720px 컬럼으로 정리.
+  if (isDesktop) {
+    return (
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
+        <DesktopHeader title="일정" showSearch={false} onRefresh={loadPlants} refreshing={plantsLoading} />
+        <View style={{ maxWidth: 720, width: '100%' }}>
+          {tabBar}
+          {tabContent}
+        </View>
+      </ScrollView>
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: palette.bg }}>
       <View style={[{ paddingTop: insets.top + 14, paddingHorizontal: 24 }, tabletCap]}>
@@ -72,42 +136,7 @@ export default function ScheduleScreen() {
         <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 8, marginBottom: 16 }}>
           앞으로의 돌봄 리듬을 한눈에.
         </ThemedText>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            backgroundColor: palette.surface,
-            borderRadius: 12,
-            padding: 4,
-            gap: 4,
-            marginBottom: 18,
-          }}
-        >
-          {TABS.map((t) => {
-            const active = tab === t.key;
-            return (
-              <Pressable
-                key={t.key}
-                onPress={() => setTab(t.key)}
-                style={{
-                  flex: 1,
-                  paddingVertical: 10,
-                  alignItems: 'center',
-                  borderRadius: 9,
-                  backgroundColor: active ? palette.surfaceRaised : 'transparent',
-                }}
-              >
-                <ThemedText
-                  variant="meta"
-                  weight={active ? 'semibold' : 'regular'}
-                  color={active ? palette.ink : palette.ink2}
-                >
-                  {t.label}
-                </ThemedText>
-              </Pressable>
-            );
-          })}
-        </View>
+        {tabBar}
       </View>
 
       <ScrollView
@@ -117,13 +146,7 @@ export default function ScheduleScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.ink3} />
         }
       >
-        {tab === 'water' ? (
-          <WaterTab plants={plants} onOpen={(id) => router.push(`/plant/${id}`)} onWater={waterPlant} />
-        ) : tab === 'fert' ? (
-          <FertTab plants={plants} onOpen={(id) => router.push(`/plant/${id}`)} />
-        ) : (
-          <RepotTab plants={plants} repotByPlant={repotByPlant} onOpen={(id) => router.push(`/plant/${id}`)} />
-        )}
+        {tabContent}
       </ScrollView>
     </View>
   );
