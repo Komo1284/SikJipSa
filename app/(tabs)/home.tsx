@@ -4,6 +4,7 @@ import { NotificationsSheet } from '@/components/NotificationsSheet';
 import { SyncBanner } from '@/components/SyncBanner';
 import { PlantThumb } from '@/components/PlantThumb';
 import { SectionHeader } from '@/components/SectionHeader';
+import { SkeletonTaskRow } from '@/components/Skeleton';
 import { TaskRow } from '@/components/TaskRow';
 import { ThemedText } from '@/components/Typography';
 import { getFertReminders, getRepotReminders, getWaterReminders } from '@/lib/reminders';
@@ -32,6 +33,8 @@ function HomeMobile() {
   const tabletCap = useTabletContentCap();
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
+  const plantsLoading = usePlantStore((s) => s.loading);
+  const plantsLoaded = usePlantStore((s) => s.loaded);
   const repotByPlant = usePlantStore((s) => s.repotByPlant);
   const waterPlant = usePlantStore((s) => s.waterPlant);
   const loadPlants = usePlantStore((s) => s.load);
@@ -173,7 +176,12 @@ function HomeMobile() {
 
       <SectionHeader title="오늘 할 일" trailing={`${todays.length}개`} />
       <View style={{ paddingHorizontal: 20, gap: 10 }}>
-        {todays.length === 0 ? (
+        {plantsLoading && !plantsLoaded ? (
+          <>
+            <SkeletonTaskRow />
+            <SkeletonTaskRow />
+          </>
+        ) : todays.length === 0 ? (
           <EmptyState
             compact
             icon={<Sprout size={28} color={palette.green} strokeWidth={1.6} />}

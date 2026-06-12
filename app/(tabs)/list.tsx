@@ -1,5 +1,6 @@
 import { EmptyState } from '@/components/EmptyState';
 import { GridCard } from '@/components/GridCard';
+import { SkeletonGridCard } from '@/components/Skeleton';
 import { TaskRow } from '@/components/TaskRow';
 import { ThemedText } from '@/components/Typography';
 import { useLocationStore } from '@/store/locations';
@@ -10,7 +11,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useResponsive } from '@/theme/responsive';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { LayoutGrid, List as ListIcon, Search, SearchX, Sprout } from 'lucide-react-native';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -28,6 +29,8 @@ function ListMobile() {
   const { isTablet } = useResponsive();
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
+  const plantsLoading = usePlantStore((s) => s.loading);
+  const plantsLoaded = usePlantStore((s) => s.loaded);
   const waterPlant = usePlantStore((s) => s.waterPlant);
   const loadPlants = usePlantStore((s) => s.load);
   const locations = useLocationStore((s) => s.locations);
@@ -61,6 +64,21 @@ function ListMobile() {
   }, [loadPlants]);
   const [searchFocused, setSearchFocused] = useState(false);
   const [layout, setLayout] = useState<Layout>('grid');
+  // 그리드↔리스트 전환 시 각 레이아웃의 스크롤 위치를 기억했다가 복원.
+  const listRef = useRef<FlatList | null>(null);
+  const offsetsRef = useRef<Record<Layout, number>>({ grid: 0, list: 0 });
+  const handleScroll = useCallback(
+    (e: { nativeEvent: { contentOffset: { y: number } } }) => {
+      offsetsRef.current[layout] = e.nativeEvent.contentOffset.y;
+    },
+    [layout],
+  );
+  useEffect(() => {
+    const y = offsetsRef.current[layout];
+    if (y > 0) {
+      requestAnimationFrame(() => listRef.current?.scrollToOffset({ offset: y, animated: false }));
+    }
+  }, [layout]);
   // 태블릿에서는 카드가 2열로는 과하게 커져서 3열로 늘린다.
   const gridCols = isTablet ? 3 : 2;
 
@@ -86,6 +104,19 @@ function ListMobile() {
             내 식물
           </ThemedText>
         </View>
+        {plantsLoading && !plantsLoaded ? (
+          <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
+            <View style={{ flex: 1, gap: 12 }}>
+              <SkeletonGridCard />
+              <SkeletonGridCard />
+            </View>
+            <View style={{ flex: 1, gap: 12 }}>
+              <SkeletonGridCard />
+              <SkeletonGridCard />
+            </View>
+          </View>
+        ) : null}
+        {plantsLoading && !plantsLoaded ? null : (
         <EmptyState
           icon={<Sprout size={40} color={palette.green} strokeWidth={1.6} />}
           title="아직 등록된 식물이 없어요"
@@ -93,6 +124,7 @@ function ListMobile() {
           actionLabel="식물 추가하기"
           onAction={() => router.push('/add')}
         />
+        )}
       </View>
     );
   }
@@ -225,6 +257,9 @@ function ListMobile() {
     return (
       <FlatList
         key={`grid-${gridCols}`}
+        ref={listRef}
+        onScroll={handleScroll}
+        scrollEventThrottle={32}
         style={{ flex: 1, backgroundColor: palette.bg }}
         data={filtered}
         keyExtractor={(p) => p.id}
@@ -249,6 +284,9 @@ function ListMobile() {
   return (
     <FlatList
       key="list"
+      ref={listRef}
+      onScroll={handleScroll}
+      scrollEventThrottle={32}
       style={{ flex: 1, backgroundColor: palette.bg }}
       data={filtered}
       keyExtractor={(p) => p.id}
