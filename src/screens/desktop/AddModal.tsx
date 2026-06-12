@@ -1,3 +1,4 @@
+import { humanizeError } from '@/lib/errors';
 import { Button } from '@/components/Button';
 import { HoverPressable } from '@/components/HoverPressable';
 import { PlantThumb } from '@/components/PlantThumb';
@@ -68,7 +69,7 @@ export function DesktopAddModal() {
           const uploaded = await repos.storage.uploadPhoto(tempId, photoUri);
           photoUrl = uploaded.publicUrl;
         } catch (e) {
-          Alert.alert('사진 업로드 실패', (e as Error).message);
+          Alert.alert('사진 업로드 실패', humanizeError(e));
           setBusy(false);
           return;
         }

@@ -1,4 +1,5 @@
 import { ThemedText } from '@/components/Typography';
+import { humanizeError, isUserCancelled } from '@/lib/errors';
 import { useAuthStore } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useRouter } from 'expo-router';
@@ -30,9 +31,12 @@ export default function Onboarding() {
       setBusy(provider);
       await signIn(provider);
     } catch (e) {
-      const msg = (e as Error).message;
-      if (!/cancel|dismiss/i.test(msg)) {
-        Alert.alert('로그인 실패', msg);
+      console.warn('[onboarding] sign-in failed:', e);
+      if (!isUserCancelled(e)) {
+        Alert.alert(
+          '로그인 실패',
+          humanizeError(e, '로그인을 완료하지 못했어요. 잠시 후 다시 시도해주세요.'),
+        );
       }
     } finally {
       setBusy(null);

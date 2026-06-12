@@ -1,3 +1,4 @@
+import { humanizeError } from '@/lib/errors';
 import { detectLocation, getRecentWeather, loadPlace, savePlace } from '@/lib/weatherService';
 import { recommendNextWater } from '@/lib/recommendation';
 import { repos } from '@/repo';
@@ -107,7 +108,8 @@ export const useWeatherStore = create<WeatherStore>((set, get) => ({
       await get().recompute();
       toast.success(next.label ? `위치를 ${next.label} 으로 변경했어요` : '위치 변경됨');
     } catch (e) {
-      toast.error(`위치 변경 실패: ${(e as Error).message}`);
+      console.warn('[weatherStore] relocate failed:', e);
+      toast.error(`위치 변경 실패: ${humanizeError(e)} (기존 위치는 그대로 유지돼요)`);
     } finally {
       set({ loading: false });
     }

@@ -1,3 +1,4 @@
+import { humanizeError } from '@/lib/errors';
 import { ActionSheet, type ActionItem } from '@/components/ActionSheet';
 import { BottomSheet } from '@/components/BottomSheet';
 import { CareLogSheet, type CareKind } from '@/components/CareLogSheet';
@@ -95,7 +96,7 @@ function DetailMobile({ plant }: { plant: Plant }) {
       const uploaded = await repos.storage.uploadPhoto(plant.id, result.assets[0].uri);
       await updatePlantPhoto(plant.id, uploaded.publicUrl);
     } catch (e) {
-      Alert.alert('사진 교체 실패', (e as Error).message);
+      Alert.alert('사진 교체 실패', humanizeError(e));
     }
   };
 
@@ -128,7 +129,7 @@ function DetailMobile({ plant }: { plant: Plant }) {
       const uploaded = await repos.storage.uploadPhoto(plant.id, result.assets[0].uri);
       await logPhoto(plant.id, uploaded.publicUrl);
     } catch (e) {
-      Alert.alert('사진 기록 실패', (e as Error).message);
+      Alert.alert('사진 기록 실패', humanizeError(e));
     }
   };
 

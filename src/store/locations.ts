@@ -1,3 +1,4 @@
+import { humanizeError } from '@/lib/errors';
 import { repos } from '@/repo';
 import { hasSupabase } from '@/repo/supabase/client';
 import { usePlantStore } from '@/store/plants';
@@ -33,7 +34,7 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
       set({ locations, loaded: true });
     } catch (e) {
       console.warn('[locationStore] load failed:', e);
-      toast.error(`공간 불러오기 실패: ${(e as Error).message}`);
+      toast.error(`공간 불러오기 실패: ${humanizeError(e)}`);
     }
   },
 
@@ -48,7 +49,7 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
       toast.success(`${input.name} 공간 추가됨`);
     } catch (e) {
       console.warn('[locationStore] add failed:', e);
-      toast.error(`공간 추가 실패: ${(e as Error).message}`);
+      toast.error(`공간 추가 실패: ${humanizeError(e)}`);
     }
   },
 
@@ -86,7 +87,7 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
       toast.success('공간 수정됨');
     } catch (e) {
       console.warn('[locationStore] update failed:', e);
-      toast.error(`공간 수정 실패: ${(e as Error).message}`);
+      toast.error(`공간 수정 실패: ${humanizeError(e)}`);
       set({ locations: prev });
       usePlantStore.getState().load();
     }
@@ -109,7 +110,7 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
       toast.success('공간 이름 변경됨');
     } catch (e) {
       console.warn('[locationStore] rename failed:', e);
-      toast.error(`이름 변경 실패: ${(e as Error).message}`);
+      toast.error(`이름 변경 실패: ${humanizeError(e)}`);
       set({ locations: prev });
       // Re-fetch plants to undo any partial cascade.
       usePlantStore.getState().load();
@@ -137,7 +138,7 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
       toast.success('공간 삭제됨');
     } catch (e) {
       console.warn('[locationStore] remove failed:', e);
-      toast.error(`공간 삭제 실패: ${(e as Error).message}`);
+      toast.error(`공간 삭제 실패: ${humanizeError(e)}`);
       set({ locations: prev });
     }
   },

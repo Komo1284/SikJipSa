@@ -1,5 +1,6 @@
 import { SEED_LOG, SEED_PLANTS } from '@/data/plants';
 import { cancelWaterReminder, rescheduleAll, scheduleWaterReminder } from '@/lib/notifications';
+import { humanizeError } from '@/lib/errors';
 import { enqueue, isOnline } from '@/lib/offlineQueue';
 import { repos } from '@/repo';
 import { hasSupabase } from '@/repo/supabase/client';
@@ -83,10 +84,9 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       set({ plants, log, repotByPlant, loading: false, loaded: true });
       rescheduleAll(plants).catch(() => {}); // fire-and-forget
     } catch (e) {
-      const msg = (e as Error).message;
       console.warn('[plantStore] load failed:', e);
-      toast.error(`식물 불러오기 실패: ${msg}`);
-      set({ loading: false, error: msg });
+      toast.error(`식물 불러오기 실패: ${humanizeError(e)}`);
+      set({ loading: false, error: (e as Error).message });
     }
   },
 
@@ -127,14 +127,13 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
         scheduleWaterReminder(updated).catch(() => {});
         toast.info('오프라인 — 연결되면 자동 동기화돼요');
       } else {
-        const msg = (e as Error).message;
-        toast.error(`물주기 기록 실패: ${msg}`);
+        toast.error(`물주기 기록 실패: ${humanizeError(e)}`);
         set((s) => ({
           plants: s.plants.map((p) => (p.id === id ? plant : p)),
           log: s.log.filter(
             (l) => !(l.date === entry.date && l.plantId === id && l.action === 'water'),
           ),
-          error: msg,
+          error: (e as Error).message,
         }));
       }
     }
@@ -159,10 +158,9 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
         repos.logs.insert(entry),
       ]);
     } catch (e) {
-      const msg = (e as Error).message;
       console.warn('[plantStore] fertilizePlant failed:', e);
-      toast.error(`비료 기록 실패: ${msg}`);
-      set({ error: msg });
+      toast.error(`비료 기록 실패: ${humanizeError(e)}`);
+      set({ error: (e as Error).message });
     }
   },
 
@@ -184,12 +182,11 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
         useWeatherStore.getState().recompute([saved.id]).catch(() => {}),
       );
     } catch (e) {
-      const msg = (e as Error).message;
       console.warn('[plantStore] addPlant failed:', e);
-      toast.error(`식물 추가 실패: ${msg}`);
+      toast.error(`식물 추가 실패: ${humanizeError(e)}`);
       set((s) => ({
         plants: s.plants.filter((p) => p.id !== tempId),
-        error: msg,
+        error: (e as Error).message,
       }));
     }
   },
@@ -205,9 +202,8 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       cancelWaterReminder(id).catch(() => {});
       toast.success(`${target.name} 삭제됨`);
     } catch (e) {
-      const msg = (e as Error).message;
       console.warn('[plantStore] deletePlant failed:', e);
-      toast.error(`삭제 실패: ${msg}`);
+      toast.error(`삭제 실패: ${humanizeError(e)}`);
       set({ plants: before });
     }
   },
@@ -278,9 +274,8 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
 
       toast.success('정보 수정됨');
     } catch (e) {
-      const msg = (e as Error).message;
       console.warn('[plantStore] updatePlant failed:', e);
-      toast.error(`수정 실패: ${msg}`);
+      toast.error(`수정 실패: ${humanizeError(e)}`);
       set((s) => ({ plants: s.plants.map((p) => (p.id === id ? prev : p)) }));
     }
   },
@@ -304,8 +299,8 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       const labels: Record<typeof action, string> = { prune: '가지치기', repot: '분갈이', note: '메모' };
       toast.success(`${labels[action]} 기록됨`);
     } catch (e) {
-      const msg = (e as Error).message;
-      toast.error(`기록 실패: ${msg}`);
+      console.warn('[plantStore] logAction failed:', e);
+      toast.error(`기록 실패: ${humanizeError(e)}`);
       set((s) => ({
         log: s.log.filter((l) => !(l.plantId === plantId && l.date === date && l.action === action)),
       }));
@@ -323,8 +318,8 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       await repos.logs.insert(entry);
       toast.success('사진 기록 추가됨');
     } catch (e) {
-      const msg = (e as Error).message;
-      toast.error(`사진 기록 실패: ${msg}`);
+      console.warn('[plantStore] logPhoto failed:', e);
+      toast.error(`사진 기록 실패: ${humanizeError(e)}`);
       set((s) => ({
         log: s.log.filter((l) => !(l.plantId === plantId && l.date === today && l.action === 'photo')),
       }));
@@ -348,9 +343,8 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       }
       toast.success('사진 변경됨');
     } catch (e) {
-      const msg = (e as Error).message;
       console.warn('[plantStore] updatePlantPhoto failed:', e);
-      toast.error(`사진 변경 실패: ${msg}`);
+      toast.error(`사진 변경 실패: ${humanizeError(e)}`);
       set((s) => ({ plants: s.plants.map((p) => (p.id === id ? { ...p, photoUrl: prev } : p)) }));
     }
   },

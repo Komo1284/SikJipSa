@@ -1,3 +1,4 @@
+import { humanizeError } from '@/lib/errors';
 import { ThemedText } from '@/components/Typography';
 import { repos } from '@/repo';
 import { DesktopAddModal } from '@/screens/desktop/AddModal';
@@ -79,7 +80,7 @@ function AddMobile() {
           const uploaded = await repos.storage.uploadPhoto(tempId, photoUri);
           photoUrl = uploaded.publicUrl;
         } catch (e) {
-          Alert.alert('사진 업로드 실패', (e as Error).message);
+          Alert.alert('사진 업로드 실패', humanizeError(e));
           setBusy(false);
           return;
         }

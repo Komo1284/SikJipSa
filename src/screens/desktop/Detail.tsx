@@ -1,3 +1,4 @@
+import { humanizeError } from '@/lib/errors';
 import { Button } from '@/components/Button';
 import { CareLogSheet, type CareKind } from '@/components/CareLogSheet';
 import { PlantThumb } from '@/components/PlantThumb';
@@ -42,7 +43,7 @@ export function DesktopDetail({ plant }: { plant: Plant }) {
       const uploaded = await repos.storage.uploadPhoto(plant.id, result.assets[0].uri);
       await updatePlantPhoto(plant.id, uploaded.publicUrl);
     } catch (e) {
-      Alert.alert('사진 교체 실패', (e as Error).message);
+      Alert.alert('사진 교체 실패', humanizeError(e));
     }
   };
 
