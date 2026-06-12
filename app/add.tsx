@@ -295,6 +295,9 @@ function AddMobile() {
         {step === 3 ? (
           <View>
             <Field label="물주기 주기">
+              <ThemedText variant="tiny" color={palette.ink3} style={{ marginTop: 2, lineHeight: 16 }}>
+                잘 모르겠다면 — 관엽 5~7일 · 허브 3~5일 · 다육/선인장 14~30일
+              </ThemedText>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
                 {CYCLES.map((d) => {
                   const active = cycle === d;

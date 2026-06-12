@@ -272,9 +272,12 @@ function RepotTab({
             family="mono"
             uppercase
             color={palette.ink3}
-            style={{ marginBottom: 10, letterSpacing: 1 }}
+            style={{ marginBottom: 6, letterSpacing: 1 }}
           >
             분갈이 기록 없음
+          </ThemedText>
+          <ThemedText variant="tiny" color={palette.ink3} style={{ marginBottom: 10, lineHeight: 16 }}>
+            기록이 없으면 분갈이 시기를 알려드릴 수 없어요. 식물을 눌러 빠른 실행 → 분갈이에서 마지막 분갈이 날짜를 남겨주세요.
           </ThemedText>
           <View style={{ gap: 10 }}>
             {noRecord.map((plant) => (
