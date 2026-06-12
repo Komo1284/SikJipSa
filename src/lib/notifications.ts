@@ -1,5 +1,6 @@
 import type { Plant } from '@/types/plant';
 import { parseISODate } from '@/utils/date';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
@@ -36,6 +37,7 @@ export async function ensureNotificationPermission(): Promise<boolean> {
     if (current.granted) {
       permissionGranted = true;
       await ensureAndroidChannel();
+      await ensureWaterCategory();
       return true;
     }
     // OS 권한 팝업은 세션당 한 번만 — 호출처마다 반복해서 띄우지 않는다.
@@ -43,7 +45,10 @@ export async function ensureNotificationPermission(): Promise<boolean> {
     promptShown = true;
     const req = await Notifications.requestPermissionsAsync();
     permissionGranted = req.granted;
-    if (permissionGranted) await ensureAndroidChannel();
+    if (permissionGranted) {
+      await ensureAndroidChannel();
+      await ensureWaterCategory();
+    }
     return permissionGranted;
   } catch (e) {
     console.warn('[notifications] permission error:', e);
@@ -65,13 +70,83 @@ export async function getNotificationPermissionStatus(): Promise<NotificationPer
 }
 
 const WATER_NOTIF_PREFIX = 'water-';
+const SNOOZE_PREFIX = 'water-snooze-';
+const REMINDER_HOUR_KEY = 'sikjipsa.reminderHour.v1';
+const DEFAULT_REMINDER_HOUR = 9;
+
+export const WATER_CATEGORY = 'water-reminder';
+export const SNOOZE_1H_ACTION = 'snooze-1h';
+export const SNOOZE_TOMORROW_ACTION = 'snooze-tomorrow';
 
 function identifierFor(plantId: string) {
   return `${WATER_NOTIF_PREFIX}${plantId}`;
 }
 
+/** 알림 받을 시각(0~23시). 기본 9시 — Me 탭에서 변경. */
+export async function getReminderHour(): Promise<number> {
+  try {
+    const raw = await AsyncStorage.getItem(REMINDER_HOUR_KEY);
+    const h = Number(raw);
+    return Number.isInteger(h) && h >= 0 && h <= 23 ? h : DEFAULT_REMINDER_HOUR;
+  } catch {
+    return DEFAULT_REMINDER_HOUR;
+  }
+}
+
+export async function setReminderHour(hour: number): Promise<void> {
+  await AsyncStorage.setItem(REMINDER_HOUR_KEY, String(hour));
+}
+
+/** 알림의 '1시간 뒤 / 내일' 액션 버튼 등록 — 권한 획득 시 1회. */
+async function ensureWaterCategory() {
+  try {
+    await Notifications.setNotificationCategoryAsync(WATER_CATEGORY, [
+      { identifier: SNOOZE_1H_ACTION, buttonTitle: '1시간 뒤', options: { opensAppToForeground: false } },
+      { identifier: SNOOZE_TOMORROW_ACTION, buttonTitle: '내일 다시', options: { opensAppToForeground: false } },
+    ]);
+  } catch (e) {
+    console.warn('[notifications] category setup failed:', e);
+  }
+}
+
 /**
- * Schedules a 09:00 local notification on the plant's next_water date.
+ * 스누즈: 같은 식물의 1회성 알림을 +1시간 또는 내일 알림 시각으로 다시
+ * 건다. 본 리마인더(water-<id>)와 별개 identifier 라 rescheduleAll 이
+ * 돌아도 스누즈가 덮이지 않는다.
+ */
+export async function snoozeWaterReminder(
+  plant: Pick<Plant, 'id' | 'name' | 'location'>,
+  kind: 'hour' | 'tomorrow',
+): Promise<void> {
+  const target = new Date();
+  if (kind === 'hour') {
+    target.setTime(target.getTime() + 60 * 60 * 1000);
+  } else {
+    target.setDate(target.getDate() + 1);
+    target.setHours(await getReminderHour(), 0, 0, 0);
+  }
+  try {
+    await Notifications.scheduleNotificationAsync({
+      identifier: `${SNOOZE_PREFIX}${plant.id}`,
+      content: {
+        title: `${plant.name} 물 줄 시간이에요`,
+        body: plant.location ? `${plant.location} · 다시 알려드려요` : '다시 알려드려요',
+        data: { plantId: plant.id, kind: 'water' },
+        categoryIdentifier: WATER_CATEGORY,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: target,
+        channelId: Platform.OS === 'android' ? 'water' : undefined,
+      },
+    });
+  } catch (e) {
+    console.warn('[notifications] snooze failed:', e);
+  }
+}
+
+/**
+ * Schedules a local notification on the plant's next_water date at the user's reminder hour (default 09:00).
  * Past dates are skipped. Returns true if a notification was scheduled.
  */
 export async function scheduleWaterReminder(plant: Plant): Promise<boolean> {
@@ -83,7 +158,7 @@ export async function scheduleWaterReminder(plant: Plant): Promise<boolean> {
   // Anchor to local midnight first so setHours(9) lands on the user's
   // wall-clock 9 AM regardless of timezone drift from `new Date('YYYY-MM-DD')`.
   const target = parseISODate(plant.nextWater);
-  target.setHours(9, 0, 0, 0);
+  target.setHours(await getReminderHour(), 0, 0, 0);
   const now = new Date();
   if (target.getTime() <= now.getTime()) return false;
 
@@ -94,6 +169,7 @@ export async function scheduleWaterReminder(plant: Plant): Promise<boolean> {
         title: `${plant.name} 물 줄 시간이에요`,
         body: plant.location ? `${plant.location} · 오늘 한 번 살펴볼까요?` : '오늘 한 번 살펴볼까요?',
         data: { plantId: plant.id, kind: 'water' },
+        categoryIdentifier: WATER_CATEGORY,
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,

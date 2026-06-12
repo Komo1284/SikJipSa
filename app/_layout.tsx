@@ -1,5 +1,10 @@
 import { ToastHost } from '@/components/ToastHost';
 import { DesktopShell } from '@/components/web/DesktopShell';
+import {
+  SNOOZE_1H_ACTION,
+  SNOOZE_TOMORROW_ACTION,
+  snoozeWaterReminder,
+} from '@/lib/notifications';
 import { startQueue } from '@/lib/offlineQueue';
 import { repos } from '@/repo';
 import { maybeCompleteAuthSession } from '@/repo/supabase/authRepo';
@@ -115,6 +120,16 @@ function useNotificationDeepLink() {
     const plantId = typeof data?.plantId === 'string' ? data.plantId : null;
     if (!plantId) return;
     handled.current = response;
+
+    // 스누즈 액션 버튼 — 이동하지 않고 1회성 알림만 다시 건다.
+    const action = response.actionIdentifier;
+    if (action === SNOOZE_1H_ACTION || action === SNOOZE_TOMORROW_ACTION) {
+      const plant = usePlantStore.getState().plants.find((p) => p.id === plantId);
+      if (plant) {
+        snoozeWaterReminder(plant, action === SNOOZE_1H_ACTION ? 'hour' : 'tomorrow').catch(() => {});
+      }
+      return;
+    }
     router.push(`/plant/${plantId}`);
   }, [response, initialized, session, plantsLoaded, router]);
 }

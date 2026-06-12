@@ -4,7 +4,9 @@ import { humanizeError } from '@/lib/errors';
 import {
   ensureNotificationPermission,
   getNotificationPermissionStatus,
+  getReminderHour,
   rescheduleAll,
+  setReminderHour,
   type NotificationPermissionStatus,
 } from '@/lib/notifications';
 import { useAuthStore } from '@/store/auth';
@@ -128,14 +130,18 @@ export default function MeScreen() {
   );
 }
 
+const REMINDER_HOURS = [7, 8, 9, 12, 18, 21];
+
 function NotificationSection() {
   const { palette, radii } = useTheme();
   const plants = usePlantStore((s) => s.plants);
   const [status, setStatus] = useState<NotificationPermissionStatus | null>(null);
+  const [hour, setHour] = useState<number>(9);
 
   const refresh = useCallback(() => {
     if (Platform.OS === 'web') return;
     getNotificationPermissionStatus().then(setStatus);
+    getReminderHour().then(setHour);
   }, []);
 
   // 기기 설정에서 알림을 켜고 돌아왔을 때 바로 반영되도록 포커스마다 재조회.
@@ -172,7 +178,7 @@ function NotificationSection() {
             <ThemedText variant="body" weight="medium">물주기 알림</ThemedText>
             <ThemedText variant="tiny" color={palette.ink3} style={{ marginTop: 2 }}>
               {granted
-                ? '켜짐 · 물주기 날 아침 9시에 알려드려요'
+                ? `켜짐 · 물주기 날 ${hour}시에 알려드려요`
                 : status === 'denied'
                   ? '꺼짐 · 기기 설정에서 허용해야 받을 수 있어요'
                   : '꺼짐 · 허용하면 물주기 날을 놓치지 않아요'}
@@ -193,7 +199,38 @@ function NotificationSection() {
               {status === 'denied' ? '기기 설정 열기' : '알림 허용하기'}
             </ThemedText>
           </Pressable>
-        ) : null}
+        ) : (
+          <View style={{ borderTopWidth: 1, borderColor: palette.line, paddingTop: 12 }}>
+            <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 8, letterSpacing: 1 }}>
+              알림 시각
+            </ThemedText>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+              {REMINDER_HOURS.map((h) => {
+                const active = hour === h;
+                return (
+                  <Pressable
+                    key={h}
+                    onPress={async () => {
+                      setHour(h);
+                      await setReminderHour(h);
+                      rescheduleAll(plants).catch(() => {});
+                    }}
+                    style={{
+                      paddingHorizontal: 14,
+                      paddingVertical: 8,
+                      borderRadius: 999,
+                      backgroundColor: active ? palette.green : palette.bg2,
+                    }}
+                  >
+                    <ThemedText variant="meta" weight="medium" color={active ? palette.bg : palette.ink2}>
+                      {h}시
+                    </ThemedText>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        )}
       </View>
     </View>
   );
