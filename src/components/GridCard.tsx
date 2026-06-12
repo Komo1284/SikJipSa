@@ -44,7 +44,7 @@ export function GridCard({ plant, onClick }: { plant: Plant; onClick: () => void
               borderRadius: 6,
               backgroundColor: dotColor,
               borderWidth: 2,
-              borderColor: 'rgba(255,255,255,0.5)',
+              borderColor: palette.surfaceRaised,
             }}
           />
         ) : null}

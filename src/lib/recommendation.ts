@@ -98,7 +98,7 @@ export function recommendNextWater(
 
   let reason: string;
   if (top.length === 0) {
-    reason = '환경이 평소와 비슷해서 기본 주기를 그대로 따라요.';
+    reason = `환경 보정이 없어 기본 ${plant.waterCycle}일 주기를 따라요.`;
   } else {
     const dirText =
       dayDelta > 0 ? `평소보다 ${dayDelta}일 늦췄어요` :

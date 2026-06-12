@@ -28,7 +28,7 @@ export function SectionHeader({
         {title}
       </ThemedText>
       {trailing ? (
-        <Pressable onPress={onTrailing} hitSlop={8}>
+        <Pressable onPress={onTrailing} hitSlop={12}>
           <ThemedText variant="meta" family="mono" color={palette.ink3} style={{ letterSpacing: 0.5 }}>
             {trailing}
           </ThemedText>

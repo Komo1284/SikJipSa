@@ -18,6 +18,8 @@ export function DesktopHome() {
   const { palette, radii, weights } = useTheme();
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
+  const loadPlants = usePlantStore((s) => s.load);
+  const plantsLoading = usePlantStore((s) => s.loading);
   const waterPlant = usePlantStore((s) => s.waterPlant);
 
   const spaceFilter = useUIStore((s) => s.spaceFilter);
@@ -45,7 +47,7 @@ export function DesktopHome() {
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
-      <DesktopHeader title={spaceTitle} />
+      <DesktopHeader title={spaceTitle} onRefresh={loadPlants} refreshing={plantsLoading} />
 
       <View style={{ flexDirection: 'row', gap: 16, marginBottom: 28 }}>
         <SummaryCard label="오늘" value={todayPlants.length} color={palette.drop} />
@@ -101,7 +103,7 @@ export function DesktopHome() {
         </ThemedText>
       </View>
 
-      <WebGrid cols={4} gap={16}>
+      <WebGrid minCol={230} gap={16}>
         {filtered.map((p) => (
           <DesktopPlantCard
             key={p.id}

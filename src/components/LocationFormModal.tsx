@@ -1,10 +1,11 @@
+import { FormInput } from '@/components/FormInput';
 import { ThemedText } from '@/components/Typography';
 import { useLocationStore } from '@/store/locations';
 import { useTheme } from '@/theme/ThemeProvider';
 import type { UserLocation } from '@/types/plant';
 import { X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Alert, Modal, Pressable, TextInput, View } from 'react-native';
+import { Alert, Modal, Pressable, View } from 'react-native';
 
 type Props = {
   visible: boolean;
@@ -113,21 +114,15 @@ export function LocationFormModal({ visible, editing, onClose }: Props) {
               >
                 이름
               </ThemedText>
-              <TextInput
+              <FormInput
                 value={name}
                 onChangeText={setName}
                 placeholder="예: 온실장, 작업실"
-                placeholderTextColor={palette.ink3}
                 autoFocus={!editing}
                 style={{
-                  paddingVertical: 14,
                   paddingHorizontal: 14,
                   fontSize: 16,
-                  borderRadius: radii.sm,
-                  borderWidth: 1,
-                  borderColor: palette.lineStrong,
                   backgroundColor: palette.surfaceRaised,
-                  color: palette.ink,
                 }}
               />
             </View>

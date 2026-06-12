@@ -12,9 +12,11 @@ type Props = {
   title: string;
   showSearch?: boolean;
   onRefresh?: () => void;
+  /** true 면 새로고침 버튼을 비활성화해 진행 중임을 보여준다. */
+  refreshing?: boolean;
 };
 
-export function DesktopHeader({ kicker = formatKickerLong(), title, showSearch = true, onRefresh }: Props) {
+export function DesktopHeader({ kicker = formatKickerLong(), title, showSearch = true, onRefresh, refreshing }: Props) {
   const { palette, weights } = useTheme();
   const query = useUIStore((s) => s.query);
   const setQuery = useUIStore((s) => s.setQuery);
@@ -79,7 +81,8 @@ export function DesktopHeader({ kicker = formatKickerLong(), title, showSearch =
         <Button
           variant="ghost"
           size="sm"
-          leftIcon={<RefreshCw size={16} color={palette.ink2} strokeWidth={1.8} />}
+          disabled={refreshing}
+          leftIcon={<RefreshCw size={16} color={refreshing ? palette.ink4 : palette.ink2} strokeWidth={1.8} />}
           onPress={onRefresh}
         />
       </View>

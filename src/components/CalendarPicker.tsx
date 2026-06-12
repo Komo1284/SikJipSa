@@ -34,7 +34,7 @@ export function CalendarPicker({ value, onChange, maxDate }: Props) {
     <View>
       {/* Month header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <Pressable onPress={() => moveMonth(-1)} hitSlop={8} style={{ padding: 6 }}>
+        <Pressable onPress={() => moveMonth(-1)} hitSlop={12} style={{ padding: 6 }}>
           <ChevronLeft size={20} color={palette.ink2} strokeWidth={1.8} />
         </Pressable>
         <ThemedText
@@ -43,7 +43,7 @@ export function CalendarPicker({ value, onChange, maxDate }: Props) {
         >
           {view.year}년 {MONTH_NAMES[view.month]}
         </ThemedText>
-        <Pressable onPress={() => moveMonth(1)} hitSlop={8} style={{ padding: 6 }}>
+        <Pressable onPress={() => moveMonth(1)} hitSlop={12} style={{ padding: 6 }}>
           <ChevronRight size={20} color={palette.ink2} strokeWidth={1.8} />
         </Pressable>
       </View>
@@ -87,6 +87,7 @@ export function CalendarPicker({ value, onChange, maxDate }: Props) {
                     flex: 1, aspectRatio: 1,
                     alignItems: 'center', justifyContent: 'center',
                     padding: 2,
+                    opacity: isFuture ? 0.35 : 1,
                   }}
                 >
                   <View

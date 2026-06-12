@@ -16,7 +16,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Camera, ChevronLeft, Droplet, Flower2, MoreHorizontal, Pencil, Scissors, Sprout, Sun, Trash2 } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Image, Linking, Pressable, ScrollView, View } from 'react-native';
 import { Tap } from '@/components/Tap';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -93,7 +93,13 @@ function DetailMobile({ plant }: { plant: Plant }) {
 
   const changePhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) return;
+    if (!perm.granted) {
+      Alert.alert('사진첩 권한 필요', '사진을 고르려면 사진첩 접근을 허용해주세요.', [
+        { text: '취소', style: 'cancel' },
+        { text: '설정 열기', onPress: () => Linking.openSettings() },
+      ]);
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true, aspect: [1, 1], quality: 0.7,
@@ -108,7 +114,7 @@ function DetailMobile({ plant }: { plant: Plant }) {
   };
 
   const confirmDelete = () => {
-    Alert.alert(plant.name, '정말 삭제할까요? 기록은 보존돼요.', [
+    Alert.alert(plant.name, '정말 삭제할까요? 삭제 후에는 되돌릴 수 없어요. (돌봄 기록은 보존돼요)', [
       { text: '취소', style: 'cancel' },
       {
         text: '삭제', style: 'destructive',
@@ -126,7 +132,13 @@ function DetailMobile({ plant }: { plant: Plant }) {
 
   const addPhotoLog = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) return;
+    if (!perm.granted) {
+      Alert.alert('사진첩 권한 필요', '사진을 고르려면 사진첩 접근을 허용해주세요.', [
+        { text: '취소', style: 'cancel' },
+        { text: '설정 열기', onPress: () => Linking.openSettings() },
+      ]);
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.7,

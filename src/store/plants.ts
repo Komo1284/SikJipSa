@@ -244,7 +244,10 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
         (x) => x.plantId === l.plantId && x.date === l.date && x.action === l.action,
       );
       if (dup) return {};
-      const next: Partial<PlantStore> = { log: [l, ...s.log] };
+      // 다른 기기에서 늦게 도착한 과거 로그가 맨 위로 끼어들지 않게
+      // 날짜 내림차순 위치에 삽입한다.
+      const sorted = [l, ...s.log].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+      const next: Partial<PlantStore> = { log: sorted };
       if (l.action === 'repot') {
         const prev = s.repotByPlant[l.plantId];
         if (!prev || l.date > prev) {

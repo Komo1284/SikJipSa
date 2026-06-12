@@ -46,6 +46,7 @@ export function Tap({ style, noFeedback, pressedScale = 0.96, onPressIn, onPress
 
   return (
     <AnimatedPressable
+      accessibilityRole="button"
       {...rest}
       onPressIn={handleIn}
       onPressOut={handleOut}

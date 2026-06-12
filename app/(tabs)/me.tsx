@@ -305,8 +305,8 @@ function LocationsSection() {
   const confirmRemove = (id: string, name: string) => {
     const usedBy = plants.filter((p) => p.location === name).length;
     const message = usedBy > 0
-      ? `${usedBy}개의 식물이 이 공간에 있어요. 삭제하면 식물은 남지만 공간 정보가 빈 값이 돼요.`
-      : '정말 삭제할까요?';
+      ? `${usedBy}개의 식물이 이 공간에 있어요. 삭제하면 식물은 남지만 공간 정보가 빈 값이 돼요. 이 작업은 되돌릴 수 없어요.`
+      : '정말 삭제할까요? 이 작업은 되돌릴 수 없어요.';
     Alert.alert(name, message, [
       { text: '취소', style: 'cancel' },
       { text: '삭제', style: 'destructive', onPress: () => removeLocation(id) },

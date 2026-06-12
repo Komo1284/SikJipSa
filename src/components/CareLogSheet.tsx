@@ -1,11 +1,12 @@
 import { BottomSheet } from '@/components/BottomSheet';
 import { CalendarPicker } from '@/components/CalendarPicker';
+import { FormInput } from '@/components/FormInput';
 import { ThemedText } from '@/components/Typography';
 import { useTheme } from '@/theme/ThemeProvider';
 import { addDays, formatMD, toISODate } from '@/utils/date';
 import { CalendarDays, Droplet, Flower2, Scissors, Sprout, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 export type CareKind = 'water' | 'fert' | 'prune' | 'repot';
 
@@ -82,7 +83,7 @@ export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Pr
               </ThemedText>
             </View>
           </View>
-          <Pressable onPress={onClose} hitSlop={8} style={{ padding: 4 }}>
+          <Pressable onPress={onClose} hitSlop={12} style={{ padding: 4 }}>
             <X size={20} color={palette.ink3} strokeWidth={1.8} />
           </Pressable>
         </View>
@@ -175,17 +176,14 @@ export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Pr
         >
           메모 (선택)
         </ThemedText>
-        <TextInput
+        <FormInput
           value={note}
           onChangeText={setNote}
           placeholder={meta.placeholder}
-          placeholderTextColor={palette.ink3}
           multiline
           style={{
             minHeight: 60, paddingVertical: 12, paddingHorizontal: 14,
-            fontSize: 15, color: palette.ink, textAlignVertical: 'top',
-            borderRadius: 10, borderWidth: 1, borderColor: palette.line,
-            backgroundColor: palette.surfaceRaised,
+            textAlignVertical: 'top', backgroundColor: palette.surfaceRaised,
           }}
         />
 

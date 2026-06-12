@@ -13,8 +13,8 @@ import { addDays, toISODate } from '@/utils/date';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { Plus, X } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, Pressable, ScrollView, TextInput, View, Platform } from 'react-native';
 
 const STEP_TITLES = ['어떤 식물인가요?', '이름과 공간을 알려주세요', '돌보는 리듬과 환경을 설정할게요'];
 const CYCLES = [3, 5, 7, 10, 14];
@@ -40,6 +40,17 @@ export function DesktopAddModal() {
   const [busy, setBusy] = useState(false);
 
   const close = () => router.back();
+
+  // 웹 표준: ESC 로 모달 닫기.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const pickPhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();

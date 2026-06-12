@@ -16,6 +16,8 @@ export function DesktopList() {
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
   const waterPlant = usePlantStore((s) => s.waterPlant);
+  const loadPlants = usePlantStore((s) => s.load);
+  const plantsLoading = usePlantStore((s) => s.loading);
 
   const spaceFilter = useUIStore((s) => s.spaceFilter);
   const query = useUIStore((s) => s.query);
@@ -34,7 +36,7 @@ export function DesktopList() {
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
-      <DesktopHeader title={title} />
+      <DesktopHeader title={title} onRefresh={loadPlants} refreshing={plantsLoading} />
 
       <ThemedText
         variant="tiny"
@@ -67,7 +69,7 @@ export function DesktopList() {
           )}
         </View>
       ) : (
-        <WebGrid cols={4} gap={16}>
+        <WebGrid minCol={230} gap={16}>
           {filtered.map((p) => (
             <DesktopPlantCard
               key={p.id}
