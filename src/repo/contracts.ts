@@ -10,6 +10,8 @@ export interface AuthRepo {
   /** Exchanges the email + OTP for a session. */
   verifyEmailOtp(email: string, token: string): Promise<Session>;
   signOut(): Promise<void>;
+  /** 계정 영구 삭제 — 서버의 delete-account Edge Function 호출 후 로컬 세션 정리. */
+  deleteAccount(): Promise<void>;
   onAuthStateChange(cb: (event: AuthChangeEvent, session: Session | null) => void): Unsubscribe;
 }
 

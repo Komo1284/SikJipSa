@@ -13,6 +13,8 @@ type AuthStore = {
   sendEmailOtp: (email: string) => Promise<void>;
   verifyEmailOtp: (email: string, token: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** 계정 영구 삭제 — 성공 시 세션이 비워지고 useAuthGuard 가 온보딩으로 보낸다. */
+  deleteAccount: () => Promise<void>;
   _applySession: (s: Session | null) => void;
 };
 
@@ -75,6 +77,17 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({ session: null });
     } catch (e) {
       set({ error: (e as Error).message });
+    }
+  },
+
+  async deleteAccount() {
+    set({ loading: true, error: null });
+    try {
+      await repos.auth.deleteAccount();
+      set({ session: null, loading: false });
+    } catch (e) {
+      set({ loading: false, error: (e as Error).message });
+      throw e;
     }
   },
 

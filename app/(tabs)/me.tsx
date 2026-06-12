@@ -1,5 +1,6 @@
 import { LocationFormModal } from '@/components/LocationFormModal';
 import { ThemedText } from '@/components/Typography';
+import { humanizeError } from '@/lib/errors';
 import {
   ensureNotificationPermission,
   getNotificationPermissionStatus,
@@ -389,12 +390,48 @@ function AccountSection() {
   const { palette, radii } = useTheme();
   const session = useAuthStore((s) => s.session);
   const signOut = useAuthStore((s) => s.signOut);
+  const deleteAccount = useAuthStore((s) => s.deleteAccount);
+  const [deleting, setDeleting] = useState(false);
 
   const confirmSignOut = () => {
     Alert.alert('로그아웃', '정말 로그아웃 할까요?', [
       { text: '취소', style: 'cancel' },
       { text: '로그아웃', style: 'destructive', onPress: () => signOut() },
     ]);
+  };
+
+  const confirmDelete = () => {
+    Alert.alert(
+      '계정 삭제',
+      '등록한 식물과 모든 돌봄 기록·사진이 영구 삭제돼요.\n이 작업은 되돌릴 수 없어요.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제 진행',
+          style: 'destructive',
+          onPress: () => {
+            // 영구 삭제는 한 번 더 묻는다 — 실수 방지용 이중 확인.
+            Alert.alert('정말 삭제할까요?', '마지막 확인이에요. 삭제 후에는 복구할 수 없어요.', [
+              { text: '취소', style: 'cancel' },
+              {
+                text: '영구 삭제',
+                style: 'destructive',
+                onPress: async () => {
+                  setDeleting(true);
+                  try {
+                    await deleteAccount();
+                  } catch (e) {
+                    Alert.alert('계정 삭제 실패', humanizeError(e));
+                  } finally {
+                    setDeleting(false);
+                  }
+                },
+              },
+            ]);
+          },
+        },
+      ],
+    );
   };
 
   if (!session) return null;
@@ -425,6 +462,11 @@ function AccountSection() {
         >
           <ThemedText variant="meta" weight="medium" color={palette.warn}>
             로그아웃
+          </ThemedText>
+        </Pressable>
+        <Pressable onPress={confirmDelete} disabled={deleting} hitSlop={8} style={{ alignItems: 'center', paddingVertical: 6 }}>
+          <ThemedText variant="tiny" color={palette.ink3} style={{ textDecorationLine: 'underline' }}>
+            {deleting ? '계정 삭제 중…' : '계정 삭제'}
           </ThemedText>
         </Pressable>
       </View>

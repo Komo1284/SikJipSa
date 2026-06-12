@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/Typography';
 import { humanizeError, isUserCancelled } from '@/lib/errors';
 import { useAuthStore } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -83,7 +84,7 @@ export default function Onboarding() {
           uppercase
           style={{ marginBottom: 14, letterSpacing: 1.4 }}
         >
-          SikJipSa · v1.0
+          SikJipSa · v{Constants.expoConfig?.version ?? '1.0.0'}
         </ThemedText>
 
         <ThemedText

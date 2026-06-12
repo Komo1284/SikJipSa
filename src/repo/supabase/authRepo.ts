@@ -168,6 +168,15 @@ export const supabaseAuthRepo: AuthRepo = {
     if (error) throw error;
   },
 
+  async deleteAccount() {
+    if (!hasSupabase || !supabase) return;
+    // functions.invoke 는 현재 세션의 JWT 를 자동으로 실어 보낸다.
+    const { error } = await supabase.functions.invoke('delete-account', { body: {} });
+    if (error) throw error;
+    // 서버에서 사용자가 이미 지워졌으므로 로컬 토큰만 정리하면 된다.
+    await supabase.auth.signOut().catch(() => {});
+  },
+
   onAuthStateChange(cb) {
     if (!hasSupabase || !supabase) return () => {};
     const sub = supabase.auth.onAuthStateChange((event, session) => {
