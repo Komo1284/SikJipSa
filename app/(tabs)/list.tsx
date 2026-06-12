@@ -1,3 +1,4 @@
+import { EmptyState } from '@/components/EmptyState';
 import { GridCard } from '@/components/GridCard';
 import { TaskRow } from '@/components/TaskRow';
 import { ThemedText } from '@/components/Typography';
@@ -8,7 +9,7 @@ import { useUIStore } from '@/store/ui';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useResponsive } from '@/theme/responsive';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { LayoutGrid, List as ListIcon, Plus, Search, SearchX, Sprout } from 'lucide-react-native';
+import { LayoutGrid, List as ListIcon, Search, SearchX, Sprout } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -75,44 +76,13 @@ function ListMobile() {
             내 식물
           </ThemedText>
         </View>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 80 }}>
-          <View
-            style={{
-              width: 88,
-              height: 88,
-              borderRadius: 44,
-              backgroundColor: palette.surface,
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 20,
-            }}
-          >
-            <Sprout size={40} color={palette.green} strokeWidth={1.6} />
-          </View>
-          <ThemedText variant="subsection" weight="semibold" style={{ marginBottom: 8 }}>
-            아직 등록된 식물이 없어요
-          </ThemedText>
-          <ThemedText variant="meta" color={palette.ink3} style={{ textAlign: 'center', marginBottom: 24 }}>
-            식물을 추가하여{'\n'}나만의 관리를 시작해보세요!
-          </ThemedText>
-          <Pressable
-            onPress={() => router.push('/add')}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 6,
-              paddingVertical: 12,
-              paddingHorizontal: 22,
-              borderRadius: 999,
-              backgroundColor: palette.ink,
-            }}
-          >
-            <Plus size={16} color={palette.bg} strokeWidth={2.2} />
-            <ThemedText variant="meta" weight="semibold" color={palette.bg}>
-              식물 추가하기
-            </ThemedText>
-          </Pressable>
-        </View>
+        <EmptyState
+          icon={<Sprout size={40} color={palette.green} strokeWidth={1.6} />}
+          title="아직 등록된 식물이 없어요"
+          description={'식물을 추가하여\n나만의 관리를 시작해보세요!'}
+          actionLabel="식물 추가하기"
+          onAction={() => router.push('/add')}
+        />
       </View>
     );
   }
@@ -227,16 +197,17 @@ function ListMobile() {
 
   // 검색어/필터 결과가 0개일 때 — 아무 피드백 없이 빈 영역만 남던 부분.
   const noResults = (
-    <View style={{ alignItems: 'center', paddingTop: 64, paddingBottom: 40, gap: 10 }}>
-      <SearchX size={32} color={palette.ink3} strokeWidth={1.6} />
-      <ThemedText variant="meta" weight="medium" color={palette.ink2}>
-        검색 결과가 없어요
-      </ThemedText>
-      <ThemedText variant="tiny" color={palette.ink3} style={{ textAlign: 'center' }}>
-        {query.trim()
-          ? '다른 이름이나 학명으로 검색해보세요.'
-          : '이 공간에는 아직 식물이 없어요.'}
-      </ThemedText>
+    <View style={{ paddingTop: 24 }}>
+      <EmptyState
+        compact
+        icon={<SearchX size={32} color={palette.ink3} strokeWidth={1.6} />}
+        title="검색 결과가 없어요"
+        description={
+          query.trim()
+            ? '다른 이름이나 학명으로 검색해보세요.'
+            : '이 공간에는 아직 식물이 없어요.'
+        }
+      />
     </View>
   );
 

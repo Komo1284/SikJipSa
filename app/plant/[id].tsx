@@ -1,4 +1,5 @@
 import { humanizeError } from '@/lib/errors';
+import { EmptyState } from '@/components/EmptyState';
 import { ActionSheet, type ActionItem } from '@/components/ActionSheet';
 import { BottomSheet } from '@/components/BottomSheet';
 import { CareLogSheet, type CareKind } from '@/components/CareLogSheet';
@@ -618,9 +619,11 @@ function HistoryTab({ log }: { log: LogEntry[] }) {
 
   if (log.length === 0) {
     return (
-      <View style={{ alignItems: 'center', padding: 40 }}>
-        <ThemedText color={palette.ink3}>아직 기록이 없어요.</ThemedText>
-      </View>
+      <EmptyState
+        compact
+        title="아직 기록이 없어요"
+        description={'물주기·비료·분갈이 같은 돌봄 기록이\n시간순으로 여기에 쌓여요.'}
+      />
     );
   }
   return (

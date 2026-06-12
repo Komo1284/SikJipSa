@@ -1,3 +1,4 @@
+import { EmptyState } from '@/components/EmptyState';
 import { MiniPlantCard } from '@/components/MiniPlantCard';
 import { NotificationsSheet } from '@/components/NotificationsSheet';
 import { PlantThumb } from '@/components/PlantThumb';
@@ -13,7 +14,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useResponsive } from '@/theme/responsive';
 import { formatKickerShort, plantStatus, soonList, todayList } from '@/utils/date';
 import { useRouter } from 'expo-router';
-import { Bell, ChevronRight, Leaf } from 'lucide-react-native';
+import { Bell, ChevronRight, Leaf, Sprout } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -156,19 +157,14 @@ function HomeMobile() {
       <SectionHeader title="오늘 할 일" trailing={`${todays.length}개`} />
       <View style={{ paddingHorizontal: 20, gap: 10 }}>
         {todays.length === 0 ? (
-          <View
-            style={{
-              backgroundColor: palette.surface,
-              paddingVertical: 28,
-              paddingHorizontal: 20,
-              borderRadius: radii.lg,
-              alignItems: 'center',
-            }}
-          >
-            <ThemedText variant="body" color={palette.ink3}>
-              오늘 할 일이 없어요.
-            </ThemedText>
-          </View>
+          <EmptyState
+            compact
+            icon={<Sprout size={28} color={palette.green} strokeWidth={1.6} />}
+            title="오늘 할 일이 없어요"
+            description="모든 식물이 잘 지내고 있어요. 잠깐 들여다봐도 좋아요."
+            actionLabel="내 식물 보러 가기"
+            onAction={() => router.push('/(tabs)/list')}
+          />
         ) : (
           todays.map((p) => (
             <TaskRow
