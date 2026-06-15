@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { NAMESPACES, resources } from './resources';
+import { resources } from './resources';
 
 export const SUPPORTED_LANGUAGES = ['ko', 'en', 'ja'] as const;
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number];
@@ -25,8 +25,9 @@ i18n.use(initReactI18next).init({
   resources,
   lng: deviceLanguage(),
   fallbackLng: FALLBACK,
-  ns: NAMESPACES as unknown as string[],
-  defaultNS: 'common',
+  ns: ['translation'],
+  defaultNS: 'translation',
+  keySeparator: '.',
   interpolation: { escapeValue: false },
   returnNull: false,
 });
