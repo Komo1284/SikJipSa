@@ -1,1 +1,21 @@
-{}
+{
+  "title": "情報の編集",
+  "notFound": "植物が見つかりませんでした。",
+  "defaultLocation": "リビング",
+  "fieldName": "名前",
+  "fieldSpecies": "学名（任意）",
+  "fieldLocation": "場所",
+  "fieldWaterCycle": "水やりの周期",
+  "fieldFertCycle": "肥料の周期",
+  "fieldLastWater": "最後に水をあげた日",
+  "fieldLastFert": "最後に肥料をあげた日",
+  "fieldLight": "この植物が好む光（1〜5）",
+  "fieldHumidity": "この植物が好む湿度（1〜5）",
+  "fieldNote": "メモ",
+  "namePlaceholder": "愛称",
+  "notePlaceholder": "観察やお世話のメモ",
+  "waterCycleHint": "変更すると、次の水やり日は最後に水をあげた日を基準に再計算されます。",
+  "selectDate": "日付を選択",
+  "cycleDays": "{{n}}日",
+  "cycleMonths": "{{n}}か月"
+}

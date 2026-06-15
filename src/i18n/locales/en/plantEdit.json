@@ -1,1 +1,21 @@
-{}
+{
+  "title": "Edit Details",
+  "notFound": "We couldn't find this plant.",
+  "defaultLocation": "Living room",
+  "fieldName": "Name",
+  "fieldSpecies": "Species (optional)",
+  "fieldLocation": "Spot",
+  "fieldWaterCycle": "Watering interval",
+  "fieldFertCycle": "Fertilizing interval",
+  "fieldLastWater": "Last watered",
+  "fieldLastFert": "Last fertilized",
+  "fieldLight": "Preferred light (1–5)",
+  "fieldHumidity": "Preferred humidity (1–5)",
+  "fieldNote": "Notes",
+  "namePlaceholder": "Nickname",
+  "notePlaceholder": "Observations or care notes",
+  "waterCycleHint": "If you change this, the next watering date is recalculated from the last watered date.",
+  "selectDate": "Select date",
+  "cycleDays": "{{n}} days",
+  "cycleMonths": "{{n}} months"
+}
