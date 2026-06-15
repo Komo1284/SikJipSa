@@ -1,1 +1,21 @@
-{}
+{
+  "title": "정보 수정",
+  "notFound": "식물을 찾을 수 없어요.",
+  "defaultLocation": "거실",
+  "fieldName": "이름",
+  "fieldSpecies": "학명 (선택)",
+  "fieldLocation": "공간",
+  "fieldWaterCycle": "물주기 주기",
+  "fieldFertCycle": "비료 주기",
+  "fieldLastWater": "마지막 물 준 날",
+  "fieldLastFert": "마지막 비료 준 날",
+  "fieldLight": "이 식물이 좋아하는 빛 (1~5)",
+  "fieldHumidity": "이 식물이 좋아하는 습도 (1~5)",
+  "fieldNote": "메모",
+  "namePlaceholder": "애칭",
+  "notePlaceholder": "관찰이나 돌봄 메모",
+  "waterCycleHint": "변경 시 다음 물주기 날짜는 마지막 물 준 날 기준으로 재계산돼요.",
+  "selectDate": "날짜 선택",
+  "cycleDays": "{{n}}일",
+  "cycleMonths": "{{n}}달"
+}

@@ -10,15 +10,18 @@ import { toISODate } from '@/utils/date';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CalendarDays } from 'lucide-react-native';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CYCLES = [3, 5, 7, 10, 14, 21, 30];
 // 30일까지는 일 단위, 그 이후는 1~6달을 한 달 간격으로 노출.
 const FERT_CYCLES = [7, 14, 21, 30, 60, 90, 120, 150, 180];
-const fertCycleLabel = (d: number) => (d < 30 ? `${d}일` : `${d / 30}달`);
 
 export default function PlantEditScreen() {
+  const { t } = useTranslation();
+  const fertCycleLabel = (d: number) =>
+    d < 30 ? t('plantEdit.cycleDays', { n: d }) : t('plantEdit.cycleMonths', { n: d / 30 });
   const { palette, radii } = useTheme();
   const insets = useSafeAreaInsets();
   const { isDesktop } = useResponsive();
@@ -29,7 +32,7 @@ export default function PlantEditScreen() {
 
   const [name, setName] = useState(plant?.name ?? '');
   const [species, setSpecies] = useState(plant?.species ?? '');
-  const [location, setLocation] = useState(plant?.location ?? '거실');
+  const [location, setLocation] = useState(plant?.location ?? t('plantEdit.defaultLocation'));
   const [cycle, setCycle] = useState(plant?.waterCycle ?? 7);
   const [fertCycle, setFertCycle] = useState(plant?.fertCycle ?? 30);
   const [lastWater, setLastWater] = useState(plant?.lastWater ?? '');
@@ -44,7 +47,7 @@ export default function PlantEditScreen() {
   if (!plant) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.bg }}>
-        <ThemedText color={palette.ink3}>식물을 찾을 수 없어요.</ThemedText>
+        <ThemedText color={palette.ink3}>{t('plantEdit.notFound')}</ThemedText>
       </View>
     );
   }
@@ -111,17 +114,17 @@ export default function PlantEditScreen() {
         }}
       >
         <Pressable onPress={() => router.back()} disabled={busy} hitSlop={8}>
-          <ThemedText variant="meta" color={palette.ink2}>취소</ThemedText>
+          <ThemedText variant="meta" color={palette.ink2}>{t('common.cancel')}</ThemedText>
         </Pressable>
         <ThemedText variant="subsection" family="serif">
-          정보 수정
+          {t('plantEdit.title')}
         </ThemedText>
         <Pressable onPress={save} disabled={busy} hitSlop={8}>
           {busy ? (
             <ActivityIndicator color={palette.green} />
           ) : (
             <ThemedText variant="meta" weight="semibold" color={palette.green}>
-              저장
+              {t('common.save')}
             </ThemedText>
           )}
         </Pressable>
@@ -131,15 +134,15 @@ export default function PlantEditScreen() {
         contentContainerStyle={[{ padding: 24, paddingBottom: 48, gap: 18 }, formWidthCap]}
         keyboardShouldPersistTaps="handled"
       >
-        <Field label="이름">
-          <FormInput value={name} onChangeText={setName} placeholder="애칭" />
+        <Field label={t('plantEdit.fieldName')}>
+          <FormInput value={name} onChangeText={setName} placeholder={t('plantEdit.namePlaceholder')} />
         </Field>
 
-        <Field label="학명 (선택)">
+        <Field label={t('plantEdit.fieldSpecies')}>
           <FormInput value={species} onChangeText={setSpecies} placeholder="Monstera deliciosa" />
         </Field>
 
-        <Field label="공간">
+        <Field label={t('plantEdit.fieldLocation')}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {locations.map((loc) => {
               const active = location === loc.name;
@@ -161,7 +164,7 @@ export default function PlantEditScreen() {
           </View>
         </Field>
 
-        <Field label="물주기 주기">
+        <Field label={t('plantEdit.fieldWaterCycle')}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {CYCLES.map((d) => {
               const active = cycle === d;
@@ -175,18 +178,18 @@ export default function PlantEditScreen() {
                   }}
                 >
                   <ThemedText variant="meta" weight="medium" color={active ? palette.bg : palette.ink}>
-                    {d}일
+                    {t('plantEdit.cycleDays', { n: d })}
                   </ThemedText>
                 </Pressable>
               );
             })}
           </View>
           <ThemedText variant="tiny" color={palette.ink3} style={{ marginTop: 6 }}>
-            변경 시 다음 물주기 날짜는 마지막 물 준 날 기준으로 재계산돼요.
+            {t('plantEdit.waterCycleHint')}
           </ThemedText>
         </Field>
 
-        <Field label="비료 주기">
+        <Field label={t('plantEdit.fieldFertCycle')}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {FERT_CYCLES.map((d) => {
               const active = fertCycle === d;
@@ -208,21 +211,21 @@ export default function PlantEditScreen() {
           </View>
         </Field>
 
-        <Field label="마지막 물 준 날">
+        <Field label={t('plantEdit.fieldLastWater')}>
           <DatePickerField
             value={lastWater}
             onPress={() => setPickerFor('water')}
           />
         </Field>
 
-        <Field label="마지막 비료 준 날">
+        <Field label={t('plantEdit.fieldLastFert')}>
           <DatePickerField
             value={lastFert}
             onPress={() => setPickerFor('fert')}
           />
         </Field>
 
-        <Field label="이 식물이 좋아하는 빛 (1~5)">
+        <Field label={t('plantEdit.fieldLight')}>
           <View style={{ flexDirection: 'row', gap: 6 }}>
             {[1, 2, 3, 4, 5].map((n) => {
               const active = lightPref === n;
@@ -245,7 +248,7 @@ export default function PlantEditScreen() {
           </View>
         </Field>
 
-        <Field label="이 식물이 좋아하는 습도 (1~5)">
+        <Field label={t('plantEdit.fieldHumidity')}>
           <View style={{ flexDirection: 'row', gap: 6 }}>
             {[1, 2, 3, 4, 5].map((n) => {
               const active = humidityPref === n;
@@ -268,11 +271,11 @@ export default function PlantEditScreen() {
           </View>
         </Field>
 
-        <Field label="메모">
+        <Field label={t('plantEdit.fieldNote')}>
           <FormInput
             value={note}
             onChangeText={setNote}
-            placeholder="관찰이나 돌봄 메모"
+            placeholder={t('plantEdit.notePlaceholder')}
             multiline
             style={{ minHeight: 100, textAlignVertical: 'top' }}
           />
@@ -288,7 +291,7 @@ export default function PlantEditScreen() {
             color={palette.ink3}
             style={{ marginBottom: 12, letterSpacing: 1 }}
           >
-            {pickerFor === 'fert' ? '마지막 비료 준 날' : '마지막 물 준 날'}
+            {pickerFor === 'fert' ? t('plantEdit.fieldLastFert') : t('plantEdit.fieldLastWater')}
           </ThemedText>
           <CalendarPicker
             value={
@@ -308,6 +311,7 @@ export default function PlantEditScreen() {
 }
 
 function DatePickerField({ value, onPress }: { value: string; onPress: () => void }) {
+  const { t } = useTranslation();
   const { palette, radii, weights } = useTheme();
   return (
     <Pressable
@@ -329,7 +333,7 @@ function DatePickerField({ value, onPress }: { value: string; onPress: () => voi
         color={value ? palette.ink : palette.ink3}
         style={{ fontFamily: weights.monoMedium, fontSize: 15 }}
       >
-        {value || '날짜 선택'}
+        {value || t('plantEdit.selectDate')}
       </ThemedText>
       <CalendarDays size={16} color={palette.ink3} strokeWidth={1.8} />
     </Pressable>
