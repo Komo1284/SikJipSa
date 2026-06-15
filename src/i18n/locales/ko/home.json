@@ -1,1 +1,20 @@
-{}
+{
+  "heroTitle": "오늘의",
+  "heroTitleAccent": "식물 일기.",
+  "tasksTodayNone": "오늘 챙길 식물은 없어요. 잠깐 들여다봐도 좋아요.",
+  "tasksTodayPrefix": "오늘 챙길 식물",
+  "tasksTodayCountLabel": "{{n}}개",
+  "statToday": "오늘",
+  "statSoon": "곧",
+  "statAll": "전체",
+  "todayTasks": "오늘 할 일",
+  "countSuffix": "{{n}}개",
+  "emptyTodayTitle": "오늘 할 일이 없어요",
+  "emptyTodayDescription": "모든 식물이 잘 지내고 있어요. 잠깐 들여다봐도 좋아요.",
+  "viewMyPlants": "내 식물 보러 가기",
+  "careSoon": "곧 돌봐야 할 식물",
+  "viewAll": "전체 보기",
+  "plantsBySpace": "공간별 식물",
+  "spaceEmpty": "아직 식물이 없어요",
+  "plantCount": "식물 {{n}}개"
+}

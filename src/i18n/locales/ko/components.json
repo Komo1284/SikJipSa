@@ -1,1 +1,78 @@
-{}
+{
+  "notifications": {
+    "title": "알림",
+    "emptyTitle": "새로운 알림이 없어요",
+    "emptyDescription": "오늘 챙길 식물이 있다면 여기에 모여요.",
+    "water": "물주기",
+    "fert": "비료",
+    "repot": "분갈이",
+    "daysOverdue": "{{n}}일 지남",
+    "tomorrow": "내일",
+    "daysLater": "{{n}}일 뒤",
+    "monthsAgo": "{{n}}개월 전"
+  },
+  "careLog": {
+    "water": {
+      "title": "물주기",
+      "verb": "물 줬어요",
+      "placeholder": "간단한 메모"
+    },
+    "fert": {
+      "title": "비료",
+      "verb": "비료 줬어요",
+      "placeholder": "예: 하이포넥스 1000배"
+    },
+    "prune": {
+      "title": "가지치기",
+      "verb": "가지치기 했어요",
+      "placeholder": "예: 긴 덩굴 15cm 정리"
+    },
+    "repot": {
+      "title": "분갈이",
+      "verb": "분갈이 했어요",
+      "placeholder": "예: 한 치수 큰 분으로 / 수태믹스"
+    },
+    "whenLabel": "언제 했어요?",
+    "yesterday": "어제",
+    "dayBeforeYesterday": "그제",
+    "daysAgo": "{{n}}일 전",
+    "pickAnotherDate": "다른 날짜 선택",
+    "openCalendar": "달력 열기",
+    "memoLabel": "메모 (선택)"
+  },
+  "syncBanner": {
+    "offlinePending": "오프라인 — 기록 {{n}}개가 연결을 기다리고 있어요",
+    "offlineNoPending": "오프라인 — 기록은 저장해뒀다가 연결되면 보낼게요",
+    "syncing": "동기화 중 — {{n}}개 남음"
+  },
+  "calendar": {
+    "dayLabels": ["일", "월", "화", "수", "목", "금", "토"],
+    "monthNames": ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+    "monthHeader": "{{year}}년 {{month}}"
+  },
+  "tabBar": {
+    "home": "홈",
+    "plants": "식물",
+    "schedule": "일정",
+    "me": "나"
+  },
+  "taskRow": {
+    "water": "물주기 · {{label}}"
+  },
+  "waterButton": {
+    "justWatered": "물 준 직후",
+    "water": "물 주기"
+  },
+  "sidebar": {
+    "home": "홈",
+    "myPlants": "내 식물",
+    "schedule": "일정",
+    "settings": "설정",
+    "spaces": "공간",
+    "all": "전체",
+    "addPlant": "식물 추가"
+  },
+  "desktopHeader": {
+    "searchPlaceholder": "이름이나 학명 검색…"
+  }
+}

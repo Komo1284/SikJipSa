@@ -1,4 +1,5 @@
 import { SHEET_CLOSE_DELAY } from '@/theme/animation';
+import i18n from '@/i18n';
 import { BottomSheet } from '@/components/BottomSheet';
 import { ThemedText } from '@/components/Typography';
 import { getFertReminders, getRepotReminders, getWaterReminders } from '@/lib/reminders';
@@ -8,6 +9,7 @@ import type { Plant } from '@/types/plant';
 import { useRouter } from 'expo-router';
 import { Bell, Droplet, Flower2, Sprout } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, View } from 'react-native';
 
 const PAGE = 5;
@@ -18,6 +20,7 @@ type Props = {
 };
 
 export function NotificationsSheet({ visible, onClose }: Props) {
+  const { t } = useTranslation();
   const { palette } = useTheme();
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
@@ -64,7 +67,7 @@ export function NotificationsSheet({ visible, onClose }: Props) {
     <BottomSheet visible={visible} onClose={onClose} maxHeight={0.85}>
       <View style={{ paddingHorizontal: 20, paddingTop: 6, paddingBottom: 4 }}>
         <ThemedText variant="subsection" weight="semibold">
-          알림
+          {t('components.notifications.title')}
         </ThemedText>
       </View>
 
@@ -79,10 +82,10 @@ export function NotificationsSheet({ visible, onClose }: Props) {
             <Bell size={28} color={palette.ink3} strokeWidth={1.6} />
           </View>
           <ThemedText variant="body" color={palette.ink2}>
-            새로운 알림이 없어요
+            {t('components.notifications.emptyTitle')}
           </ThemedText>
           <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 6, textAlign: 'center' }}>
-            오늘 챙길 식물이 있다면 여기에 모여요.
+            {t('components.notifications.emptyDescription')}
           </ThemedText>
         </View>
       ) : (
@@ -94,7 +97,7 @@ export function NotificationsSheet({ visible, onClose }: Props) {
         >
           {water.length > 0 ? (
             <Section
-              title="물주기"
+              title={t('components.notifications.water')}
               count={water.length}
               icon={<Droplet size={16} color={palette.drop} strokeWidth={1.8} />}
             >
@@ -112,7 +115,7 @@ export function NotificationsSheet({ visible, onClose }: Props) {
 
           {fert.length > 0 ? (
             <Section
-              title="비료"
+              title={t('components.notifications.fert')}
               count={fert.length}
               icon={<Flower2 size={16} color={palette.bloom} strokeWidth={1.8} />}
             >
@@ -130,7 +133,7 @@ export function NotificationsSheet({ visible, onClose }: Props) {
 
           {repot.length > 0 ? (
             <Section
-              title="분갈이"
+              title={t('components.notifications.repot')}
               count={repot.length}
               icon={<Sprout size={16} color={palette.earth} strokeWidth={1.8} />}
             >
@@ -138,7 +141,7 @@ export function NotificationsSheet({ visible, onClose }: Props) {
                 <Row
                   key={plant.id}
                   plant={plant}
-                  detail={`${monthsAgo}개월 전`}
+                  detail={t('components.notifications.monthsAgo', { n: monthsAgo })}
                   detailColor={palette.earth}
                   onPress={() => goPlant(plant.id)}
                 />
@@ -152,10 +155,10 @@ export function NotificationsSheet({ visible, onClose }: Props) {
 }
 
 function dueLabel(d: number): string {
-  if (d < 0) return `${-d}일 지남`;
-  if (d === 0) return '오늘';
-  if (d === 1) return '내일';
-  return `${d}일 뒤`;
+  if (d < 0) return i18n.t('components.notifications.daysOverdue', { n: -d });
+  if (d === 0) return i18n.t('common.today');
+  if (d === 1) return i18n.t('components.notifications.tomorrow');
+  return i18n.t('components.notifications.daysLater', { n: d });
 }
 
 function Section({

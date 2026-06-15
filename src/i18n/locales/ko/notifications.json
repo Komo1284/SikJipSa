@@ -1,1 +1,10 @@
-{}
+{
+  "waterChannelName": "물주기 알림",
+  "snoozeOneHour": "1시간 뒤",
+  "snoozeTomorrow": "내일 다시",
+  "waterTitle": "{{name}} 물 줄 시간이에요",
+  "waterBody": "오늘 한 번 살펴볼까요?",
+  "waterBodyWithLocation": "{{location}} · 오늘 한 번 살펴볼까요?",
+  "snoozeBody": "다시 알려드려요",
+  "snoozeBodyWithLocation": "{{location}} · 다시 알려드려요"
+}

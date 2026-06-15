@@ -3,8 +3,10 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useResponsive } from '@/theme/responsive';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function TabsLayout() {
+  const { t } = useTranslation();
   const { palette } = useTheme();
   const { isDesktop } = useResponsive();
 
@@ -17,10 +19,10 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: palette.bg },
       }}
     >
-      <Tabs.Screen name="home" options={{ title: '홈' }} />
-      <Tabs.Screen name="list" options={{ title: '식물' }} />
-      <Tabs.Screen name="schedule" options={{ title: '일정' }} />
-      <Tabs.Screen name="me" options={{ title: '나' }} />
+      <Tabs.Screen name="home" options={{ title: t('components.tabBar.home') }} />
+      <Tabs.Screen name="list" options={{ title: t('components.tabBar.plants') }} />
+      <Tabs.Screen name="schedule" options={{ title: t('components.tabBar.schedule') }} />
+      <Tabs.Screen name="me" options={{ title: t('components.tabBar.me') }} />
     </Tabs>
   );
 }

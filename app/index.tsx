@@ -14,9 +14,11 @@ import {
   Pressable,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Svg, { Defs, G, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 export default function Onboarding() {
+  const { t } = useTranslation();
   const { palette, shadows, weights } = useTheme();
   const router = useRouter();
   const { width, height } = Dimensions.get('window');
@@ -37,8 +39,8 @@ export default function Onboarding() {
       console.warn('[onboarding] sign-in failed:', e);
       if (!isUserCancelled(e)) {
         Alert.alert(
-          '로그인 실패',
-          humanizeError(e, '로그인을 완료하지 못했어요. 잠시 후 다시 시도해주세요.'),
+          t('auth.signInFailedTitle'),
+          humanizeError(e, t('auth.signInFailedMessage')),
         );
       }
     } finally {
@@ -96,11 +98,11 @@ export default function Onboarding() {
           <ThemedText family="serif" italic style={{ fontSize: 52, lineHeight: 64, color: palette.green, fontFamily: weights.serifItalic }}>
             SikJipSa
           </ThemedText>
-          {'\n'}식물과 함께 자라는{'\n'}작은 기록.
+          {'\n'}{t('auth.tagline')}
         </ThemedText>
 
         <ThemedText variant="body" color={palette.ink2} style={{ marginTop: 22, marginBottom: 36, maxWidth: 320 }}>
-          물주기·비료·분갈이까지 — 내 공간의{'\n'}식물 한 그루 한 그루를 잊지 않도록.
+          {t('auth.subtitle')}
         </ThemedText>
 
         <Pressable
@@ -125,7 +127,7 @@ export default function Onboarding() {
             <>
               <KakaoLogo />
               <ThemedText weight="semibold" color="#191600" style={{ fontSize: 16, marginLeft: 10 }}>
-                카카오로 시작하기
+                {t('auth.kakaoButton')}
               </ThemedText>
             </>
           )}
@@ -154,7 +156,7 @@ export default function Onboarding() {
             <>
               <GoogleLogo />
               <ThemedText weight="semibold" color={palette.ink} style={{ fontSize: 16, marginLeft: 10 }}>
-                Google로 시작하기
+                {t('auth.googleButton')}
               </ThemedText>
             </>
           )}
@@ -162,7 +164,7 @@ export default function Onboarding() {
 
         <View style={{ alignItems: 'center', marginTop: 20 }}>
           <ThemedText variant="tiny" color={palette.ink3} style={{ lineHeight: 18, textAlign: 'center' }}>
-            로그인하면{' '}
+            {t('auth.legalPrefix')}
             <ThemedText
               variant="tiny"
               color={palette.ink2}
@@ -170,9 +172,9 @@ export default function Onboarding() {
               style={{ textDecorationLine: 'underline' }}
               onPress={() => Linking.openURL(LEGAL_URLS.terms)}
             >
-              서비스 이용약관
+              {t('auth.legalTerms')}
             </ThemedText>
-            {' '}및{' '}
+            {t('auth.legalConjunction')}
             <ThemedText
               variant="tiny"
               color={palette.ink2}
@@ -180,9 +182,9 @@ export default function Onboarding() {
               style={{ textDecorationLine: 'underline' }}
               onPress={() => Linking.openURL(LEGAL_URLS.privacy)}
             >
-              개인정보 처리방침
+              {t('auth.legalPrivacy')}
             </ThemedText>
-            에{'\n'}동의하는 것으로 간주돼요.
+            {t('auth.legalSuffix')}
           </ThemedText>
         </View>
       </View>

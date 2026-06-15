@@ -1,1 +1,17 @@
-{}
+{
+  "rainTotal": "최근 7일 누적 강수 {{mm}}mm",
+  "heatwave": "평균 {{temp}}℃ 폭염",
+  "coldwave": "평균 {{temp}}℃ 한파",
+  "dry": "습도 {{humidity}}% 건조",
+  "humid": "습도 {{humidity}}% 다습",
+  "lightRich": "빛이 풍부한 자리",
+  "lightLow": "빛이 다소 부족한 자리",
+  "humidityPrefDrier": "식물이 선호하는 습도({{expected}}%)보다 건조한 {{humidity}}%",
+  "humidityPrefWetter": "식물이 선호하는 습도({{expected}}%)보다 습한 {{humidity}}%",
+  "poorAirflow": "환기가 약한 공간",
+  "reasonDefault": "환경 보정이 없어 기본 {{days}}일 주기를 따라요.",
+  "dirLater": "평소보다 {{days}}일 늦췄어요",
+  "dirEarlier": "평소보다 {{days}}일 빨라졌어요",
+  "dirSame": "주기는 그대로지만 환경 변화가 있어요",
+  "reasonAdjusted": "{{phrases}}. {{direction}}."
+}

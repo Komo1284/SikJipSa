@@ -1,1 +1,90 @@
-{}
+{
+  "title": "나",
+  "subtitle": "앱의 생김새와 리듬을 바꿀 수 있어요.",
+  "accentColor": "포인트 컬러",
+  "theme": "테마",
+  "themeMode": {
+    "light": "라이트",
+    "dark": "다크",
+    "system": "시스템"
+  },
+  "language": "언어",
+  "notification": {
+    "section": "알림",
+    "waterTitle": "물주기 알림",
+    "onAt": "켜짐 · 물주기 날 {{hour}}시에 알려드려요",
+    "deniedHint": "꺼짐 · 기기 설정에서 허용해야 받을 수 있어요",
+    "offHint": "꺼짐 · 허용하면 물주기 날을 놓치지 않아요",
+    "openDeviceSettings": "기기 설정 열기",
+    "allow": "알림 허용하기",
+    "timeLabel": "알림 시각",
+    "hourLabel": "{{hour}}시"
+  },
+  "place": {
+    "section": "식물이 있는 위치",
+    "sourcePrompt": "날씨 기반 추천에 쓰일 위치를 어떻게 가져올까요?",
+    "useGps": "GPS 사용 (정확)",
+    "useIp": "대도시 추정 (개략)",
+    "noLocation": "위치 정보 없음",
+    "sourceGps": "GPS · 추천 정확도 높음",
+    "sourceIp": "IP · 도시 단위로 대략 추정",
+    "sourceManual": "수동 설정",
+    "sourceNone": "미설정 · 공간 환경만 반영",
+    "statTempAvg": "평균 기온",
+    "statHumidity": "습도",
+    "statRain": "강수",
+    "statTempHigh": "최고",
+    "weatherUnavailable": "날씨 데이터를 아직 가져오지 못했어요. 새로고침을 눌러주세요.",
+    "updatedJustNow": "방금 업데이트",
+    "updatedHoursAgo": "{{hours}}시간 전 업데이트",
+    "updatedDaysAgo": "{{days}}일 전 업데이트 — 새로고침을 눌러주세요"
+  },
+  "locations": {
+    "section": "공간",
+    "meta": "식물 {{n}}개 · 일조 {{light}}/5 · 환기 {{airflow}}/5",
+    "empty": "공간이 없어요. 아래에서 추가해보세요.",
+    "add": "새 공간 추가",
+    "removeInUse": "{{n}}개의 식물이 이 공간에 있어요. 삭제하면 식물은 남지만 공간 정보가 빈 값이 돼요. 이 작업은 되돌릴 수 없어요.",
+    "removeConfirm": "정말 삭제할까요? 이 작업은 되돌릴 수 없어요."
+  },
+  "account": {
+    "section": "계정",
+    "anonymous": "익명 사용자",
+    "signOut": "로그아웃",
+    "signOutConfirm": "정말 로그아웃 할까요?",
+    "delete": "계정 삭제",
+    "deleteMessage": "등록한 식물과 모든 돌봄 기록·사진이 영구 삭제돼요.\n이 작업은 되돌릴 수 없어요.",
+    "deleteProceed": "삭제 진행",
+    "deleteFinalTitle": "정말 삭제할까요?",
+    "deleteFinalMessage": "마지막 확인이에요. 삭제 후에는 복구할 수 없어요.",
+    "deletePermanent": "영구 삭제",
+    "deleteFailed": "계정 삭제 실패",
+    "deleting": "계정 삭제 중…"
+  },
+  "legal": {
+    "section": "약관·정책",
+    "terms": "서비스 이용약관",
+    "privacy": "개인정보 처리방침",
+    "openFailedTitle": "열 수 없어요",
+    "openFailedMessage": "문서를 여는 중 문제가 생겼어요. 잠시 후 다시 시도해주세요."
+  },
+  "scoreHints": {
+    "light": ["아주 어두움", "어두움", "보통", "밝음", "직사광"],
+    "airflow": ["거의 없음", "약함", "보통", "잘 통함", "매우 잘 통함"],
+    "weather": ["거의 영향 없음", "약간", "보통", "꽤 영향 받음", "바깥과 비슷"]
+  },
+  "locationForm": {
+    "editTitle": "공간 수정",
+    "addTitle": "새 공간 추가",
+    "nameLabel": "이름",
+    "namePlaceholder": "예: 온실장, 작업실",
+    "lightLabel": "일조량",
+    "airflowLabel": "공기 순환",
+    "weatherLabel": "바깥 날씨 영향",
+    "submitEdit": "수정",
+    "nameRequiredTitle": "이름 필요",
+    "nameRequiredMessage": "공간 이름을 입력해주세요.",
+    "duplicateTitle": "중복",
+    "duplicateMessage": "같은 이름의 공간이 이미 있어요."
+  }
+}

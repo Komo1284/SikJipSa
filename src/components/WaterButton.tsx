@@ -4,6 +4,7 @@ import type { Plant } from '@/types/plant';
 import { TODAY, daysBetween } from '@/utils/date';
 import { Check, Droplet } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import Animated, {
   useAnimatedStyle, useSharedValue, withSequence, withTiming,
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function WaterButton({ plant, onDone, size = 44 }: Props) {
+  const { t } = useTranslation();
   const { palette } = useTheme();
   const [done, setDone] = useState(false);
   const scale = useSharedValue(1);
@@ -53,7 +55,7 @@ export function WaterButton({ plant, onDone, size = 44 }: Props) {
       onPress={press}
       hitSlop={8}
       accessibilityRole="button"
-      accessibilityLabel={done ? '물 준 직후' : '물 주기'}
+      accessibilityLabel={done ? t('components.waterButton.justWatered') : t('components.waterButton.water')}
     >
       <Animated.View
         style={[

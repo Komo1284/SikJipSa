@@ -6,6 +6,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import type { Plant } from '@/types/plant';
 import { nextActionLabelRecommended as nextActionLabel, plantStatusRecommended as plantStatus } from '@/utils/date';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { Tap } from '@/components/Tap';
 
@@ -18,6 +19,7 @@ export function TaskRow({
   onOpen: () => void;
   onWater: (p: Plant) => void;
 }) {
+  const { t } = useTranslation();
   const { palette, radii, shadows } = useTheme();
   const st = plantStatus(plant);
   const tone = st === 'overdue' ? 'warn' : st === 'today' ? 'water' : 'neutral';
@@ -46,7 +48,7 @@ export function TaskRow({
           {plant.light ? `${plant.location} · ${plant.light}` : plant.location}
         </ThemedText>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 }}>
-          <Chip tone={tone}>{`물주기 · ${nextActionLabel(plant)}`}</Chip>
+          <Chip tone={tone}>{t('components.taskRow.water', { label: nextActionLabel(plant) })}</Chip>
           {plant.recommendationDelta != null && plant.recommendationDelta !== 0 ? (
             <ThemedText
               variant="tiny"

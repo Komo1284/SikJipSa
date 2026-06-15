@@ -7,6 +7,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { addDays, formatMD, toISODate } from '@/utils/date';
 import { CalendarDays, Droplet, Flower2, Scissors, Sprout, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
 export type CareKind = 'water' | 'fert' | 'prune' | 'repot';
@@ -19,14 +20,15 @@ type Props = {
   onSubmit: (date: string, note: string) => void;
 };
 
-const META: Record<CareKind, { title: string; verb: string; Icon: typeof Droplet; color: (p: ReturnType<typeof useTheme>['palette']) => string; placeholder: string }> = {
-  water: { title: '물주기', verb: '물 줬어요', Icon: Droplet, color: (p) => p.drop, placeholder: '간단한 메모' },
-  fert:  { title: '비료',   verb: '비료 줬어요', Icon: Flower2, color: (p) => p.bloom, placeholder: '예: 하이포넥스 1000배' },
-  prune: { title: '가지치기', verb: '가지치기 했어요', Icon: Scissors, color: (p) => p.ink2, placeholder: '예: 긴 덩굴 15cm 정리' },
-  repot: { title: '분갈이', verb: '분갈이 했어요', Icon: Sprout, color: (p) => p.earth, placeholder: '예: 한 치수 큰 분으로 / 수태믹스' },
+const META: Record<CareKind, { Icon: typeof Droplet; color: (p: ReturnType<typeof useTheme>['palette']) => string }> = {
+  water: { Icon: Droplet, color: (p) => p.drop },
+  fert:  { Icon: Flower2, color: (p) => p.bloom },
+  prune: { Icon: Scissors, color: (p) => p.ink2 },
+  repot: { Icon: Sprout, color: (p) => p.earth },
 };
 
 export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Props) {
+  const { t } = useTranslation();
   const { palette, weights } = useTheme();
   const [date, setDate] = useState(toISODate(new Date()));
   const [note, setNote] = useState('');
@@ -35,6 +37,9 @@ export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Pr
   const meta = META[kind];
   const Icon = meta.Icon;
   const accent = meta.color(palette);
+  const title = t(`components.careLog.${kind}.title`);
+  const verb = t(`components.careLog.${kind}.verb`);
+  const placeholder = t(`components.careLog.${kind}.placeholder`);
 
   useEffect(() => {
     if (visible) {
@@ -46,7 +51,7 @@ export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Pr
 
   const presets = [0, -1, -2, -3].map((offset) => {
     const iso = addDays(toISODate(new Date()), offset);
-    const label = offset === 0 ? '오늘' : offset === -1 ? '어제' : offset === -2 ? '그제' : `${-offset}일 전`;
+    const label = offset === 0 ? t('common.today') : offset === -1 ? t('components.careLog.yesterday') : offset === -2 ? t('components.careLog.dayBeforeYesterday') : t('components.careLog.daysAgo', { n: -offset });
     return { iso, label };
   });
   const isPresetActive = (iso: string) => presets.some((p) => p.iso === iso);
@@ -78,7 +83,7 @@ export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Pr
             </View>
             <View>
               <ThemedText family="serif" style={{ fontSize: 22, fontFamily: weights.serifRegular }}>
-                {meta.title}
+                {title}
               </ThemedText>
               <ThemedText variant="tiny" color={palette.ink3}>
                 {plantName}
@@ -95,7 +100,7 @@ export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Pr
           variant="tiny" family="mono" uppercase color={palette.ink3}
           style={{ marginTop: 22, marginBottom: 8, letterSpacing: 1 }}
         >
-          언제 했어요?
+          {t('components.careLog.whenLabel')}
         </ThemedText>
 
         <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -144,11 +149,11 @@ export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Pr
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <CalendarDays size={18} color={!isPresetActive(date) ? palette.greenDeep : palette.ink2} strokeWidth={1.8} />
             <ThemedText variant="meta" weight="medium" color={!isPresetActive(date) ? palette.greenDeep : palette.ink}>
-              {!isPresetActive(date) ? formatMD(date) : '다른 날짜 선택'}
+              {!isPresetActive(date) ? formatMD(date) : t('components.careLog.pickAnotherDate')}
             </ThemedText>
           </View>
           <ThemedText variant="tiny" color={palette.ink3}>
-            {calendarOpen ? '닫기' : '달력 열기'}
+            {calendarOpen ? t('common.close') : t('components.careLog.openCalendar')}
           </ThemedText>
         </Pressable>
 
@@ -176,12 +181,12 @@ export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Pr
           variant="tiny" family="mono" uppercase color={palette.ink3}
           style={{ marginTop: 18, marginBottom: 6, letterSpacing: 1 }}
         >
-          메모 (선택)
+          {t('components.careLog.memoLabel')}
         </ThemedText>
         <FormInput
           value={note}
           onChangeText={setNote}
-          placeholder={meta.placeholder}
+          placeholder={placeholder}
           multiline
           style={{
             minHeight: 60, paddingVertical: 12, paddingHorizontal: 14,
@@ -200,7 +205,7 @@ export function CareLogSheet({ visible, kind, plantName, onClose, onSubmit }: Pr
           }}
         >
           <ThemedText variant="body" weight="semibold" color={palette.bg}>
-            {meta.verb}
+            {verb}
           </ThemedText>
         </Pressable>
       </ScrollView>

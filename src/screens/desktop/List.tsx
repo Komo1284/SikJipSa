@@ -10,8 +10,10 @@ import { useRouter } from 'expo-router';
 import { SearchX, Sprout } from 'lucide-react-native';
 import React, { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export function DesktopList() {
+  const { t } = useTranslation();
   const { palette } = useTheme();
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
@@ -32,7 +34,7 @@ export function DesktopList() {
   }, [plants, spaceFilter, query]);
 
   const title =
-    spaceFilter === 'all' ? '내 식물 · 전체' : spaceFilter;
+    spaceFilter === 'all' ? t('desktop.myPlantsAll') : spaceFilter;
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
@@ -45,7 +47,7 @@ export function DesktopList() {
         color={palette.ink3}
         style={{ letterSpacing: 1.3, marginBottom: 14 }}
       >
-        목록 · {filtered.length}
+        {t('desktop.listCount', { n: filtered.length })}
       </ThemedText>
 
       {filtered.length === 0 ? (
@@ -54,17 +56,17 @@ export function DesktopList() {
             <EmptyState
               compact
               icon={<Sprout size={32} color={palette.green} strokeWidth={1.6} />}
-              title="아직 등록된 식물이 없어요"
-              description="식물을 추가하여 나만의 관리를 시작해보세요!"
-              actionLabel="식물 추가하기"
+              title={t('desktop.emptyTitle')}
+              description={t('desktop.emptyDescription')}
+              actionLabel={t('desktop.addPlant')}
               onAction={() => router.push('/add' as never)}
             />
           ) : (
             <EmptyState
               compact
               icon={<SearchX size={32} color={palette.ink3} strokeWidth={1.6} />}
-              title="검색 결과가 없어요"
-              description="다른 이름이나 학명으로 검색하거나 공간 필터를 바꿔보세요."
+              title={t('desktop.noResultsTitle')}
+              description={t('desktop.noResultsDescription')}
             />
           )}
         </View>

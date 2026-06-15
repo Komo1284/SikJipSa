@@ -1,3 +1,4 @@
+import i18n from '@/i18n';
 import type { Plant } from '@/types/plant';
 
 /**
@@ -34,7 +35,7 @@ export function daysBetween(a: Date | string, b: Date | string): number {
 
 export function formatMD(date: string | Date): string {
   const d = typeof date === 'string' ? parseISODate(date) : date;
-  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+  return i18n.t('misc.monthDay', { m: d.getMonth() + 1, d: d.getDate() });
 }
 
 export type PlantStatus = 'overdue' | 'today' | 'soon' | 'ok';
@@ -49,10 +50,10 @@ export function plantStatus(p: Plant): PlantStatus {
 
 export function nextActionLabel(p: Plant): string {
   const d = daysBetween(TODAY, p.nextWater);
-  if (d < 0) return `${-d}일 지남`;
-  if (d === 0) return '오늘';
-  if (d === 1) return '내일';
-  return `${d}일 뒤`;
+  if (d < 0) return i18n.t('misc.daysOverdue', { n: -d });
+  if (d === 0) return i18n.t('common.today');
+  if (d === 1) return i18n.t('misc.tomorrow');
+  return i18n.t('misc.daysLater', { n: d });
 }
 
 /** 환경 보정된 권장 물주기 일자. 없으면 절대 주기로 fallback. */
@@ -63,10 +64,10 @@ export function effectiveNextWater(p: Plant): string {
 /** 추천 기준 D-day 라벨. UI 의 모든 카드/상세에서 이걸 우선 사용. */
 export function nextActionLabelRecommended(p: Plant): string {
   const d = daysBetween(TODAY, effectiveNextWater(p));
-  if (d < 0) return `${-d}일 지남`;
-  if (d === 0) return '오늘';
-  if (d === 1) return '내일';
-  return `${d}일 뒤`;
+  if (d < 0) return i18n.t('misc.daysOverdue', { n: -d });
+  if (d === 0) return i18n.t('common.today');
+  if (d === 1) return i18n.t('misc.tomorrow');
+  return i18n.t('misc.daysLater', { n: d });
 }
 
 export function plantStatusRecommended(p: Plant): PlantStatus {

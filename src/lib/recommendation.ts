@@ -1,3 +1,4 @@
+import i18n from '@/i18n';
 import type { Plant, UserLocation, WeatherDay } from '@/types/plant';
 import { addDays, toISODate } from '@/utils/date';
 
@@ -34,19 +35,19 @@ export function recommendNextWater(
     humAvg = avg(recent.map((d) => d.humidityAvg).filter(isNum));
 
     if (rainTotal >= 20) {
-      factors.push({ delta: +0.18 * ww, weight: ww, phrase: `최근 7일 누적 강수 ${Math.round(rainTotal)}mm` });
+      factors.push({ delta: +0.18 * ww, weight: ww, phrase: i18n.t('recommendation.rainTotal', { mm: Math.round(rainTotal) }) });
     }
     if (tempAvg !== null && tempAvg > 28) {
-      factors.push({ delta: -0.20 * ww, weight: ww, phrase: `평균 ${tempAvg.toFixed(0)}℃ 폭염` });
+      factors.push({ delta: -0.20 * ww, weight: ww, phrase: i18n.t('recommendation.heatwave', { temp: tempAvg.toFixed(0) }) });
     }
     if (tempAvg !== null && tempAvg < 5) {
-      factors.push({ delta: +0.30 * ww, weight: ww, phrase: `평균 ${tempAvg.toFixed(0)}℃ 한파` });
+      factors.push({ delta: +0.30 * ww, weight: ww, phrase: i18n.t('recommendation.coldwave', { temp: tempAvg.toFixed(0) }) });
     }
     if (humAvg !== null && humAvg < 40) {
-      factors.push({ delta: -0.12 * ww, weight: ww, phrase: `습도 ${humAvg.toFixed(0)}% 건조` });
+      factors.push({ delta: -0.12 * ww, weight: ww, phrase: i18n.t('recommendation.dry', { humidity: humAvg.toFixed(0) }) });
     }
     if (humAvg !== null && humAvg > 75) {
-      factors.push({ delta: +0.10 * ww, weight: ww, phrase: `습도 ${humAvg.toFixed(0)}% 다습` });
+      factors.push({ delta: +0.10 * ww, weight: ww, phrase: i18n.t('recommendation.humid', { humidity: humAvg.toFixed(0) }) });
     }
   }
 
@@ -57,7 +58,7 @@ export function recommendNextWater(
       factors.push({
         delta: -(diff / 5) * 0.15,
         weight: 0.5,
-        phrase: diff > 0 ? '빛이 풍부한 자리' : '빛이 다소 부족한 자리',
+        phrase: diff > 0 ? i18n.t('recommendation.lightRich') : i18n.t('recommendation.lightLow'),
       });
     }
   }
@@ -74,15 +75,15 @@ export function recommendNextWater(
         delta: -(diff / 100) * 0.20,
         weight: 0.5,
         phrase: diff > 0
-          ? `식물이 선호하는 습도(${expected}%)보다 건조한 ${humAvg.toFixed(0)}%`
-          : `식물이 선호하는 습도(${expected}%)보다 습한 ${humAvg.toFixed(0)}%`,
+          ? i18n.t('recommendation.humidityPrefDrier', { expected, humidity: humAvg.toFixed(0) })
+          : i18n.t('recommendation.humidityPrefWetter', { expected, humidity: humAvg.toFixed(0) }),
       });
     }
   }
 
   // Airflow penalty — stagnant air keeps soil wet longer
   if (location && location.airflowScore <= 2) {
-    factors.push({ delta: +0.10, weight: 0.5, phrase: '환기가 약한 공간' });
+    factors.push({ delta: +0.10, weight: 0.5, phrase: i18n.t('recommendation.poorAirflow') });
   }
 
   // Sum and clamp
@@ -98,14 +99,14 @@ export function recommendNextWater(
 
   let reason: string;
   if (top.length === 0) {
-    reason = `환경 보정이 없어 기본 ${plant.waterCycle}일 주기를 따라요.`;
+    reason = i18n.t('recommendation.reasonDefault', { days: plant.waterCycle });
   } else {
     const dirText =
-      dayDelta > 0 ? `평소보다 ${dayDelta}일 늦췄어요` :
-      dayDelta < 0 ? `평소보다 ${-dayDelta}일 빨라졌어요` :
-      '주기는 그대로지만 환경 변화가 있어요';
+      dayDelta > 0 ? i18n.t('recommendation.dirLater', { days: dayDelta }) :
+      dayDelta < 0 ? i18n.t('recommendation.dirEarlier', { days: -dayDelta }) :
+      i18n.t('recommendation.dirSame');
     const phrases = top.map((f) => f.phrase).join(' · ');
-    reason = `${phrases}. ${dirText}.`;
+    reason = i18n.t('recommendation.reasonAdjusted', { phrases, direction: dirText });
   }
 
   return { date, delta: dayDelta, reason };

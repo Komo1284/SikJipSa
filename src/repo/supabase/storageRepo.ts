@@ -1,3 +1,4 @@
+import i18n from '@/i18n';
 import type { StorageRepo } from '@/repo/contracts';
 import { hasSupabase, supabase } from './client';
 
@@ -29,7 +30,7 @@ export const supabaseStorageRepo: StorageRepo = {
     }
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('로그인이 필요합니다');
+    if (!user) throw new Error(i18n.t('misc.loginRequired'));
 
     const ext = fileUri.split('.').pop()?.toLowerCase() ?? 'jpg';
     const path = `${user.id}/${plantId}/${Date.now()}.${ext}`;
@@ -37,7 +38,7 @@ export const supabaseStorageRepo: StorageRepo = {
 
     const body = await readAsArrayBuffer(fileUri);
     if (body.byteLength === 0) {
-      throw new Error('사진 파일을 읽지 못했어요 (0 bytes)');
+      throw new Error(i18n.t('misc.photoReadFailed'));
     }
 
     const { error } = await supabase.storage.from(BUCKET).upload(path, body, {

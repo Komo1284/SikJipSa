@@ -1,3 +1,4 @@
+import i18n from '@/i18n';
 import type { AuthRepo } from '@/repo/contracts';
 import type { AuthChangeEvent, OAuthProvider, Session, Unsubscribe } from '@/repo/types';
 import {
@@ -54,7 +55,7 @@ async function performKakaoFlow(): Promise<Session> {
   if (!supabase) throw new Error('Supabase client not configured');
 
   const tokens = await kakaoLogin();
-  if (!tokens?.accessToken) throw new Error('카카오 액세스 토큰을 받지 못했어요');
+  if (!tokens?.accessToken) throw new Error(i18n.t('auth.kakaoNoAccessToken'));
 
   const { data: bridge, error: bridgeErr } = await supabase.functions.invoke<{
     email: string;
@@ -64,7 +65,7 @@ async function performKakaoFlow(): Promise<Session> {
   });
   if (bridgeErr) throw bridgeErr;
   if (!bridge?.email || !bridge?.tokenHash) {
-    throw new Error('카카오 인증 브릿지 응답 형식이 올바르지 않아요');
+    throw new Error(i18n.t('auth.kakaoBridgeInvalid'));
   }
 
   const { data: sessionData, error: verifyErr } = await supabase.auth.verifyOtp({
@@ -74,7 +75,7 @@ async function performKakaoFlow(): Promise<Session> {
   if (verifyErr) throw verifyErr;
 
   const session = toSession(sessionData.session);
-  if (!session) throw new Error('세션 생성 실패');
+  if (!session) throw new Error(i18n.t('auth.sessionCreateFailed'));
   return session;
 }
 
@@ -106,11 +107,11 @@ async function performGoogleNativeFlow(): Promise<Session> {
   const response = await GoogleSignin.signIn();
 
   if (!isSuccessResponse(response)) {
-    throw new Error(`Google 로그인 취소 (${response.type})`);
+    throw new Error(i18n.t('auth.googleSignInCancelled', { type: response.type }));
   }
 
   const idToken = response.data.idToken;
-  if (!idToken) throw new Error('id_token 을 받지 못했어요');
+  if (!idToken) throw new Error(i18n.t('auth.googleNoIdToken'));
 
   const { data, error } = await supabase.auth.signInWithIdToken({
     provider: 'google',
@@ -118,7 +119,7 @@ async function performGoogleNativeFlow(): Promise<Session> {
   });
   if (error) throw error;
   const session = toSession(data.session);
-  if (!session) throw new Error('세션 생성 실패');
+  if (!session) throw new Error(i18n.t('auth.sessionCreateFailed'));
   return session;
 }
 
@@ -137,7 +138,7 @@ export const supabaseAuthRepo: AuthRepo = {
     }
     if (provider === 'google') return performGoogleNativeFlow();
     if (provider === 'kakao') return performKakaoFlow();
-    throw new Error(`${provider} 로그인은 지원하지 않아요`);
+    throw new Error(i18n.t('auth.providerNotSupported', { provider }));
   },
 
   async sendEmailOtp(email) {
@@ -158,7 +159,7 @@ export const supabaseAuthRepo: AuthRepo = {
     });
     if (error) throw error;
     const session = toSession(data.session);
-    if (!session) throw new Error('세션 생성 실패');
+    if (!session) throw new Error(i18n.t('auth.sessionCreateFailed'));
     return session;
   },
 

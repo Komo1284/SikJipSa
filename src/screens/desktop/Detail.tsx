@@ -13,8 +13,10 @@ import { useRouter } from 'expo-router';
 import { Camera, Droplet, Flower2, Pencil, Scissors, Sprout, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export function DesktopDetail({ plant }: { plant: Plant }) {
+  const { t } = useTranslation();
   const { palette, radii, weights } = useTheme();
   const router = useRouter();
   const waterPlant = usePlantStore((s) => s.waterPlant);
@@ -43,15 +45,15 @@ export function DesktopDetail({ plant }: { plant: Plant }) {
       const uploaded = await repos.storage.uploadPhoto(plant.id, result.assets[0].uri);
       await updatePlantPhoto(plant.id, uploaded.publicUrl);
     } catch (e) {
-      Alert.alert('사진 교체 실패', humanizeError(e));
+      Alert.alert(t('desktop.photoReplaceFailed'), humanizeError(e));
     }
   };
 
   const confirmDelete = () => {
-    Alert.alert(plant.name, '정말 삭제할까요? 기록은 보존돼요.', [
-      { text: '취소', style: 'cancel' },
+    Alert.alert(plant.name, t('desktop.deleteConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: '삭제', style: 'destructive',
+        text: t('common.delete'), style: 'destructive',
         onPress: async () => {
           await deletePlant(plant.id);
           router.push('/(tabs)/list' as never);
@@ -69,19 +71,19 @@ export function DesktopDetail({ plant }: { plant: Plant }) {
       d.setDate(d.getDate() + plant.fertCycle);
       const today = parseISODate(toISODate(new Date()));
       const days = Math.round((d.getTime() - today.getTime()) / 86_400_000);
-      if (days < 0) return `${-days}일 지남`;
-      if (days === 0) return '오늘';
-      return `${days}일 뒤`;
+      if (days < 0) return t('desktop.daysPast', { n: -days });
+      if (days === 0) return t('common.today');
+      return t('desktop.daysLater', { n: days });
     } catch { return '—'; }
   })();
 
   // 광량/습도(현재 환경)는 신규 식물에서 더 이상 입력받지 않으므로 값이 있는
   // 기존 식물만 stat 으로 노출한다.
   const stats: { k: string; v: string; color?: string }[] = [
-    { k: '다음 물', v: nextActionLabel(plant), color: palette.drop },
-    { k: '다음 비료', v: fertNext, color: palette.bloom },
-    ...(plant.light ? [{ k: '광량', v: plant.light }] : []),
-    ...(plant.humidity ? [{ k: '습도', v: plant.humidity }] : []),
+    { k: t('desktop.nextWater'), v: nextActionLabel(plant), color: palette.drop },
+    { k: t('desktop.nextFert'), v: fertNext, color: palette.bloom },
+    ...(plant.light ? [{ k: t('desktop.light'), v: plant.light }] : []),
+    ...(plant.humidity ? [{ k: t('desktop.humidity'), v: plant.humidity }] : []),
   ];
 
   return (
@@ -89,7 +91,7 @@ export function DesktopDetail({ plant }: { plant: Plant }) {
       <View style={{ marginBottom: 20 }}>
         <Button
           variant="ghost"
-          label="← 목록으로"
+          label={t('desktop.backToList')}
           onPress={() => router.push('/(tabs)/list' as never)}
         />
       </View>
@@ -159,7 +161,7 @@ export function DesktopDetail({ plant }: { plant: Plant }) {
           {plant.note ? (
             <View style={{ padding: 16, backgroundColor: palette.greenBg, borderRadius: 14, marginBottom: 24 }}>
               <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1, marginBottom: 4 }}>
-                메모
+                {t('desktop.memo')}
               </ThemedText>
               <ThemedText variant="body" style={{ lineHeight: 22 }}>
                 {plant.note}
@@ -169,50 +171,50 @@ export function DesktopDetail({ plant }: { plant: Plant }) {
 
           <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
             <Button
-              label="물주기 기록"
+              label={t('desktop.logWater')}
               leftIcon={<Droplet size={16} color={palette.bg} strokeWidth={1.8} fill={palette.bg} />}
               onPress={() => setCareSheet('water')}
             />
             <Button
               variant="ghost"
-              label="비료 기록"
+              label={t('desktop.logFert')}
               leftIcon={<Flower2 size={16} color={palette.ink2} strokeWidth={1.8} />}
               onPress={() => setCareSheet('fert')}
             />
             <Button
               variant="ghost"
-              label="가지치기"
+              label={t('desktop.prune')}
               leftIcon={<Scissors size={16} color={palette.ink2} strokeWidth={1.8} />}
               onPress={() => setCareSheet('prune')}
             />
             <Button
               variant="ghost"
-              label="분갈이"
+              label={t('desktop.repot')}
               leftIcon={<Sprout size={16} color={palette.ink2} strokeWidth={1.8} />}
               onPress={() => setCareSheet('repot')}
             />
             <Button
               variant="ghost"
-              label="정보 수정"
+              label={t('desktop.editInfo')}
               leftIcon={<Pencil size={16} color={palette.ink2} strokeWidth={1.8} />}
               onPress={() => router.push(`/plant/edit/${plant.id}` as never)}
             />
             <Button
               variant="ghost"
-              label="사진 교체"
+              label={t('desktop.replacePhoto')}
               leftIcon={<Camera size={16} color={palette.ink2} strokeWidth={1.8} />}
               onPress={changePhoto}
             />
             <Button
               variant="ghost"
-              label="삭제"
+              label={t('common.delete')}
               leftIcon={<Trash2 size={16} color={palette.warn} strokeWidth={1.8} />}
               onPress={confirmDelete}
             />
           </View>
 
           <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1, marginTop: 28, marginBottom: 8 }}>
-            마지막 물 · {formatMD(plant.lastWater)} · 마지막 비료 · {formatMD(plant.lastFert)}
+            {t('desktop.lastWaterFert', { water: formatMD(plant.lastWater), fert: formatMD(plant.lastFert) })}
           </ThemedText>
         </View>
       </View>

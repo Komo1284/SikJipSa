@@ -5,6 +5,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { formatKickerLong } from '@/utils/date';
 import { RefreshCw, Search } from 'lucide-react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { TextInput, View } from 'react-native';
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function DesktopHeader({ kicker = formatKickerLong(), title, showSearch = true, onRefresh, refreshing }: Props) {
+  const { t } = useTranslation();
   const { palette, weights } = useTheme();
   const query = useUIStore((s) => s.query);
   const setQuery = useUIStore((s) => s.setQuery);
@@ -60,7 +62,7 @@ export function DesktopHeader({ kicker = formatKickerLong(), title, showSearch =
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder="이름이나 학명 검색…"
+              placeholder={t('components.desktopHeader.searchPlaceholder')}
               placeholderTextColor={palette.ink3}
               style={{
                 width: 260,

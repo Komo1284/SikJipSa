@@ -3,6 +3,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { toISODate } from '@/utils/date';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 type Props = {
@@ -12,11 +13,11 @@ type Props = {
   maxDate?: string;
 };
 
-const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
-const MONTH_NAMES = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-
 export function CalendarPicker({ value, onChange, maxDate }: Props) {
+  const { t } = useTranslation();
   const { palette, weights } = useTheme();
+  const DAY_LABELS = t('components.calendar.dayLabels', { returnObjects: true }) as string[];
+  const MONTH_NAMES = t('components.calendar.monthNames', { returnObjects: true }) as string[];
   const today = toISODate(new Date());
   const max = maxDate ?? today;
 
@@ -41,7 +42,7 @@ export function CalendarPicker({ value, onChange, maxDate }: Props) {
           family="serif"
           style={{ fontSize: 18, fontFamily: weights.serifRegular }}
         >
-          {view.year}년 {MONTH_NAMES[view.month]}
+          {t('components.calendar.monthHeader', { year: view.year, month: MONTH_NAMES[view.month] })}
         </ThemedText>
         <Pressable onPress={() => moveMonth(1)} hitSlop={12} style={{ padding: 6 }}>
           <ChevronRight size={20} color={palette.ink2} strokeWidth={1.8} />

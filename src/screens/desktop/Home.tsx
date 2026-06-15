@@ -13,8 +13,10 @@ import { TODAY, daysBetween, nextActionLabel, todayList } from '@/utils/date';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export function DesktopHome() {
+  const { t } = useTranslation();
   const { palette, radii, weights } = useTheme();
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
@@ -42,7 +44,7 @@ export function DesktopHome() {
 
   const spaceTitle =
     spaceFilter === 'all'
-      ? '안녕하세요, 오늘도 천천히'
+      ? t('desktop.greeting')
       : spaceFilter;
 
   return (
@@ -50,9 +52,9 @@ export function DesktopHome() {
       <DesktopHeader title={spaceTitle} onRefresh={loadPlants} refreshing={plantsLoading} />
 
       <View style={{ flexDirection: 'row', gap: 16, marginBottom: 28 }}>
-        <SummaryCard label="오늘" value={todayPlants.length} color={palette.drop} />
-        <SummaryCard label="이번 주" value={weekCount} color={palette.green} />
-        <SummaryCard label="보살피는 중" value={plants.length} color={palette.ink} />
+        <SummaryCard label={t('common.today')} value={todayPlants.length} color={palette.drop} />
+        <SummaryCard label={t('desktop.thisWeek')} value={weekCount} color={palette.green} />
+        <SummaryCard label={t('desktop.caringFor')} value={plants.length} color={palette.ink} />
       </View>
 
       <ThemedText
@@ -62,7 +64,7 @@ export function DesktopHome() {
         color={palette.ink3}
         style={{ letterSpacing: 1.3, marginBottom: 14 }}
       >
-        오늘 할 일 · {todayPlants.length}
+        {t('desktop.todayTasks', { n: todayPlants.length })}
       </ThemedText>
 
       <View
@@ -83,7 +85,7 @@ export function DesktopHome() {
               alignItems: 'center',
             }}
           >
-            <ThemedText color={palette.ink3}>오늘 할 일이 없어요.</ThemedText>
+            <ThemedText color={palette.ink3}>{t('desktop.noTodayTasks')}</ThemedText>
           </View>
         ) : (
           todayPlants.map((p) => (
@@ -99,7 +101,7 @@ export function DesktopHome() {
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
         <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1.3 }}>
-          내 식물 · {filtered.length}
+          {t('desktop.myPlants', { n: filtered.length })}
         </ThemedText>
       </View>
 
@@ -118,6 +120,7 @@ export function DesktopHome() {
 }
 
 function SummaryCard({ label, value, color }: { label: string; value: number; color: string }) {
+  const { t } = useTranslation();
   const { palette, weights } = useTheme();
   return (
     <View
@@ -144,7 +147,7 @@ function SummaryCard({ label, value, color }: { label: string; value: number; co
           {value}
         </ThemedText>
         <ThemedText variant="meta" color={palette.ink3}>
-          식물
+          {t('desktop.plantUnit')}
         </ThemedText>
       </View>
     </View>

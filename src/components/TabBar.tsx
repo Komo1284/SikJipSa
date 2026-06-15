@@ -6,23 +6,25 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
 import { Calendar, Grid3x3, Home, Plus, User } from 'lucide-react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Item =
-  | { kind: 'tab'; route: string; label: string; icon: typeof Home }
+  | { kind: 'tab'; route: string; labelKey: string; icon: typeof Home }
   | { kind: 'add' };
 
 const ITEMS: Item[] = [
-  { kind: 'tab', route: 'home', label: '홈', icon: Home },
-  { kind: 'tab', route: 'list', label: '식물', icon: Grid3x3 },
+  { kind: 'tab', route: 'home', labelKey: 'components.tabBar.home', icon: Home },
+  { kind: 'tab', route: 'list', labelKey: 'components.tabBar.plants', icon: Grid3x3 },
   { kind: 'add' },
-  { kind: 'tab', route: 'schedule', label: '일정', icon: Calendar },
-  { kind: 'tab', route: 'me', label: '나', icon: User },
+  { kind: 'tab', route: 'schedule', labelKey: 'components.tabBar.schedule', icon: Calendar },
+  { kind: 'tab', route: 'me', labelKey: 'components.tabBar.me', icon: User },
 ];
 
 export function TabBar(props: BottomTabBarProps) {
+  const { t } = useTranslation();
   const { palette, shadows, weights } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -74,7 +76,7 @@ export function TabBar(props: BottomTabBarProps) {
           return (
             <TabButton
               key={it.route}
-              label={it.label}
+              label={t(it.labelKey)}
               icon={it.icon}
               active={active}
               onPress={() => go(it.route)}

@@ -23,29 +23,28 @@ import type { UserLocation } from '@/types/plant';
 import { useFocusEffect } from 'expo-router';
 import { Bell, BellOff, ChevronRight, CloudRain, Droplet as DropletIcon, FileText, MapPin, Pencil, Plus, RefreshCw, ShieldCheck, Sun, Thermometer, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const ACCENTS: { key: AccentKey; label: string; color: string }[] = [
-  { key: 'green',  label: '그린',   color: '#2D4A2B' },
-  { key: 'sage',   label: '세이지', color: '#6A8A5A' },
-  { key: 'ochre',  label: '오크',   color: '#B8864B' },
-  { key: 'forest', label: '포레스트', color: '#1A3D2E' },
+const ACCENT_COLORS: { key: AccentKey; color: string }[] = [
+  { key: 'green',  color: '#2D4A2B' },
+  { key: 'sage',   color: '#6A8A5A' },
+  { key: 'ochre',  color: '#B8864B' },
+  { key: 'forest', color: '#1A3D2E' },
 ];
 
-const MODES: { key: ThemeMode | 'system'; label: string }[] = [
-  { key: 'light',  label: '라이트' },
-  { key: 'dark',   label: '다크' },
-  { key: 'system', label: '시스템' },
-];
+const MODE_KEYS: (ThemeMode | 'system')[] = ['light', 'dark', 'system'];
 
 export default function MeScreen() {
+  const { t } = useTranslation();
   const { palette, mode, accent, radii, setMode, setAccent } = useTheme();
   const insets = useSafeAreaInsets();
   const tabletCap = useTabletContentCap();
   const { isDesktop } = useResponsive();
   const { language, setLanguage, options: languageOptions } = useLanguage();
   const languageItems = languageOptions.map((o) => ({ key: o.code, label: o.label }));
+  const modeItems = MODE_KEYS.map((key) => ({ key, label: t(`settings.themeMode.${key}`) }));
 
   const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <View style={{ marginBottom: 26 }}>
@@ -91,9 +90,9 @@ export default function MeScreen() {
 
   const sections = (
     <>
-      <Section title="포인트 컬러">
+      <Section title={t('settings.accentColor')}>
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          {ACCENTS.map((a) => {
+          {ACCENT_COLORS.map((a) => {
             const active = accent === a.key;
             return (
               <Pressable
@@ -113,11 +112,11 @@ export default function MeScreen() {
         </View>
       </Section>
 
-      <Section title="테마">
-        <Seg items={MODES} value={mode} onChange={setMode} />
+      <Section title={t('settings.theme')}>
+        <Seg items={modeItems} value={mode} onChange={setMode} />
       </Section>
 
-      <Section title="언어">
+      <Section title={t('settings.language')}>
         <Seg items={languageItems} value={language} onChange={(c) => { setLanguage(c); }} />
       </Section>
 
@@ -137,7 +136,7 @@ export default function MeScreen() {
   if (isDesktop) {
     return (
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
-        <DesktopHeader title="나" showSearch={false} />
+        <DesktopHeader title={t('settings.title')} showSearch={false} />
         <View style={{ maxWidth: 640, width: '100%' }}>{sections}</View>
       </ScrollView>
     );
@@ -148,9 +147,9 @@ export default function MeScreen() {
       style={{ flex: 1, backgroundColor: palette.bg }}
       contentContainerStyle={[{ paddingTop: insets.top + 14, paddingBottom: 120, paddingHorizontal: 24 }, tabletCap]}
     >
-      <ThemedText variant="screenTitle" family="serif">나</ThemedText>
+      <ThemedText variant="screenTitle" family="serif">{t('settings.title')}</ThemedText>
       <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 8, marginBottom: 24 }}>
-        앱의 생김새와 리듬을 바꿀 수 있어요.
+        {t('settings.subtitle')}
       </ThemedText>
       {sections}
     </ScrollView>
@@ -160,6 +159,7 @@ export default function MeScreen() {
 const REMINDER_HOURS = [7, 8, 9, 12, 18, 21];
 
 function NotificationSection() {
+  const { t } = useTranslation();
   const { palette, radii } = useTheme();
   const plants = usePlantStore((s) => s.plants);
   const [status, setStatus] = useState<NotificationPermissionStatus | null>(null);
@@ -188,7 +188,7 @@ function NotificationSection() {
   return (
     <View style={{ marginBottom: 26 }}>
       <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 10, letterSpacing: 1 }}>
-        알림
+        {t('settings.notification.section')}
       </ThemedText>
       <View style={{ backgroundColor: palette.surface, borderRadius: radii.md, padding: 16, gap: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -202,13 +202,13 @@ function NotificationSection() {
             <Icon size={18} color={granted ? palette.greenDeep : palette.ink3} strokeWidth={1.8} />
           </View>
           <View style={{ flex: 1 }}>
-            <ThemedText variant="body" weight="medium">물주기 알림</ThemedText>
+            <ThemedText variant="body" weight="medium">{t('settings.notification.waterTitle')}</ThemedText>
             <ThemedText variant="tiny" color={palette.ink3} style={{ marginTop: 2 }}>
               {granted
-                ? `켜짐 · 물주기 날 ${hour}시에 알려드려요`
+                ? t('settings.notification.onAt', { hour })
                 : status === 'denied'
-                  ? '꺼짐 · 기기 설정에서 허용해야 받을 수 있어요'
-                  : '꺼짐 · 허용하면 물주기 날을 놓치지 않아요'}
+                  ? t('settings.notification.deniedHint')
+                  : t('settings.notification.offHint')}
             </ThemedText>
           </View>
         </View>
@@ -223,13 +223,13 @@ function NotificationSection() {
             }}
           >
             <ThemedText variant="meta" weight="medium" color={palette.green}>
-              {status === 'denied' ? '기기 설정 열기' : '알림 허용하기'}
+              {status === 'denied' ? t('settings.notification.openDeviceSettings') : t('settings.notification.allow')}
             </ThemedText>
           </Pressable>
         ) : (
           <View style={{ borderTopWidth: 1, borderColor: palette.line, paddingTop: 12 }}>
             <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 8, letterSpacing: 1 }}>
-              알림 시각
+              {t('settings.notification.timeLabel')}
             </ThemedText>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
               {REMINDER_HOURS.map((h) => {
@@ -250,7 +250,7 @@ function NotificationSection() {
                     }}
                   >
                     <ThemedText variant="meta" weight="medium" color={active ? palette.bg : palette.ink2}>
-                      {h}시
+                      {t('settings.notification.hourLabel', { hour: h })}
                     </ThemedText>
                   </Pressable>
                 );
@@ -264,6 +264,7 @@ function NotificationSection() {
 }
 
 function PlaceSection() {
+  const { t } = useTranslation();
   const { palette, radii } = useTheme();
   const place = useWeatherStore((s) => s.place);
   const weather = useWeatherStore((s) => s.weather);
@@ -275,20 +276,20 @@ function PlaceSection() {
   const freshness = (() => {
     if (!lastUpdated) return null;
     const mins = Math.floor((Date.now() - lastUpdated) / 60000);
-    if (mins < 60) return '방금 업데이트';
+    if (mins < 60) return t('settings.place.updatedJustNow');
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}시간 전 업데이트`;
-    return `${Math.floor(hours / 24)}일 전 업데이트 — 새로고침을 눌러주세요`;
+    if (hours < 24) return t('settings.place.updatedHoursAgo', { hours });
+    return t('settings.place.updatedDaysAgo', { days: Math.floor(hours / 24) });
   })();
 
   const updateLocation = () => {
     Alert.alert(
-      '식물이 있는 위치',
-      '날씨 기반 추천에 쓰일 위치를 어떻게 가져올까요?',
+      t('settings.place.section'),
+      t('settings.place.sourcePrompt'),
       [
-        { text: 'GPS 사용 (정확)', onPress: () => relocate('gps') },
-        { text: '대도시 추정 (개략)', onPress: () => relocate('ip') },
-        { text: '취소', style: 'cancel' },
+        { text: t('settings.place.useGps'), onPress: () => relocate('gps') },
+        { text: t('settings.place.useIp'), onPress: () => relocate('ip') },
+        { text: t('common.cancel'), style: 'cancel' },
       ],
     );
   };
@@ -296,7 +297,7 @@ function PlaceSection() {
   return (
     <View style={{ marginBottom: 26 }}>
       <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 10, letterSpacing: 1 }}>
-        식물이 있는 위치
+        {t('settings.place.section')}
       </ThemedText>
 
       <View style={{ backgroundColor: palette.surface, borderRadius: radii.md, padding: 16, gap: 14 }}>
@@ -312,16 +313,16 @@ function PlaceSection() {
           </View>
           <View style={{ flex: 1 }}>
             <ThemedText variant="body" weight="medium">
-              {place?.label ?? '위치 정보 없음'}
+              {place?.label ?? t('settings.place.noLocation')}
             </ThemedText>
             <ThemedText variant="tiny" color={palette.ink3} style={{ marginTop: 2 }}>
               {place?.source === 'gps'
-                ? 'GPS · 추천 정확도 높음'
+                ? t('settings.place.sourceGps')
                 : place?.source === 'ip'
-                  ? 'IP · 도시 단위로 대략 추정'
+                  ? t('settings.place.sourceIp')
                   : place?.source === 'manual'
-                    ? '수동 설정'
-                    : '미설정 · 공간 환경만 반영'}
+                    ? t('settings.place.sourceManual')
+                    : t('settings.place.sourceNone')}
             </ThemedText>
           </View>
           <Pressable onPress={updateLocation} hitSlop={8} style={{ padding: 6 }} disabled={loading}>
@@ -336,14 +337,14 @@ function PlaceSection() {
               borderTopWidth: 1, borderColor: palette.line, paddingTop: 12,
             }}
           >
-            <WeatherStat icon={<Thermometer size={14} color={palette.ink3} strokeWidth={1.8} />} value={today.tempAvg != null ? `${today.tempAvg.toFixed(0)}℃` : '—'} sub="평균 기온" />
-            <WeatherStat icon={<DropletIcon size={14} color={palette.ink3} strokeWidth={1.8} />} value={today.humidityAvg != null ? `${today.humidityAvg.toFixed(0)}%` : '—'} sub="습도" />
-            <WeatherStat icon={<CloudRain size={14} color={palette.ink3} strokeWidth={1.8} />} value={today.rainMm != null ? `${today.rainMm.toFixed(0)}mm` : '—'} sub="강수" />
-            <WeatherStat icon={<Sun size={14} color={palette.ink3} strokeWidth={1.8} />} value={today.tempHigh != null ? `${today.tempHigh.toFixed(0)}℃` : '—'} sub="최고" />
+            <WeatherStat icon={<Thermometer size={14} color={palette.ink3} strokeWidth={1.8} />} value={today.tempAvg != null ? `${today.tempAvg.toFixed(0)}℃` : '—'} sub={t('settings.place.statTempAvg')} />
+            <WeatherStat icon={<DropletIcon size={14} color={palette.ink3} strokeWidth={1.8} />} value={today.humidityAvg != null ? `${today.humidityAvg.toFixed(0)}%` : '—'} sub={t('settings.place.statHumidity')} />
+            <WeatherStat icon={<CloudRain size={14} color={palette.ink3} strokeWidth={1.8} />} value={today.rainMm != null ? `${today.rainMm.toFixed(0)}mm` : '—'} sub={t('settings.place.statRain')} />
+            <WeatherStat icon={<Sun size={14} color={palette.ink3} strokeWidth={1.8} />} value={today.tempHigh != null ? `${today.tempHigh.toFixed(0)}℃` : '—'} sub={t('settings.place.statTempHigh')} />
           </View>
         ) : place?.lat != null ? (
           <ThemedText variant="tiny" color={palette.ink3} style={{ borderTopWidth: 1, borderColor: palette.line, paddingTop: 12 }}>
-            날씨 데이터를 아직 가져오지 못했어요. 새로고침을 눌러주세요.
+            {t('settings.place.weatherUnavailable')}
           </ThemedText>
         ) : null}
         {today && freshness ? (
@@ -368,6 +369,7 @@ function WeatherStat({ icon, value, sub }: { icon: React.ReactNode; value: strin
 }
 
 function LocationsSection() {
+  const { t } = useTranslation();
   const { palette, radii } = useTheme();
   const locations = useLocationStore((s) => s.locations);
   const removeLocation = useLocationStore((s) => s.remove);
@@ -387,18 +389,18 @@ function LocationsSection() {
   const confirmRemove = (id: string, name: string) => {
     const usedBy = plants.filter((p) => p.location === name).length;
     const message = usedBy > 0
-      ? `${usedBy}개의 식물이 이 공간에 있어요. 삭제하면 식물은 남지만 공간 정보가 빈 값이 돼요. 이 작업은 되돌릴 수 없어요.`
-      : '정말 삭제할까요? 이 작업은 되돌릴 수 없어요.';
+      ? t('settings.locations.removeInUse', { n: usedBy })
+      : t('settings.locations.removeConfirm');
     Alert.alert(name, message, [
-      { text: '취소', style: 'cancel' },
-      { text: '삭제', style: 'destructive', onPress: () => removeLocation(id) },
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: () => removeLocation(id) },
     ]);
   };
 
   return (
     <View style={{ marginBottom: 26 }}>
       <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 10, letterSpacing: 1 }}>
-        공간
+        {t('settings.locations.section')}
       </ThemedText>
       <View style={{ backgroundColor: palette.surface, borderRadius: radii.md, overflow: 'hidden' }}>
         {locations.map((loc, idx) => {
@@ -420,7 +422,7 @@ function LocationsSection() {
                   {loc.name}
                 </ThemedText>
                 <ThemedText variant="tiny" color={palette.ink3} style={{ marginTop: 2 }}>
-                  식물 {count}개 · 일조 {loc.lightScore}/5 · 환기 {loc.airflowScore}/5
+                  {t('settings.locations.meta', { n: count, light: loc.lightScore, airflow: loc.airflowScore })}
                 </ThemedText>
               </View>
               <Pressable onPress={() => openEdit(loc)} hitSlop={8} style={{ padding: 8 }}>
@@ -434,7 +436,7 @@ function LocationsSection() {
         })}
         {locations.length === 0 ? (
           <ThemedText variant="meta" color={palette.ink3} style={{ padding: 14 }}>
-            공간이 없어요. 아래에서 추가해보세요.
+            {t('settings.locations.empty')}
           </ThemedText>
         ) : null}
       </View>
@@ -457,7 +459,7 @@ function LocationsSection() {
       >
         <Plus size={16} color={palette.ink2} strokeWidth={2} />
         <ThemedText variant="meta" weight="medium" color={palette.ink2}>
-          새 공간 추가
+          {t('settings.locations.add')}
         </ThemedText>
       </Pressable>
 
@@ -471,6 +473,7 @@ function LocationsSection() {
 }
 
 function AccountSection() {
+  const { t } = useTranslation();
   const { palette, radii } = useTheme();
   const session = useAuthStore((s) => s.session);
   const signOut = useAuthStore((s) => s.signOut);
@@ -478,34 +481,34 @@ function AccountSection() {
   const [deleting, setDeleting] = useState(false);
 
   const confirmSignOut = () => {
-    Alert.alert('로그아웃', '정말 로그아웃 할까요?', [
-      { text: '취소', style: 'cancel' },
-      { text: '로그아웃', style: 'destructive', onPress: () => signOut() },
+    Alert.alert(t('settings.account.signOut'), t('settings.account.signOutConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('settings.account.signOut'), style: 'destructive', onPress: () => signOut() },
     ]);
   };
 
   const confirmDelete = () => {
     Alert.alert(
-      '계정 삭제',
-      '등록한 식물과 모든 돌봄 기록·사진이 영구 삭제돼요.\n이 작업은 되돌릴 수 없어요.',
+      t('settings.account.delete'),
+      t('settings.account.deleteMessage'),
       [
-        { text: '취소', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: '삭제 진행',
+          text: t('settings.account.deleteProceed'),
           style: 'destructive',
           onPress: () => {
             // 영구 삭제는 한 번 더 묻는다 — 실수 방지용 이중 확인.
-            Alert.alert('정말 삭제할까요?', '마지막 확인이에요. 삭제 후에는 복구할 수 없어요.', [
-              { text: '취소', style: 'cancel' },
+            Alert.alert(t('settings.account.deleteFinalTitle'), t('settings.account.deleteFinalMessage'), [
+              { text: t('common.cancel'), style: 'cancel' },
               {
-                text: '영구 삭제',
+                text: t('settings.account.deletePermanent'),
                 style: 'destructive',
                 onPress: async () => {
                   setDeleting(true);
                   try {
                     await deleteAccount();
                   } catch (e) {
-                    Alert.alert('계정 삭제 실패', humanizeError(e));
+                    Alert.alert(t('settings.account.deleteFailed'), humanizeError(e));
                   } finally {
                     setDeleting(false);
                   }
@@ -523,11 +526,11 @@ function AccountSection() {
   return (
     <View style={{ marginBottom: 26 }}>
       <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 10, letterSpacing: 1 }}>
-        계정
+        {t('settings.account.section')}
       </ThemedText>
       <View style={{ padding: 16, backgroundColor: palette.surface, borderRadius: radii.md, gap: 10 }}>
         <ThemedText variant="meta" color={palette.ink2}>
-          {session.displayName ?? session.email ?? '익명 사용자'}
+          {session.displayName ?? session.email ?? t('settings.account.anonymous')}
         </ThemedText>
         {session.email ? (
           <ThemedText variant="tiny" color={palette.ink3}>
@@ -545,12 +548,12 @@ function AccountSection() {
           }}
         >
           <ThemedText variant="meta" weight="medium" color={palette.warn}>
-            로그아웃
+            {t('settings.account.signOut')}
           </ThemedText>
         </Pressable>
         <Pressable onPress={confirmDelete} disabled={deleting} hitSlop={8} style={{ alignItems: 'center', paddingVertical: 6 }}>
           <ThemedText variant="tiny" color={palette.ink3} style={{ textDecorationLine: 'underline' }}>
-            {deleting ? '계정 삭제 중…' : '계정 삭제'}
+            {deleting ? t('settings.account.deleting') : t('settings.account.delete')}
           </ThemedText>
         </Pressable>
       </View>
@@ -559,20 +562,21 @@ function AccountSection() {
 }
 
 function LegalSection() {
+  const { t } = useTranslation();
   const { palette, radii } = useTheme();
 
   const open = (url: string) =>
-    Linking.openURL(url).catch(() => Alert.alert('열 수 없어요', '문서를 여는 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.'));
+    Linking.openURL(url).catch(() => Alert.alert(t('settings.legal.openFailedTitle'), t('settings.legal.openFailedMessage')));
 
   const rows: { key: string; label: string; url: string; Icon: typeof FileText }[] = [
-    { key: 'terms', label: '서비스 이용약관', url: LEGAL_URLS.terms, Icon: FileText },
-    { key: 'privacy', label: '개인정보 처리방침', url: LEGAL_URLS.privacy, Icon: ShieldCheck },
+    { key: 'terms', label: t('settings.legal.terms'), url: LEGAL_URLS.terms, Icon: FileText },
+    { key: 'privacy', label: t('settings.legal.privacy'), url: LEGAL_URLS.privacy, Icon: ShieldCheck },
   ];
 
   return (
     <View style={{ marginBottom: 26 }}>
       <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 10, letterSpacing: 1 }}>
-        약관·정책
+        {t('settings.legal.section')}
       </ThemedText>
       <View style={{ backgroundColor: palette.surface, borderRadius: radii.md, overflow: 'hidden' }}>
         {rows.map((row, idx) => (

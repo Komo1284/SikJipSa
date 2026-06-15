@@ -8,6 +8,7 @@ import { todayList } from '@/utils/date';
 import { usePathname, useRouter } from 'expo-router';
 import { Calendar, Grid3x3, Home, Leaf, Plus } from 'lucide-react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
 type SpaceFilter = 'all' | string;
@@ -18,13 +19,14 @@ type Props = {
 };
 
 const NAV = [
-  { id: 'home',     label: '홈',      path: '/(tabs)/home',     icon: Home,    tip: '오늘 할 일' },
-  { id: 'list',     label: '내 식물',  path: '/(tabs)/list',     icon: Grid3x3, tip: '전체 식물' },
-  { id: 'schedule', label: '일정',    path: '/(tabs)/schedule', icon: Calendar, tip: '돌봄 캘린더' },
-  { id: 'me',       label: '설정',    path: '/(tabs)/me',       icon: Leaf,    tip: '테마·폰트' },
+  { id: 'home',     labelKey: 'components.sidebar.home',     path: '/(tabs)/home',     icon: Home },
+  { id: 'list',     labelKey: 'components.sidebar.myPlants', path: '/(tabs)/list',     icon: Grid3x3 },
+  { id: 'schedule', labelKey: 'components.sidebar.schedule', path: '/(tabs)/schedule', icon: Calendar },
+  { id: 'me',       labelKey: 'components.sidebar.settings', path: '/(tabs)/me',       icon: Leaf },
 ] as const;
 
 export function Sidebar({ spaceFilter = 'all', onSpaceFilter }: Props) {
+  const { t } = useTranslation();
   const { palette, radii, weights } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
@@ -87,7 +89,7 @@ export function Sidebar({ spaceFilter = 'all', onSpaceFilter }: Props) {
                 color={active ? palette.greenDeep : palette.ink2}
                 style={{ flex: 1, fontSize: 14 }}
               >
-                {it.label}
+                {t(it.labelKey)}
               </ThemedText>
               {count !== undefined ? (
                 <View
@@ -119,10 +121,10 @@ export function Sidebar({ spaceFilter = 'all', onSpaceFilter }: Props) {
           color={palette.ink3}
           style={{ marginTop: 24, marginBottom: 4, paddingHorizontal: 14, letterSpacing: 1 }}
         >
-          공간
+          {t('components.sidebar.spaces')}
         </ThemedText>
 
-        {[{ id: 'all', label: '전체', count: plants.length, dotColor: palette.ink3 }]
+        {[{ id: 'all', label: t('components.sidebar.all'), count: plants.length, dotColor: palette.ink3 }]
           .concat(
             locations.map((l) => ({
               id: l.name,
@@ -167,7 +169,7 @@ export function Sidebar({ spaceFilter = 'all', onSpaceFilter }: Props) {
 
       <View style={{ marginTop: 10 }}>
         <Button
-          label="식물 추가"
+          label={t('components.sidebar.addPlant')}
           leftIcon={<Plus size={16} color={palette.bg} strokeWidth={2.2} />}
           fullWidth
           onPress={() => router.push('/add' as never)}

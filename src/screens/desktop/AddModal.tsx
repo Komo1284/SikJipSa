@@ -15,17 +15,20 @@ import { useRouter } from 'expo-router';
 import { Plus, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, TextInput, View, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
-const STEP_TITLES = ['어떤 식물인가요?', '이름과 공간을 알려주세요', '돌보는 리듬과 환경을 설정할게요'];
 const CYCLES = [3, 5, 7, 10, 14];
-const LIGHTS = ['강한 직사광', '밝은 간접광', '반그늘', '약한 그늘'];
-const HUMIDITIES = ['매우 높음', '높음', '보통', '낮음'];
 
 export function DesktopAddModal() {
+  const { t } = useTranslation();
   const { palette, radii, shadows, weights } = useTheme();
   const router = useRouter();
   const addPlant = usePlantStore((s) => s.addPlant);
   const locations = useLocationStore((s) => s.locations);
+
+  const STEP_TITLES = [t('desktop.step1Title'), t('desktop.step2Title'), t('desktop.step3Title')];
+  const LIGHTS = [t('desktop.lightStrong'), t('desktop.lightBright'), t('desktop.lightPartial'), t('desktop.lightLow')];
+  const HUMIDITIES = [t('desktop.humidityVeryHigh'), t('desktop.humidityHigh'), t('desktop.humidityNormal'), t('desktop.humidityLow')];
 
   const [step, setStep] = useState(0);
   const [seed, setSeed] = useState<(typeof SEED_PLANTS)[number] | null>(null);
@@ -34,8 +37,8 @@ export function DesktopAddModal() {
   const [cycle, setCycle] = useState(7);
   const [lastWater, setLastWater] = useState(toISODate(new Date()));
   const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [light, setLight] = useState<string>('밝은 간접광');
-  const [humidity, setHumidity] = useState<string>('보통');
+  const [light, setLight] = useState<string>(t('desktop.lightBright'));
+  const [humidity, setHumidity] = useState<string>(t('desktop.humidityNormal'));
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -55,7 +58,7 @@ export function DesktopAddModal() {
   const pickPhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('권한 필요', '사진첩 접근 권한을 허용해주세요.');
+      Alert.alert(t('desktop.permissionRequired'), t('desktop.photoPermissionMessage'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -80,7 +83,7 @@ export function DesktopAddModal() {
           const uploaded = await repos.storage.uploadPhoto(tempId, photoUri);
           photoUrl = uploaded.publicUrl;
         } catch (e) {
-          Alert.alert('사진 업로드 실패', humanizeError(e));
+          Alert.alert(t('desktop.photoUploadFailed'), humanizeError(e));
           setBusy(false);
           return;
         }
@@ -90,7 +93,7 @@ export function DesktopAddModal() {
         id: tempId,
         name: name || base.name,
         species: base.species,
-        location: location || '거실',
+        location: location || t('desktop.defaultLocation'),
         light,
         humidity,
         waterCycle: cycle,
@@ -148,7 +151,7 @@ export function DesktopAddModal() {
         >
           <View>
             <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1.4, marginBottom: 4 }}>
-              단계 {step + 1} / 3
+              {t('desktop.stepIndicator', { n: step + 1 })}
             </ThemedText>
             <ThemedText family="serif" style={{ fontSize: 24, lineHeight: 28, fontFamily: weights.serifRegular }}>
               {STEP_TITLES[step]}
@@ -225,18 +228,18 @@ export function DesktopAddModal() {
                       >
                         <Plus size={18} color={palette.green} strokeWidth={2} />
                       </View>
-                      <ThemedText variant="tiny" color={palette.ink3}>사진 추가</ThemedText>
+                      <ThemedText variant="tiny" color={palette.ink3}>{t('desktop.addPhoto')}</ThemedText>
                     </View>
                   )}
                 </Pressable>
                 <View style={{ flex: 1 }}>
                   <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1, marginBottom: 6 }}>
-                    애칭
+                    {t('desktop.nickname')}
                   </ThemedText>
                   <TextInput
                     value={name}
                     onChangeText={setName}
-                    placeholder="예: 초록이"
+                    placeholder={t('desktop.nicknamePlaceholder')}
                     placeholderTextColor={palette.ink3}
                     style={{
                       paddingVertical: 12,
@@ -254,7 +257,7 @@ export function DesktopAddModal() {
               </View>
               <View>
                 <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1, marginBottom: 8 }}>
-                  공간
+                  {t('desktop.space')}
                 </ThemedText>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 }}>
                   {locations.map((l) => {
@@ -280,7 +283,7 @@ export function DesktopAddModal() {
             <View style={{ gap: 18 }}>
               <View>
                 <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1, marginBottom: 8 }}>
-                  물주기 주기
+                  {t('desktop.waterCycle')}
                 </ThemedText>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 }}>
                   {CYCLES.map((d) => {
@@ -304,7 +307,7 @@ export function DesktopAddModal() {
                               {d}
                             </ThemedText>
                             <ThemedText variant="tiny" color={palette.ink3}>
-                              일
+                              {t('desktop.dayUnit')}
                             </ThemedText>
                           </View>
                         </HoverPressable>
@@ -316,7 +319,7 @@ export function DesktopAddModal() {
 
               <View>
                 <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1, marginBottom: 6 }}>
-                  마지막 물 준 날
+                  {t('desktop.lastWateredDate')}
                 </ThemedText>
                 <TextInput
                   value={lastWater}
@@ -339,7 +342,7 @@ export function DesktopAddModal() {
 
               <View>
                 <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1, marginBottom: 8 }}>
-                  광량
+                  {t('desktop.light')}
                 </ThemedText>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 }}>
                   {LIGHTS.map((l) => {
@@ -361,7 +364,7 @@ export function DesktopAddModal() {
 
               <View>
                 <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1, marginBottom: 8 }}>
-                  습도
+                  {t('desktop.humidity')}
                 </ThemedText>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 }}>
                   {HUMIDITIES.map((h) => {
@@ -383,12 +386,12 @@ export function DesktopAddModal() {
 
               <View>
                 <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ letterSpacing: 1, marginBottom: 6 }}>
-                  메모 (선택)
+                  {t('desktop.memoOptional')}
                 </ThemedText>
                 <TextInput
                   value={note}
                   onChangeText={setNote}
-                  placeholder="이 식물에 대한 관찰이나 주의사항"
+                  placeholder={t('desktop.memoPlaceholder')}
                   placeholderTextColor={palette.ink3}
                   multiline
                   style={{
@@ -425,12 +428,12 @@ export function DesktopAddModal() {
         >
           <Button
             variant="ghost"
-            label={step > 0 ? '이전' : '취소'}
+            label={step > 0 ? t('desktop.previous') : t('common.cancel')}
             onPress={() => (step > 0 ? setStep(step - 1) : close())}
             disabled={busy}
           />
           <Button
-            label={step < 2 ? '다음' : busy ? '저장 중…' : '완료'}
+            label={step < 2 ? t('common.next') : busy ? t('common.saving') : t('common.done')}
             onPress={() => (step < 2 ? setStep(step + 1) : submit())}
             disabled={busy}
           />

@@ -4,6 +4,7 @@ import { ThemedText } from '@/components/Typography';
 import { SHEET_CLOSE_DELAY } from '@/theme/animation';
 import { useTheme } from '@/theme/ThemeProvider';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 export type ActionItem = {
@@ -24,6 +25,7 @@ type Props = {
 };
 
 export function ActionSheet({ visible, onClose, title, actions }: Props) {
+  const { t } = useTranslation();
   const { palette, radii } = useTheme();
 
   const handle = (a: ActionItem) => {
@@ -102,7 +104,7 @@ export function ActionSheet({ visible, onClose, title, actions }: Props) {
           }}
         >
           <ThemedText variant="body" weight="medium" color={palette.ink2}>
-            취소
+            {t('common.cancel')}
           </ThemedText>
         </Tap>
       </View>

@@ -1,3 +1,4 @@
+import i18n from '@/i18n';
 import type { Plant } from '@/types/plant';
 import { parseISODate } from '@/utils/date';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,7 +21,7 @@ let permissionGranted = false;
 async function ensureAndroidChannel() {
   if (Platform.OS !== 'android') return;
   await Notifications.setNotificationChannelAsync('water', {
-    name: '물주기 알림',
+    name: i18n.t('notifications.waterChannelName'),
     importance: Notifications.AndroidImportance.DEFAULT,
     sound: 'default',
   });
@@ -101,8 +102,8 @@ export async function setReminderHour(hour: number): Promise<void> {
 async function ensureWaterCategory() {
   try {
     await Notifications.setNotificationCategoryAsync(WATER_CATEGORY, [
-      { identifier: SNOOZE_1H_ACTION, buttonTitle: '1시간 뒤', options: { opensAppToForeground: false } },
-      { identifier: SNOOZE_TOMORROW_ACTION, buttonTitle: '내일 다시', options: { opensAppToForeground: false } },
+      { identifier: SNOOZE_1H_ACTION, buttonTitle: i18n.t('notifications.snoozeOneHour'), options: { opensAppToForeground: false } },
+      { identifier: SNOOZE_TOMORROW_ACTION, buttonTitle: i18n.t('notifications.snoozeTomorrow'), options: { opensAppToForeground: false } },
     ]);
   } catch (e) {
     console.warn('[notifications] category setup failed:', e);
@@ -129,8 +130,10 @@ export async function snoozeWaterReminder(
     await Notifications.scheduleNotificationAsync({
       identifier: `${SNOOZE_PREFIX}${plant.id}`,
       content: {
-        title: `${plant.name} 물 줄 시간이에요`,
-        body: plant.location ? `${plant.location} · 다시 알려드려요` : '다시 알려드려요',
+        title: i18n.t('notifications.waterTitle', { name: plant.name }),
+        body: plant.location
+          ? i18n.t('notifications.snoozeBodyWithLocation', { location: plant.location })
+          : i18n.t('notifications.snoozeBody'),
         data: { plantId: plant.id, kind: 'water' },
         categoryIdentifier: WATER_CATEGORY,
       },
@@ -166,8 +169,10 @@ export async function scheduleWaterReminder(plant: Plant): Promise<boolean> {
     await Notifications.scheduleNotificationAsync({
       identifier: identifierFor(plant.id),
       content: {
-        title: `${plant.name} 물 줄 시간이에요`,
-        body: plant.location ? `${plant.location} · 오늘 한 번 살펴볼까요?` : '오늘 한 번 살펴볼까요?',
+        title: i18n.t('notifications.waterTitle', { name: plant.name }),
+        body: plant.location
+          ? i18n.t('notifications.waterBodyWithLocation', { location: plant.location })
+          : i18n.t('notifications.waterBody'),
         data: { plantId: plant.id, kind: 'water' },
         categoryIdentifier: WATER_CATEGORY,
       },

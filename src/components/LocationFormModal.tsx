@@ -5,6 +5,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import type { UserLocation } from '@/types/plant';
 import { X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Modal, Pressable, View } from 'react-native';
 
 type Props = {
@@ -14,14 +15,14 @@ type Props = {
   onClose: () => void;
 };
 
-const SCORE_HINT = {
-  light:   ['아주 어두움', '어두움', '보통', '밝음', '직사광'],
-  airflow: ['거의 없음', '약함', '보통', '잘 통함', '매우 잘 통함'],
-  weather: ['거의 영향 없음', '약간', '보통', '꽤 영향 받음', '바깥과 비슷'],
-};
-
 export function LocationFormModal({ visible, editing, onClose }: Props) {
+  const { t } = useTranslation();
   const { palette, radii, shadows, weights } = useTheme();
+  const SCORE_HINT = {
+    light:   t('settings.scoreHints.light', { returnObjects: true }) as string[],
+    airflow: t('settings.scoreHints.airflow', { returnObjects: true }) as string[],
+    weather: t('settings.scoreHints.weather', { returnObjects: true }) as string[],
+  };
   const add = useLocationStore((s) => s.add);
   const update = useLocationStore((s) => s.update);
   const locations = useLocationStore((s) => s.locations);
@@ -44,9 +45,9 @@ export function LocationFormModal({ visible, editing, onClose }: Props) {
 
   const submit = async () => {
     const trimmed = name.trim();
-    if (!trimmed) { Alert.alert('이름 필요', '공간 이름을 입력해주세요.'); return; }
+    if (!trimmed) { Alert.alert(t('settings.locationForm.nameRequiredTitle'), t('settings.locationForm.nameRequiredMessage')); return; }
     const dup = locations.find((l) => l.name === trimmed && l.id !== editing?.id);
-    if (dup) { Alert.alert('중복', '같은 이름의 공간이 이미 있어요.'); return; }
+    if (dup) { Alert.alert(t('settings.locationForm.duplicateTitle'), t('settings.locationForm.duplicateMessage')); return; }
 
     setBusy(true);
     try {
@@ -96,7 +97,7 @@ export function LocationFormModal({ visible, editing, onClose }: Props) {
             }}
           >
             <ThemedText family="serif" style={{ fontSize: 22, fontFamily: weights.serifRegular }}>
-              {editing ? '공간 수정' : '새 공간 추가'}
+              {editing ? t('settings.locationForm.editTitle') : t('settings.locationForm.addTitle')}
             </ThemedText>
             <Pressable onPress={onClose} hitSlop={8}>
               <X size={20} color={palette.ink3} strokeWidth={1.8} />
@@ -112,12 +113,12 @@ export function LocationFormModal({ visible, editing, onClose }: Props) {
                 color={palette.ink3}
                 style={{ marginBottom: 8, letterSpacing: 1 }}
               >
-                이름
+                {t('settings.locationForm.nameLabel')}
               </ThemedText>
               <FormInput
                 value={name}
                 onChangeText={setName}
-                placeholder="예: 온실장, 작업실"
+                placeholder={t('settings.locationForm.namePlaceholder')}
                 autoFocus={!editing}
                 style={{
                   paddingHorizontal: 14,
@@ -128,19 +129,19 @@ export function LocationFormModal({ visible, editing, onClose }: Props) {
             </View>
 
             <ScoreField
-              label="일조량"
+              label={t('settings.locationForm.lightLabel')}
               value={lightScore}
               onChange={setLightScore}
               hints={SCORE_HINT.light}
             />
             <ScoreField
-              label="공기 순환"
+              label={t('settings.locationForm.airflowLabel')}
               value={airflowScore}
               onChange={setAirflowScore}
               hints={SCORE_HINT.airflow}
             />
             <ScoreField
-              label="바깥 날씨 영향"
+              label={t('settings.locationForm.weatherLabel')}
               value={weatherScore}
               onChange={setWeatherScore}
               hints={SCORE_HINT.weather}
@@ -169,7 +170,7 @@ export function LocationFormModal({ visible, editing, onClose }: Props) {
                 alignItems: 'center',
               }}
             >
-              <ThemedText variant="meta" weight="medium" color={palette.ink2}>취소</ThemedText>
+              <ThemedText variant="meta" weight="medium" color={palette.ink2}>{t('common.cancel')}</ThemedText>
             </Pressable>
             <Pressable
               onPress={submit}
@@ -184,7 +185,7 @@ export function LocationFormModal({ visible, editing, onClose }: Props) {
               }}
             >
               <ThemedText variant="meta" weight="semibold" color={palette.bg}>
-                {busy ? '저장 중…' : (editing ? '수정' : '추가')}
+                {busy ? t('common.saving') : (editing ? t('settings.locationForm.submitEdit') : t('common.add'))}
               </ThemedText>
             </Pressable>
           </View>

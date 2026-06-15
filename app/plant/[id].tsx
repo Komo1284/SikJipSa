@@ -17,6 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Camera, ChevronLeft, Droplet, Flower2, MoreHorizontal, Pencil, Scissors, Sprout, Sun, Trash2 } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Image, Linking, Pressable, ScrollView, View } from 'react-native';
 import { Tap } from '@/components/Tap';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +25,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 type Tab = 'care' | 'env' | 'history';
 
 export default function PlantDetail() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { palette } = useTheme();
   const { isDesktop } = useResponsive();
@@ -33,9 +35,9 @@ export default function PlantDetail() {
     return (
       <View style={{ flex: 1, backgroundColor: palette.bg }}>
         <EmptyState
-          title="찾을 수 없는 식물이에요"
-          description={'삭제되었거나 다른 계정의 식물일 수 있어요.'}
-          actionLabel="돌아가기"
+          title={t('plantDetail.notFoundTitle')}
+          description={t('plantDetail.notFoundDescription')}
+          actionLabel={t('plantDetail.goBack')}
           onAction={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'))}
         />
       </View>
@@ -46,6 +48,7 @@ export default function PlantDetail() {
 }
 
 function DetailMobile({ plant }: { plant: Plant }) {
+  const { t } = useTranslation();
   const { palette, radii, shadows, weights, resolved } = useTheme();
   const insets = useSafeAreaInsets();
   const tabletCap = useTabletContentCap(680);
@@ -77,7 +80,7 @@ function DetailMobile({ plant }: { plant: Plant }) {
 
   const effectiveDate = plant.recommendedNextWater ?? plant.nextWater;
   const wDays = daysBetween(TODAY, effectiveDate);
-  const wLabel = wDays < 0 ? `${-wDays}d 지남` : wDays === 0 ? '오늘' : `${wDays}d`;
+  const wLabel = wDays < 0 ? t('plantDetail.daysOverdue', { n: -wDays }) : wDays === 0 ? t('common.today') : `${wDays}d`;
   const wTone = wDays < 0 ? palette.warn : wDays === 0 ? palette.drop : palette.ink;
 
   // Next fertilizer = last_fert + fert_cycle. Show D-day relative to today.
@@ -89,15 +92,15 @@ function DetailMobile({ plant }: { plant: Plant }) {
     } catch { return plant.lastFert; }
   })();
   const fDays = daysBetween(TODAY, fertNextDate);
-  const fLabel = fDays < 0 ? `${-fDays}d 지남` : fDays === 0 ? '오늘' : `${fDays}d`;
+  const fLabel = fDays < 0 ? t('plantDetail.daysOverdue', { n: -fDays }) : fDays === 0 ? t('common.today') : `${fDays}d`;
   const fTone = fDays < 0 ? palette.warn : fDays <= 7 ? palette.bloom : palette.ink;
 
   const changePhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('사진첩 권한 필요', '사진을 고르려면 사진첩 접근을 허용해주세요.', [
-        { text: '취소', style: 'cancel' },
-        { text: '설정 열기', onPress: () => Linking.openSettings() },
+      Alert.alert(t('plantDetail.photoPermissionTitle'), t('plantDetail.photoPermissionMessage'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.openSettings'), onPress: () => Linking.openSettings() },
       ]);
       return;
     }
@@ -110,15 +113,15 @@ function DetailMobile({ plant }: { plant: Plant }) {
       const uploaded = await repos.storage.uploadPhoto(plant.id, result.assets[0].uri);
       await updatePlantPhoto(plant.id, uploaded.publicUrl);
     } catch (e) {
-      Alert.alert('사진 교체 실패', humanizeError(e));
+      Alert.alert(t('plantDetail.photoReplaceFailed'), humanizeError(e));
     }
   };
 
   const confirmDelete = () => {
-    Alert.alert(plant.name, '정말 삭제할까요? 삭제 후에는 되돌릴 수 없어요. (돌봄 기록은 보존돼요)', [
-      { text: '취소', style: 'cancel' },
+    Alert.alert(plant.name, t('plantDetail.deleteConfirmMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: '삭제', style: 'destructive',
+        text: t('common.delete'), style: 'destructive',
         onPress: async () => {
           haptics.heavy();
           await deletePlant(plant.id);
@@ -135,9 +138,9 @@ function DetailMobile({ plant }: { plant: Plant }) {
   const addPhotoLog = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('사진첩 권한 필요', '사진을 고르려면 사진첩 접근을 허용해주세요.', [
-        { text: '취소', style: 'cancel' },
-        { text: '설정 열기', onPress: () => Linking.openSettings() },
+      Alert.alert(t('plantDetail.photoPermissionTitle'), t('plantDetail.photoPermissionMessage'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.openSettings'), onPress: () => Linking.openSettings() },
       ]);
       return;
     }
@@ -150,29 +153,29 @@ function DetailMobile({ plant }: { plant: Plant }) {
       const uploaded = await repos.storage.uploadPhoto(plant.id, result.assets[0].uri);
       await logPhoto(plant.id, uploaded.publicUrl);
     } catch (e) {
-      Alert.alert('사진 기록 실패', humanizeError(e));
+      Alert.alert(t('plantDetail.photoLogFailed'), humanizeError(e));
     }
   };
 
   const menuActions: ActionItem[] = [
     {
       key: 'edit',
-      label: '정보 수정',
-      sub: '이름·주기·환경 등',
+      label: t('plantDetail.menuEditLabel'),
+      sub: t('plantDetail.menuEditSub'),
       icon: <Pencil size={18} color={palette.ink2} strokeWidth={1.8} />,
       onPress: editPlant,
     },
     {
       key: 'photo',
-      label: '대표 사진 교체',
-      sub: '카드와 상세에 보이는 사진',
+      label: t('plantDetail.menuPhotoLabel'),
+      sub: t('plantDetail.menuPhotoSub'),
       icon: <Camera size={18} color={palette.ink2} strokeWidth={1.8} />,
       onPress: changePhoto,
     },
     {
       key: 'delete',
-      label: '식물 삭제',
-      sub: '기록은 보존돼요',
+      label: t('plantDetail.menuDeleteLabel'),
+      sub: t('plantDetail.menuDeleteSub'),
       icon: <Trash2 size={18} color={palette.warn} strokeWidth={1.8} />,
       destructive: true,
       onPress: confirmDelete,
@@ -230,7 +233,7 @@ function DetailMobile({ plant }: { plant: Plant }) {
       >
         <Tap onPress={() => setReasonOpen(true)} style={{ flex: 1 }}>
           <StatCell
-            label={plant.recommendedNextWater ? '추천 물주기' : '다음 물'}
+            label={plant.recommendedNextWater ? t('plantDetail.statRecommendedWater') : t('plantDetail.statNextWater')}
             value={wLabel}
             color={wTone}
             badge={plant.recommendationDelta != null && plant.recommendationDelta !== 0
@@ -239,9 +242,9 @@ function DetailMobile({ plant }: { plant: Plant }) {
           />
         </Tap>
         <Divider palette={palette} />
-        <StatCell label="다음 비료" value={fLabel} color={fTone} />
+        <StatCell label={t('plantDetail.statNextFert')} value={fLabel} color={fTone} />
         <Divider palette={palette} />
-        <StatCell label="습도" value={shortHumidity(plant.humidity)} color={palette.ink} />
+        <StatCell label={t('plantDetail.statHumidity')} value={shortHumidity(plant.humidity, t)} color={palette.ink} />
       </View>
 
       <ScrollView
@@ -251,36 +254,36 @@ function DetailMobile({ plant }: { plant: Plant }) {
       >
         <QuickAction
           icon={<Droplet size={20} color={palette.drop} strokeWidth={1.8} fill={palette.drop} />}
-          label="물주기"
-          sub={`${plant.waterCycle}일 주기`}
+          label={t('plantDetail.quickWater')}
+          sub={t('plantDetail.cycleDays', { n: plant.waterCycle })}
           tone={palette.dropSoft}
           onPress={() => setCareSheet('water')}
         />
         <QuickAction
           icon={<Flower2 size={20} color={palette.bloom} strokeWidth={1.8} />}
-          label="비료"
-          sub={`${plant.fertCycle}일 주기`}
+          label={t('plantDetail.quickFert')}
+          sub={t('plantDetail.cycleDays', { n: plant.fertCycle })}
           tone={palette.bloomSoft}
           onPress={() => setCareSheet('fert')}
         />
         <QuickAction
           icon={<Scissors size={18} color={palette.ink2} strokeWidth={1.8} />}
-          label="가지치기"
-          sub="기록"
+          label={t('plantDetail.quickPrune')}
+          sub={t('plantDetail.quickLogSub')}
           tone={palette.surface}
           onPress={() => setCareSheet('prune')}
         />
         <QuickAction
           icon={<Sprout size={18} color={palette.earth} strokeWidth={1.8} />}
-          label="분갈이"
-          sub="기록"
+          label={t('plantDetail.quickRepot')}
+          sub={t('plantDetail.quickLogSub')}
           tone={palette.surface}
           onPress={() => setCareSheet('repot')}
         />
         <QuickAction
           icon={<Camera size={20} color={palette.ink2} strokeWidth={1.8} />}
-          label="사진"
-          sub="성장 기록"
+          label={t('plantDetail.quickPhoto')}
+          sub={t('plantDetail.quickPhotoSub')}
           tone={palette.surface}
           onPress={addPhotoLog}
         />
@@ -290,9 +293,9 @@ function DetailMobile({ plant }: { plant: Plant }) {
         <View style={{ flexDirection: 'row', gap: 24, borderBottomWidth: 1, borderColor: palette.line }}>
           {(
             [
-              ['care', '돌봄'],
-              ['env', '환경'],
-              ['history', '기록'],
+              ['care', t('plantDetail.tabCare')],
+              ['env', t('plantDetail.tabEnv')],
+              ['history', t('plantDetail.tabHistory')],
             ] as const
           ).map(([k, l]) => {
             const active = tab === k;
@@ -390,18 +393,19 @@ function Divider({ palette }: { palette: ReturnType<typeof useTheme>['palette'] 
  * 앞 단어만 잘라쓰면 "매우" 같은 의미 없는 토막이 나온다. 한국어 직관에 맞춰
  * 알려진 4단계로 정규화해서 짧게 표기.
  */
-function shortHumidity(raw: string | undefined): string {
+function shortHumidity(raw: string | undefined, t: (key: string) => string): string {
   if (!raw) return '—';
   const s = raw.trim();
-  if (s.includes('매우 높') || s.includes('70')) return '매우 높음';
-  if (s.includes('높')) return '높음';
-  if (s.includes('보통')) return '보통';
-  if (s.includes('매우 낮')) return '매우 낮음';
-  if (s.includes('낮')) return '낮음';
+  if (s.includes('매우 높') || s.includes('70')) return t('plantDetail.humidityVeryHigh');
+  if (s.includes('높')) return t('plantDetail.humidityHigh');
+  if (s.includes('보통')) return t('plantDetail.humidityNormal');
+  if (s.includes('매우 낮')) return t('plantDetail.humidityVeryLow');
+  if (s.includes('낮')) return t('plantDetail.humidityLow');
   return s.length > 6 ? s.slice(0, 6) + '…' : s;
 }
 
 function RecommendationSheet({ visible, plant, onClose }: { visible: boolean; plant: Plant; onClose: () => void }) {
+  const { t } = useTranslation();
   const { palette, radii, weights } = useTheme();
   return (
     <BottomSheet visible={visible} onClose={onClose} maxHeight={0.65}>
@@ -409,30 +413,30 @@ function RecommendationSheet({ visible, plant, onClose }: { visible: boolean; pl
           column, so the title needs breathing room or its top stroke clips. */}
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, paddingTop: 16, gap: 16 }}>
         <ThemedText family="serif" style={{ fontSize: 22, lineHeight: 30, fontFamily: weights.serifRegular }}>
-          추천 물주기
+          {t('plantDetail.recommendedWaterTitle')}
         </ThemedText>
         <View style={{ padding: 16, backgroundColor: palette.greenBg, borderRadius: radii.md, gap: 6 }}>
           <ThemedText variant="tiny" family="mono" uppercase color={palette.greenDeep} style={{ letterSpacing: 1 }}>
-            왜 이렇게 추천했어요?
+            {t('plantDetail.recommendationReasonLabel')}
           </ThemedText>
           <ThemedText variant="body" color={palette.ink} style={{ lineHeight: 22 }}>
-            {plant.recommendationReason ?? '아직 환경 데이터가 모이지 않았어요. 위치 정보를 켜면 더 정확해져요.'}
+            {plant.recommendationReason ?? t('plantDetail.recommendationReasonFallback')}
           </ThemedText>
         </View>
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <View style={{ flex: 1, padding: 12, backgroundColor: palette.surface, borderRadius: radii.sm }}>
-            <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3}>절대 주기</ThemedText>
+            <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3}>{t('plantDetail.baseCycle')}</ThemedText>
             <ThemedText variant="body" weight="semibold" style={{ marginTop: 4 }}>
-              {plant.waterCycle}일마다
+              {t('plantDetail.everyNDays', { n: plant.waterCycle })}
             </ThemedText>
           </View>
           <View style={{ flex: 1, padding: 12, backgroundColor: palette.surface, borderRadius: radii.sm }}>
-            <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3}>보정</ThemedText>
+            <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3}>{t('plantDetail.adjustment')}</ThemedText>
             <ThemedText variant="body" weight="semibold" color={(plant.recommendationDelta ?? 0) > 0 ? palette.bloom : (plant.recommendationDelta ?? 0) < 0 ? palette.drop : palette.ink} style={{ marginTop: 4 }}>
               {plant.recommendationDelta == null ? '—'
-                : plant.recommendationDelta > 0 ? `+${plant.recommendationDelta}일`
-                : plant.recommendationDelta < 0 ? `${plant.recommendationDelta}일`
-                : '0일'}
+                : plant.recommendationDelta > 0 ? t('plantDetail.deltaDaysPlus', { n: plant.recommendationDelta })
+                : plant.recommendationDelta < 0 ? t('plantDetail.deltaDays', { n: plant.recommendationDelta })
+                : t('plantDetail.deltaDaysZero')}
             </ThemedText>
           </View>
         </View>
@@ -499,6 +503,7 @@ function QuickAction({
 }
 
 function CareTab({ plant }: { plant: import('@/types/plant').Plant }) {
+  const { t } = useTranslation();
   const { palette, radii } = useTheme();
 
   const row = (icon: React.ReactNode, label: string, value: string, sub?: string) => (
@@ -544,20 +549,20 @@ function CareTab({ plant }: { plant: import('@/types/plant').Plant }) {
     <View>
       {row(
         <Droplet size={18} color={palette.drop} fill={palette.drop} />,
-        '물주기 주기',
-        `${plant.waterCycle}일마다`,
-        `마지막: ${formatMD(plant.lastWater)} · 다음(추천): ${formatMD(plant.recommendedNextWater ?? plant.nextWater)}`,
+        t('plantDetail.waterCycleLabel'),
+        t('plantDetail.everyNDays', { n: plant.waterCycle }),
+        t('plantDetail.lastAndNextRecommended', { last: formatMD(plant.lastWater), next: formatMD(plant.recommendedNextWater ?? plant.nextWater) }),
       )}
-      {row(<Flower2 size={18} color={palette.bloom} strokeWidth={1.8} />, '비료', `${plant.fertCycle}일마다`, `마지막: ${formatMD(plant.lastFert)}`)}
+      {row(<Flower2 size={18} color={palette.bloom} strokeWidth={1.8} />, t('plantDetail.fertLabel'), t('plantDetail.everyNDays', { n: plant.fertCycle }), t('plantDetail.lastOnly', { last: formatMD(plant.lastFert) }))}
       {/* 광량/습도(현재 환경)는 공간 설정의 lightScore/airflowScore 가 source of truth.
           기존 데이터에 값이 남아있는 식물만 표시한다. */}
-      {plant.light ? row(<Sun size={18} color={palette.earth} strokeWidth={1.8} />, '광량', plant.light) : null}
-      {plant.humidity ? row(<Droplet size={18} color={palette.ink3} strokeWidth={1.8} />, '습도', plant.humidity) : null}
+      {plant.light ? row(<Sun size={18} color={palette.earth} strokeWidth={1.8} />, t('plantDetail.lightLabel'), plant.light) : null}
+      {plant.humidity ? row(<Droplet size={18} color={palette.ink3} strokeWidth={1.8} />, t('plantDetail.humidityLabel'), plant.humidity) : null}
 
       {plant.note ? (
         <View style={{ backgroundColor: palette.greenBg, padding: 16, borderRadius: radii.md, marginTop: 6 }}>
           <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 6 }}>
-            메모
+            {t('plantDetail.noteLabel')}
           </ThemedText>
           <ThemedText variant="meta" style={{ fontSize: 14, lineHeight: 22 }}>
             {plant.note}
@@ -569,28 +574,29 @@ function CareTab({ plant }: { plant: import('@/types/plant').Plant }) {
 }
 
 function EnvTab({ plant }: { plant: import('@/types/plant').Plant }) {
+  const { t } = useTranslation();
   const { palette, radii } = useTheme();
   // 광량/습도 카테고리 문자열은 더 이상 입력받지 않으므로 값이 있는 식물만 막대를
   // 그린다. 신규 식물은 "물 요구" 한 줄만 보이는 게 정상.
   const bars: { label: string; value: number; detail: string }[] = [];
   if (plant.light) {
     bars.push({
-      label: '광량',
+      label: t('plantDetail.lightLabel'),
       value: plant.light.includes('강한') ? 0.95 : plant.light.includes('직사') ? 0.8 : plant.light.includes('밝은') ? 0.6 : 0.35,
       detail: plant.light,
     });
   }
   if (plant.humidity) {
     bars.push({
-      label: '습도',
+      label: t('plantDetail.humidityLabel'),
       value: plant.humidity.includes('매우 높음') ? 0.9 : plant.humidity.includes('높음') ? 0.75 : plant.humidity.includes('보통') ? 0.5 : 0.2,
       detail: plant.humidity,
     });
   }
   bars.push({
-    label: '물 요구',
+    label: t('plantDetail.waterDemandLabel'),
     value: 1 - Math.min(plant.waterCycle / 30, 1),
-    detail: `${plant.waterCycle}일 주기`,
+    detail: t('plantDetail.cycleDays', { n: plant.waterCycle }),
   });
   return (
     <View style={{ backgroundColor: palette.surface, padding: 20, borderRadius: radii.lg, gap: 18 }}>
@@ -612,11 +618,11 @@ function EnvTab({ plant }: { plant: import('@/types/plant').Plant }) {
 
       <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
         <View style={{ flex: 1, padding: 14, backgroundColor: palette.bg, borderRadius: radii.sm }}>
-          <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3}>위치</ThemedText>
+          <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3}>{t('plantDetail.locationLabel')}</ThemedText>
           <ThemedText variant="body" weight="medium" style={{ marginTop: 4 }}>{plant.location}</ThemedText>
         </View>
         <View style={{ flex: 1, padding: 14, backgroundColor: palette.bg, borderRadius: radii.sm }}>
-          <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3}>학명</ThemedText>
+          <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3}>{t('plantDetail.speciesLabel')}</ThemedText>
           <ThemedText variant="meta" weight="medium" italic style={{ marginTop: 4 }}>{plant.species}</ThemedText>
         </View>
       </View>
@@ -624,25 +630,35 @@ function EnvTab({ plant }: { plant: import('@/types/plant').Plant }) {
   );
 }
 
-const ACTION_META: Record<LogEntry['action'], { label: string; color: (p: ReturnType<typeof useTheme>['palette']) => string }> = {
-  water: { label: '물주기', color: (p) => p.drop },
-  fert:  { label: '비료',   color: (p) => p.bloom },
-  prune: { label: '가지치기', color: (p) => p.ink2 },
-  repot: { label: '분갈이', color: (p) => p.ink2 },
-  note:  { label: '메모',   color: (p) => p.ink2 },
-  photo: { label: '사진 기록', color: (p) => p.green },
+const ACTION_COLORS: Record<LogEntry['action'], (p: ReturnType<typeof useTheme>['palette']) => string> = {
+  water: (p) => p.drop,
+  fert:  (p) => p.bloom,
+  prune: (p) => p.ink2,
+  repot: (p) => p.ink2,
+  note:  (p) => p.ink2,
+  photo: (p) => p.green,
 };
 
 function HistoryTab({ log }: { log: LogEntry[] }) {
+  const { t } = useTranslation();
   const { palette, radii } = useTheme();
   const [zoomed, setZoomed] = useState<string | null>(null);
+
+  const ACTION_META: Record<LogEntry['action'], { label: string; color: (p: ReturnType<typeof useTheme>['palette']) => string }> = {
+    water: { label: t('plantDetail.actionWater'), color: ACTION_COLORS.water },
+    fert:  { label: t('plantDetail.actionFert'),  color: ACTION_COLORS.fert },
+    prune: { label: t('plantDetail.actionPrune'), color: ACTION_COLORS.prune },
+    repot: { label: t('plantDetail.actionRepot'), color: ACTION_COLORS.repot },
+    note:  { label: t('plantDetail.actionNote'),  color: ACTION_COLORS.note },
+    photo: { label: t('plantDetail.actionPhoto'), color: ACTION_COLORS.photo },
+  };
 
   if (log.length === 0) {
     return (
       <EmptyState
         compact
-        title="아직 기록이 없어요"
-        description={'물주기·비료·분갈이 같은 돌봄 기록이\n시간순으로 여기에 쌓여요.'}
+        title={t('plantDetail.historyEmptyTitle')}
+        description={t('plantDetail.historyEmptyDescription')}
       />
     );
   }

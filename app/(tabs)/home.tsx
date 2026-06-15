@@ -18,6 +18,7 @@ import { formatKickerShort, plantStatus, soonList, todayList } from '@/utils/dat
 import { useRouter } from 'expo-router';
 import { Bell, ChevronRight, Leaf, Sprout } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -28,6 +29,7 @@ export default function HomeScreen() {
 }
 
 function HomeMobile() {
+  const { t } = useTranslation();
   const { palette, radii, shadows, weights, typography } = useTheme();
   const insets = useSafeAreaInsets();
   const tabletCap = useTabletContentCap();
@@ -107,20 +109,20 @@ function HomeMobile() {
           // top stroke of 좋/정. Bumped to 54 for a comfortable optical box.
           style={{ fontSize: 42, lineHeight: 54, marginTop: 18, fontFamily: weights.serifRegular, letterSpacing: -0.84 }}
         >
-          오늘의{'\n'}
+          {t('home.heroTitle')}{'\n'}
           <ThemedText
             family="serif"
             italic
             style={{ fontSize: 42, lineHeight: 54, fontFamily: weights.serifItalic, color: palette.green, letterSpacing: -0.84 }}
           >
-            식물 일기.
+            {t('home.heroTitleAccent')}
           </ThemedText>
         </ThemedText>
 
         <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 8 }}>
           {todays.length === 0
-            ? '오늘 챙길 식물은 없어요. 잠깐 들여다봐도 좋아요.'
-            : <>오늘 챙길 식물 <ThemedText variant="meta" weight="semibold">{todays.length}개</ThemedText></>}
+            ? t('home.tasksTodayNone')
+            : <>{t('home.tasksTodayPrefix')} <ThemedText variant="meta" weight="semibold">{t('home.tasksTodayCountLabel', { n: todays.length })}</ThemedText></>}
         </ThemedText>
       </View>
 
@@ -136,9 +138,9 @@ function HomeMobile() {
         }}
       >
         {[
-          { n: todays.length, lbl: '오늘', c: palette.drop },
-          { n: soon.length, lbl: '곧', c: palette.bloom },
-          { n: plants.length, lbl: '전체', c: palette.green },
+          { n: todays.length, lbl: t('home.statToday'), c: palette.drop },
+          { n: soon.length, lbl: t('home.statSoon'), c: palette.bloom },
+          { n: plants.length, lbl: t('home.statAll'), c: palette.green },
         ].map((s, i) => (
           <View
             key={s.lbl}
@@ -168,7 +170,7 @@ function HomeMobile() {
         ))}
       </View>
 
-      <SectionHeader title="오늘 할 일" trailing={`${todays.length}개`} />
+      <SectionHeader title={t('home.todayTasks')} trailing={t('home.countSuffix', { n: todays.length })} />
       {plantsLoading && !plantsLoaded ? (
         <View style={{ paddingHorizontal: 20, gap: 10 }}>
           <SkeletonTaskRow />
@@ -179,9 +181,9 @@ function HomeMobile() {
           <EmptyState
             compact
             icon={<Sprout size={28} color={palette.green} strokeWidth={1.6} />}
-            title="오늘 할 일이 없어요"
-            description="모든 식물이 잘 지내고 있어요. 잠깐 들여다봐도 좋아요."
-            actionLabel="내 식물 보러 가기"
+            title={t('home.emptyTodayTitle')}
+            description={t('home.emptyTodayDescription')}
+            actionLabel={t('home.viewMyPlants')}
             onAction={() => router.push('/(tabs)/list')}
           />
         </View>
@@ -191,7 +193,7 @@ function HomeMobile() {
 
   const listFooter = (
     <>
-      <SectionHeader title="곧 돌봐야 할 식물" trailing="전체 보기" onTrailing={() => router.push('/(tabs)/list')} />
+      <SectionHeader title={t('home.careSoon')} trailing={t('home.viewAll')} onTrailing={() => router.push('/(tabs)/list')} />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -205,7 +207,7 @@ function HomeMobile() {
           ))}
       </ScrollView>
 
-      <SectionHeader title="공간별 식물" />
+      <SectionHeader title={t('home.plantsBySpace')} />
       <View style={{ paddingHorizontal: 20, gap: 8 }}>
         {locations.map((loc) => {
           const items = plants.filter((p) => p.location === loc.name);
@@ -243,7 +245,7 @@ function HomeMobile() {
                   {loc.name}
                 </ThemedText>
                 <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 2 }}>
-                  {items.length === 0 ? '아직 식물이 없어요' : `식물 ${items.length}개`}
+                  {items.length === 0 ? t('home.spaceEmpty') : t('home.plantCount', { n: items.length })}
                 </ThemedText>
               </View>
               <ChevronRight size={16} color={palette.ink3} strokeWidth={1.6} />
