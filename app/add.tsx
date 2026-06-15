@@ -16,12 +16,7 @@ import { Check, ChevronLeft, Plus } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const STEPS = [
-  { n: 1, title: '어떤 식물인가요?', sub: '이름과 종류를 알려주세요.' },
-  { n: 2, title: '어디에 두었나요?', sub: '공간에 따라 환경이 달라요.' },
-  { n: 3, title: '돌보는 리듬은?',   sub: '물주기 주기를 정해주세요.' },
-];
+import { useTranslation } from 'react-i18next';
 
 const CYCLES = [3, 5, 7, 10, 14, 21, 30];
 
@@ -32,8 +27,15 @@ export default function AddScreen() {
 }
 
 function AddMobile() {
+  const { t } = useTranslation();
   const { palette, radii, weights, resolved: themeMode } = useTheme();
   const insets = useSafeAreaInsets();
+
+  const STEPS = [
+    { n: 1, title: t('add.step1Title'), sub: t('add.step1Sub') },
+    { n: 2, title: t('add.step2Title'), sub: t('add.step2Sub') },
+    { n: 3, title: t('add.step3Title'), sub: t('add.step3Sub') },
+  ];
   const addPlant = usePlantStore((s) => s.addPlant);
   const locations = useLocationStore((s) => s.locations);
 
@@ -55,7 +57,7 @@ function AddMobile() {
   const pickPhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('권한 필요', '사진첩 접근 권한을 허용해주세요.');
+      Alert.alert(t('add.permissionRequired'), t('add.photoPermissionMessage'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -84,7 +86,7 @@ function AddMobile() {
           const uploaded = await repos.storage.uploadPhoto(tempId, photoUri);
           photoUrl = uploaded.publicUrl;
         } catch (e) {
-          Alert.alert('사진 업로드 실패', humanizeError(e));
+          Alert.alert(t('add.photoUploadFailed'), humanizeError(e));
           setBusy(false);
           return;
         }
@@ -92,9 +94,9 @@ function AddMobile() {
 
       const plant: Plant = {
         id: tempId,
-        name: name || '이름 없는 식물',
+        name: name || t('add.defaultPlantName'),
         species: species || '',
-        location: location || '거실',
+        location: location || t('add.defaultLocation'),
         // 광량/습도(현재 환경)는 location 의 lightScore/airflowScore 로 대체했고
         // 식물 단위 입력은 더 이상 받지 않는다 — 빈 문자열로 저장.
         light: '',
@@ -122,7 +124,7 @@ function AddMobile() {
   const next = () => {
     if (step === 1 && !name.trim()) {
       haptics.error();
-      setStepError('식물 이름을 입력해주세요.');
+      setStepError(t('add.nameRequired'));
       return;
     }
     // 공간이 하나라도 있으면 명시적으로 고르게 한다 — 예전엔 말없이
@@ -130,7 +132,7 @@ function AddMobile() {
     // 계정만 기본값으로 통과시켜 진행이 막히지 않게 한다.
     if (step === 2 && locations.length > 0 && !location) {
       haptics.error();
-      setStepError('식물을 둘 공간을 선택해주세요.');
+      setStepError(t('add.locationRequired'));
       return;
     }
     setStepError(null);
@@ -172,7 +174,7 @@ function AddMobile() {
         keyboardShouldPersistTaps="handled"
       >
         <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 10, letterSpacing: 1.3 }}>
-          STEP {step}/3
+          {t('add.stepIndicator', { step })}
         </ThemedText>
         <ThemedText family="serif" style={{ fontSize: 32, lineHeight: 36, fontFamily: weights.serifRegular, letterSpacing: -0.3 }}>
           {cur.title}
@@ -183,14 +185,14 @@ function AddMobile() {
 
         {step === 1 ? (
           <View style={{ gap: 16 }}>
-            <Field label="식물 이름">
+            <Field label={t('add.nameLabel')}>
               <FormInput
                 value={name}
-                onChangeText={(t) => {
-                  setName(t);
+                onChangeText={(text) => {
+                  setName(text);
                   if (stepError) setStepError(null);
                 }}
-                placeholder="예: 몬스테라"
+                placeholder={t('add.namePlaceholder')}
                 autoFocus
                 returnKeyType="next"
               />
@@ -200,7 +202,7 @@ function AddMobile() {
                 </ThemedText>
               ) : null}
             </Field>
-            <Field label="학명 (선택)">
+            <Field label={t('add.speciesLabel')}>
               <FormInput
                 value={species}
                 onChangeText={setSpecies}
@@ -235,14 +237,14 @@ function AddMobile() {
                   >
                     <Plus size={22} color={palette.green} strokeWidth={2} />
                   </View>
-                  <ThemedText variant="meta" weight="medium" color={palette.ink2}>사진 추가</ThemedText>
-                  <ThemedText variant="tiny" family="mono" color={palette.ink3}>권장 1:1</ThemedText>
+                  <ThemedText variant="meta" weight="medium" color={palette.ink2}>{t('add.addPhoto')}</ThemedText>
+                  <ThemedText variant="tiny" family="mono" color={palette.ink3}>{t('add.photoRecommend')}</ThemedText>
                 </>
               )}
             </Pressable>
             {photoUri ? (
               <Pressable onPress={() => setPhotoUri(null)} style={{ alignSelf: 'center', marginTop: 8 }}>
-                <ThemedText variant="tiny" color={palette.ink3}>사진 제거</ThemedText>
+                <ThemedText variant="tiny" color={palette.ink3}>{t('add.removePhoto')}</ThemedText>
               </Pressable>
             ) : null}
           </View>
@@ -276,7 +278,7 @@ function AddMobile() {
                       {loc.name}
                     </ThemedText>
                     <ThemedText variant="meta" color={active ? palette.bg : palette.ink3} style={{ marginTop: 3, opacity: active ? 0.8 : 1 }}>
-                      식물 {count}개
+                      {t('add.plantCount', { n: count })}
                     </ThemedText>
                   </View>
                   {active ? <Check size={18} color={palette.bg} strokeWidth={2.2} /> : null}
@@ -285,7 +287,7 @@ function AddMobile() {
             })}
             {locations.length === 0 ? (
               <ThemedText variant="meta" color={palette.ink3}>
-                공간이 없어요. 설정 탭에서 추가해주세요.
+                {t('add.noLocations')}
               </ThemedText>
             ) : null}
             {stepError && step === 2 ? (
@@ -298,9 +300,9 @@ function AddMobile() {
 
         {step === 3 ? (
           <View>
-            <Field label="물주기 주기">
+            <Field label={t('add.waterCycleLabel')}>
               <ThemedText variant="tiny" color={palette.ink3} style={{ marginTop: 2, lineHeight: 16 }}>
-                잘 모르겠다면 — 관엽 5~7일 · 허브 3~5일 · 다육/선인장 14~30일
+                {t('add.waterCycleHint')}
               </ThemedText>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
                 {CYCLES.map((d) => {
@@ -315,7 +317,7 @@ function AddMobile() {
                       }}
                     >
                       <ThemedText variant="meta" weight="medium" color={active ? palette.bg : palette.ink}>
-                        {d}일
+                        {t('add.cycleDays', { d })}
                       </ThemedText>
                     </Pressable>
                   );
@@ -323,7 +325,7 @@ function AddMobile() {
               </View>
             </Field>
 
-            <Field label="이 식물이 좋아하는 빛 (1~5)" style={{ marginTop: 22 }}>
+            <Field label={t('add.lightPrefLabel')} style={{ marginTop: 22 }}>
               <View style={{ flexDirection: 'row', gap: 6, marginTop: 4 }}>
                 {[1, 2, 3, 4, 5].map((n) => {
                   const active = lightPref === n;
@@ -346,7 +348,7 @@ function AddMobile() {
               </View>
             </Field>
 
-            <Field label="이 식물이 좋아하는 습도 (1~5)" style={{ marginTop: 22 }}>
+            <Field label={t('add.humidityPrefLabel')} style={{ marginTop: 22 }}>
               <View style={{ flexDirection: 'row', gap: 6, marginTop: 4 }}>
                 {[1, 2, 3, 4, 5].map((n) => {
                   const active = humidityPref === n;
@@ -369,11 +371,11 @@ function AddMobile() {
               </View>
             </Field>
 
-            <Field label="메모 (선택)" style={{ marginTop: 22 }}>
+            <Field label={t('add.noteLabel')} style={{ marginTop: 22 }}>
               <FormInput
                 value={note}
                 onChangeText={setNote}
-                placeholder="이 식물에 대한 관찰이나 주의사항"
+                placeholder={t('add.notePlaceholder')}
                 multiline
                 style={{ minHeight: 80, textAlignVertical: 'top' }}
               />
@@ -411,12 +413,12 @@ function AddMobile() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <ActivityIndicator color={palette.bg} />
               <ThemedText variant="body" weight="semibold" color={palette.bg} style={{ fontSize: 15 }}>
-                저장 중…
+                {t('common.saving')}
               </ThemedText>
             </View>
           ) : (
             <ThemedText variant="body" weight="semibold" color={palette.bg} style={{ fontSize: 15 }}>
-              {step < 3 ? '다음' : '식물 추가하기'}
+              {step < 3 ? t('common.next') : t('add.submit')}
             </ThemedText>
           )}
         </Pressable>
