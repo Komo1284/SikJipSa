@@ -1,1 +1,20 @@
-{}
+{
+  "heroTitle": "Today's",
+  "heroTitleAccent": "plant diary.",
+  "tasksTodayNone": "No plants need care today. Feel free to just check in.",
+  "tasksTodayPrefix": "Plants to care for today",
+  "tasksTodayCountLabel": "{{n}}",
+  "statToday": "Today",
+  "statSoon": "Soon",
+  "statAll": "All",
+  "todayTasks": "Today's tasks",
+  "countSuffix": "{{n}}",
+  "emptyTodayTitle": "Nothing to do today",
+  "emptyTodayDescription": "All your plants are doing well. Feel free to just check in.",
+  "viewMyPlants": "Go to my plants",
+  "careSoon": "Plants to care for soon",
+  "viewAll": "View all",
+  "plantsBySpace": "Plants by space",
+  "spaceEmpty": "No plants here yet",
+  "plantCount": "{{n}} plants"
+}

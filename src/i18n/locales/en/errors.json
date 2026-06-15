@@ -1,1 +1,11 @@
-{}
+{
+  "generic": "Something went wrong. Please try again in a moment.",
+  "network": "Please check your network connection.",
+  "playServices": "Google Play services aren't available. Please check your device settings.",
+  "sessionExpired": "Your session has expired. Please log in again.",
+  "forbidden": "You don't have access. Please log in again and try.",
+  "duplicate": "This item already exists.",
+  "payloadTooLarge": "That file is too large. Please try a smaller photo.",
+  "rateLimit": "Too many requests. Please try again in a moment.",
+  "serverError": "The server hit a temporary issue. Please try again in a moment."
+}

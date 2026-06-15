@@ -1,1 +1,17 @@
-{}
+{
+  "rainTotal": "{{mm}}mm total rainfall over the past 7 days",
+  "heatwave": "Heatwave averaging {{temp}}℃",
+  "coldwave": "Cold snap averaging {{temp}}℃",
+  "dry": "Dry air at {{humidity}}% humidity",
+  "humid": "Humid air at {{humidity}}% humidity",
+  "lightRich": "A spot with plenty of light",
+  "lightLow": "A spot with somewhat low light",
+  "humidityPrefDrier": "{{humidity}}%, drier than your plant's preferred humidity ({{expected}}%)",
+  "humidityPrefWetter": "{{humidity}}%, more humid than your plant's preferred humidity ({{expected}}%)",
+  "poorAirflow": "A poorly ventilated space",
+  "reasonDefault": "With no environmental adjustments, it follows the default {{days}}-day cycle.",
+  "dirLater": "Pushed back {{days}} days from usual",
+  "dirEarlier": "Moved up {{days}} days from usual",
+  "dirSame": "The cycle stays the same, but the environment has changed",
+  "reasonAdjusted": "{{phrases}}. {{direction}}."
+}

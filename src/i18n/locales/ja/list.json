@@ -1,1 +1,11 @@
-{}
+{
+  "title": "マイプラント",
+  "emptyTitle": "まだ登録された植物がありません",
+  "emptyDescription": "植物を追加して\nあなただけのお世話を始めましょう！",
+  "addPlant": "植物を追加する",
+  "searchPlaceholder": "植物の名前や種類で検索",
+  "filterAll": "すべて",
+  "noResultsTitle": "検索結果がありません",
+  "noResultsSearch": "別の名前や学名で検索してみてください。",
+  "noResultsSpace": "このスペースにはまだ植物がありません。"
+}

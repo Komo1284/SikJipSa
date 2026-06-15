@@ -1,1 +1,10 @@
-{}
+{
+  "waterChannelName": "Watering reminders",
+  "snoozeOneHour": "In 1 hour",
+  "snoozeTomorrow": "Tomorrow",
+  "waterTitle": "Time to water {{name}}",
+  "waterBody": "Want to check on it today?",
+  "waterBodyWithLocation": "{{location}} · Want to check on it today?",
+  "snoozeBody": "We'll remind you again",
+  "snoozeBodyWithLocation": "{{location}} · We'll remind you again"
+}

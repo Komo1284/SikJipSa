@@ -1,1 +1,17 @@
-{}
+{
+  "rainTotal": "直近7日間の累積降水量{{mm}}mm",
+  "heatwave": "平均{{temp}}℃の猛暑",
+  "coldwave": "平均{{temp}}℃の寒波",
+  "dry": "湿度{{humidity}}%の乾燥",
+  "humid": "湿度{{humidity}}%の多湿",
+  "lightRich": "光が豊富な場所",
+  "lightLow": "光がやや不足する場所",
+  "humidityPrefDrier": "植物が好む湿度（{{expected}}%）より乾いた{{humidity}}%",
+  "humidityPrefWetter": "植物が好む湿度（{{expected}}%）より湿った{{humidity}}%",
+  "poorAirflow": "換気の弱い空間",
+  "reasonDefault": "環境による補正がないため、基本の{{days}}日周期に従います。",
+  "dirLater": "いつもより{{days}}日遅らせました",
+  "dirEarlier": "いつもより{{days}}日早めました",
+  "dirSame": "周期はそのままですが、環境に変化があります",
+  "reasonAdjusted": "{{phrases}}。{{direction}}。"
+}

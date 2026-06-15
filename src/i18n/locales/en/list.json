@@ -1,1 +1,11 @@
-{}
+{
+  "title": "My Plants",
+  "emptyTitle": "No plants registered yet",
+  "emptyDescription": "Add a plant to\nstart your own plant care!",
+  "addPlant": "Add a Plant",
+  "searchPlaceholder": "Search by plant name or species",
+  "filterAll": "All",
+  "noResultsTitle": "No results found",
+  "noResultsSearch": "Try searching with a different name or scientific name.",
+  "noResultsSpace": "There are no plants in this space yet."
+}

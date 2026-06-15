@@ -1,1 +1,20 @@
-{}
+{
+  "heroTitle": "今日の",
+  "heroTitleAccent": "植物日記。",
+  "tasksTodayNone": "今日お世話する植物はありません。少し様子を見るだけでも大丈夫です。",
+  "tasksTodayPrefix": "今日お世話する植物",
+  "tasksTodayCountLabel": "{{n}}個",
+  "statToday": "今日",
+  "statSoon": "まもなく",
+  "statAll": "すべて",
+  "todayTasks": "今日のお世話",
+  "countSuffix": "{{n}}個",
+  "emptyTodayTitle": "今日のお世話はありません",
+  "emptyTodayDescription": "すべての植物が元気に過ごしています。少し様子を見るだけでも大丈夫です。",
+  "viewMyPlants": "マイプランツを見る",
+  "careSoon": "まもなくお世話が必要な植物",
+  "viewAll": "すべて見る",
+  "plantsBySpace": "スペース別の植物",
+  "spaceEmpty": "まだ植物がありません",
+  "plantCount": "植物{{n}}個"
+}
