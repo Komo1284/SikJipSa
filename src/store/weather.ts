@@ -1,3 +1,4 @@
+import i18n from '@/i18n';
 import { humanizeError } from '@/lib/errors';
 import { detectIpLocation, detectLocation, getRecentWeather, loadPlace, savePlace } from '@/lib/weatherService';
 import { recommendNextWater } from '@/lib/recommendation';
@@ -24,12 +25,12 @@ function askLocationConsent(): Promise<'gps' | 'ip' | 'skip'> {
   if (Platform.OS === 'web') return Promise.resolve('gps');
   return new Promise((resolve) => {
     Alert.alert(
-      '날씨 기반 물주기 추천',
-      '내 위치의 기온·습도·강수량을 반영해 물주기 시점을 보정해드려요.\n위치를 어떻게 가져올까요?',
+      i18n.t('stores.locationConsentTitle'),
+      i18n.t('stores.locationConsentMessage'),
       [
-        { text: 'GPS 사용 (정확)', onPress: () => resolve('gps') },
-        { text: '대도시 추정 (대략)', onPress: () => resolve('ip') },
-        { text: '나중에', style: 'cancel', onPress: () => resolve('skip') },
+        { text: i18n.t('stores.locationConsentGps'), onPress: () => resolve('gps') },
+        { text: i18n.t('stores.locationConsentIp'), onPress: () => resolve('ip') },
+        { text: i18n.t('stores.locationConsentLater'), style: 'cancel', onPress: () => resolve('skip') },
       ],
       { cancelable: true, onDismiss: () => resolve('skip') },
     );
@@ -137,7 +138,7 @@ export const useWeatherStore = create<WeatherStore>((set, get) => ({
         next = await detectLocation();
       }
       if (!next || next.lat == null) {
-        toast.error('위치를 가져오지 못했어요');
+        toast.error(i18n.t('stores.locationFetchFailed'));
         set({ loading: false });
         return;
       }
@@ -146,10 +147,10 @@ export const useWeatherStore = create<WeatherStore>((set, get) => ({
       const weather = await getRecentWeather(next);
       set({ weather, lastUpdated: weather.length > 0 ? Date.now() : get().lastUpdated });
       await get().recompute();
-      toast.success(next.label ? `위치를 ${next.label} 으로 변경했어요` : '위치 변경됨');
+      toast.success(next.label ? i18n.t('stores.locationChangedTo', { label: next.label }) : i18n.t('stores.locationChanged'));
     } catch (e) {
       console.warn('[weatherStore] relocate failed:', e);
-      toast.error(`위치 변경 실패: ${humanizeError(e)} (기존 위치는 그대로 유지돼요)`);
+      toast.error(i18n.t('stores.locationChangeFailed', { error: humanizeError(e) }));
     } finally {
       set({ loading: false });
     }

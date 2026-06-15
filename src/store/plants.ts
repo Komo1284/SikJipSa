@@ -1,3 +1,4 @@
+import i18n from '@/i18n';
 import { SEED_LOG, SEED_PLANTS } from '@/data/plants';
 import { cancelWaterReminder, rescheduleAll, scheduleWaterReminder } from '@/lib/notifications';
 import { humanizeError } from '@/lib/errors';
@@ -85,8 +86,8 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       rescheduleAll(plants).catch(() => {}); // fire-and-forget
     } catch (e) {
       console.warn('[plantStore] load failed:', e);
-      toast.error(`식물 불러오기 실패: ${humanizeError(e)}`, undefined, {
-        label: '다시 시도',
+      toast.error(i18n.t('stores.plantsLoadFailed', { error: humanizeError(e) }), undefined, {
+        label: i18n.t('common.retry'),
         onPress: () => get().load(),
       });
       set({ loading: false, error: (e as Error).message });
@@ -128,9 +129,9 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
         enqueue({ kind: 'plant.update', id, patch: { lastWater: date, nextWater } });
         enqueue({ kind: 'log.insert', entry });
         scheduleWaterReminder(updated).catch(() => {});
-        toast.info('오프라인 — 연결되면 자동 동기화돼요');
+        toast.info(i18n.t('stores.offlineAutoSync'));
       } else {
-        toast.error(`물주기 기록 실패: ${humanizeError(e)}`);
+        toast.error(i18n.t('stores.waterLogFailed', { error: humanizeError(e) }));
         set((s) => ({
           plants: s.plants.map((p) => (p.id === id ? plant : p)),
           log: s.log.filter(
@@ -166,9 +167,9 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
         // 물주기와 동일하게 큐로 보존 — 예전엔 오프라인이면 그대로 유실됐다.
         enqueue({ kind: 'plant.update', id, patch: { lastFert: date } });
         enqueue({ kind: 'log.insert', entry });
-        toast.info('오프라인 — 연결되면 자동 동기화돼요');
+        toast.info(i18n.t('stores.offlineAutoSync'));
       } else {
-        toast.error(`비료 기록 실패: ${humanizeError(e)}`);
+        toast.error(i18n.t('stores.fertLogFailed', { error: humanizeError(e) }));
         set((s) => ({
           plants: s.plants.map((p) => (p.id === id ? plant : p)),
           log: s.log.filter(
@@ -190,7 +191,7 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
         plants: s.plants.map((p) => (p.id === tempId ? saved : p)),
       }));
       toast.success(
-        `${plant.name} 추가됐어요. 비료·분갈이 주기 같은 자세한 정보는 상세 화면 ⋯ → "정보 수정" 에서 채워주세요.`,
+        i18n.t('stores.plantAdded', { name: plant.name }),
         9000,
       );
       scheduleWaterReminder(saved).catch(() => {});
@@ -199,7 +200,7 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       );
     } catch (e) {
       console.warn('[plantStore] addPlant failed:', e);
-      toast.error(`식물 추가 실패: ${humanizeError(e)}`);
+      toast.error(i18n.t('stores.plantAddFailed', { error: humanizeError(e) }));
       set((s) => ({
         plants: s.plants.filter((p) => p.id !== tempId),
         error: (e as Error).message,
@@ -216,10 +217,10 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
     try {
       await repos.plants.softDelete(id);
       cancelWaterReminder(id).catch(() => {});
-      toast.success(`${target.name} 삭제됨`);
+      toast.success(i18n.t('stores.plantDeleted', { name: target.name }));
     } catch (e) {
       console.warn('[plantStore] deletePlant failed:', e);
-      toast.error(`삭제 실패: ${humanizeError(e)}`);
+      toast.error(i18n.t('stores.deleteFailed', { error: humanizeError(e) }));
       set({ plants: before });
     }
   },
@@ -291,10 +292,10 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
         await useWeatherStore.getState().recompute([id]);
       }
 
-      toast.success('정보 수정됨');
+      toast.success(i18n.t('stores.infoUpdated'));
     } catch (e) {
       console.warn('[plantStore] updatePlant failed:', e);
-      toast.error(`수정 실패: ${humanizeError(e)}`);
+      toast.error(i18n.t('stores.updateFailed', { error: humanizeError(e) }));
       set((s) => ({ plants: s.plants.map((p) => (p.id === id ? prev : p)) }));
     }
   },
@@ -315,16 +316,20 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
     });
     try {
       await repos.logs.insert(entry);
-      const labels: Record<typeof action, string> = { prune: '가지치기', repot: '분갈이', note: '메모' };
-      toast.success(`${labels[action]} 기록됨`);
+      const labels: Record<typeof action, string> = {
+        prune: i18n.t('stores.actionPrune'),
+        repot: i18n.t('stores.actionRepot'),
+        note: i18n.t('stores.actionNote'),
+      };
+      toast.success(i18n.t('stores.actionLogged', { action: labels[action] }));
     } catch (e) {
       console.warn('[plantStore] logAction failed:', e);
       if (!isOnline() || isLikelyNetworkError(e)) {
         enqueue({ kind: 'log.insert', entry });
-        toast.info('오프라인 — 연결되면 자동 동기화돼요');
+        toast.info(i18n.t('stores.offlineAutoSync'));
         return;
       }
-      toast.error(`기록 실패: ${humanizeError(e)}`);
+      toast.error(i18n.t('stores.logFailed', { error: humanizeError(e) }));
       set((s) => ({
         log: s.log.filter((l) => !(l.plantId === plantId && l.date === date && l.action === action)),
       }));
@@ -340,10 +345,10 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
     set((s) => ({ log: [entry, ...s.log] }));
     try {
       await repos.logs.insert(entry);
-      toast.success('사진 기록 추가됨');
+      toast.success(i18n.t('stores.photoLogAdded'));
     } catch (e) {
       console.warn('[plantStore] logPhoto failed:', e);
-      toast.error(`사진 기록 실패: ${humanizeError(e)}`);
+      toast.error(i18n.t('stores.photoLogFailed', { error: humanizeError(e) }));
       set((s) => ({
         log: s.log.filter((l) => !(l.plantId === plantId && l.date === today && l.action === 'photo')),
       }));
@@ -361,14 +366,14 @@ export const usePlantStore = create<PlantStore>((set, get) => ({
       // and keeps a trail of past cover photos.
       if (photoUrl) {
         const today = toISODate(new Date());
-        const entry: LogEntry = { plantId: id, action: 'photo', date: today, note: '대표 사진 변경', photoUrl };
+        const entry: LogEntry = { plantId: id, action: 'photo', date: today, note: i18n.t('stores.coverPhotoChanged'), photoUrl };
         set((s) => ({ log: [entry, ...s.log] }));
         repos.logs.insert(entry).catch(() => {});
       }
-      toast.success('사진 변경됨');
+      toast.success(i18n.t('stores.photoChanged'));
     } catch (e) {
       console.warn('[plantStore] updatePlantPhoto failed:', e);
-      toast.error(`사진 변경 실패: ${humanizeError(e)}`);
+      toast.error(i18n.t('stores.photoChangeFailed', { error: humanizeError(e) }));
       set((s) => ({ plants: s.plants.map((p) => (p.id === id ? { ...p, photoUrl: prev } : p)) }));
     }
   },

@@ -1,3 +1,4 @@
+import i18n from '@/i18n';
 import { humanizeError } from '@/lib/errors';
 import { repos } from '@/repo';
 import { hasSupabase } from '@/repo/supabase/client';
@@ -34,8 +35,8 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
       set({ locations, loaded: true });
     } catch (e) {
       console.warn('[locationStore] load failed:', e);
-      toast.error(`공간 불러오기 실패: ${humanizeError(e)}`, undefined, {
-        label: '다시 시도',
+      toast.error(i18n.t('stores.locationsLoadFailed', { error: humanizeError(e) }), undefined, {
+        label: i18n.t('common.retry'),
         onPress: () => get().load(),
       });
     }
@@ -49,10 +50,10 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
     try {
       const created = await repos.locations.create(input);
       set((s) => ({ locations: [...s.locations, created] }));
-      toast.success(`${input.name} 공간 추가됨`);
+      toast.success(i18n.t('stores.locationAdded', { name: input.name }));
     } catch (e) {
       console.warn('[locationStore] add failed:', e);
-      toast.error(`공간 추가 실패: ${humanizeError(e)}`);
+      toast.error(i18n.t('stores.locationAddFailed', { error: humanizeError(e) }));
     }
   },
 
@@ -87,10 +88,10 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
     try {
       const updated = await repos.locations.update(id, patch);
       set((s) => ({ locations: s.locations.map((l) => (l.id === id ? updated : l)) }));
-      toast.success('공간 수정됨');
+      toast.success(i18n.t('stores.locationUpdated'));
     } catch (e) {
       console.warn('[locationStore] update failed:', e);
-      toast.error(`공간 수정 실패: ${humanizeError(e)}`);
+      toast.error(i18n.t('stores.locationUpdateFailed', { error: humanizeError(e) }));
       set({ locations: prev });
       usePlantStore.getState().load();
     }
@@ -110,10 +111,10 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
 
     try {
       await repos.locations.rename(id, name);
-      toast.success('공간 이름 변경됨');
+      toast.success(i18n.t('stores.locationRenamed'));
     } catch (e) {
       console.warn('[locationStore] rename failed:', e);
-      toast.error(`이름 변경 실패: ${humanizeError(e)}`);
+      toast.error(i18n.t('stores.locationRenameFailed', { error: humanizeError(e) }));
       set({ locations: prev });
       // Re-fetch plants to undo any partial cascade.
       usePlantStore.getState().load();
@@ -138,10 +139,10 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
           await ps.updatePlant(p.id, { location: remaining }).catch(() => {});
         }
       }
-      toast.success('공간 삭제됨');
+      toast.success(i18n.t('stores.locationDeleted'));
     } catch (e) {
       console.warn('[locationStore] remove failed:', e);
-      toast.error(`공간 삭제 실패: ${humanizeError(e)}`);
+      toast.error(i18n.t('stores.locationDeleteFailed', { error: humanizeError(e) }));
       set({ locations: prev });
     }
   },

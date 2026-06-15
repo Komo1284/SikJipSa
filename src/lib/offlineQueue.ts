@@ -1,3 +1,4 @@
+import i18n from '@/i18n';
 import { repos } from '@/repo';
 import { toast } from '@/store/toast';
 import type { LogEntry, Plant } from '@/types/plant';
@@ -88,14 +89,14 @@ export async function flush(): Promise<void> {
           console.warn('[offlineQueue] dropping op after 5 attempts:', next.op, e);
           queue.shift();
           await persist();
-          toast.error('오프라인에 쌓인 기록 하나를 서버에 저장하지 못해 건너뛰었어요');
+          toast.error(i18n.t('stores.queueOpDropped'));
         } else {
           break;
         }
       }
     }
     if (queue.length === 0 && sent > 0) {
-      toast.success(`밀려 있던 기록 ${sent}개를 동기화했어요`);
+      toast.success(i18n.t('stores.queueSynced', { n: sent }));
     }
   } finally {
     flushing = false;
@@ -118,7 +119,7 @@ export function startQueue() {
       // back online — drain
       online = next;
       publish();
-      if (queue.length > 0) toast.info('네트워크 복구. 쌓인 기록을 보내는 중…');
+      if (queue.length > 0) toast.info(i18n.t('stores.networkRestored'));
       flush().catch(() => {});
     } else {
       online = next;
