@@ -1,1 +1,90 @@
-{}
+{
+  "title": "マイページ",
+  "subtitle": "アプリの見た目やリズムを変えられます。",
+  "accentColor": "アクセントカラー",
+  "theme": "テーマ",
+  "themeMode": {
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム"
+  },
+  "language": "言語",
+  "notification": {
+    "section": "通知",
+    "waterTitle": "水やり通知",
+    "onAt": "オン · 水やりの日に{{hour}}時にお知らせします",
+    "deniedHint": "オフ · 端末の設定で許可すると受け取れます",
+    "offHint": "オフ · 許可すれば水やりの日を逃しません",
+    "openDeviceSettings": "端末の設定を開く",
+    "allow": "通知を許可する",
+    "timeLabel": "通知時刻",
+    "hourLabel": "{{hour}}時"
+  },
+  "place": {
+    "section": "植物のある場所",
+    "sourcePrompt": "天気に基づくおすすめに使う位置情報をどう取得しますか？",
+    "useGps": "GPSを使う（正確）",
+    "useIp": "都市単位で推定（おおまか）",
+    "noLocation": "位置情報なし",
+    "sourceGps": "GPS · おすすめの精度が高い",
+    "sourceIp": "IP · 都市単位でおおまかに推定",
+    "sourceManual": "手動設定",
+    "sourceNone": "未設定 · 室内環境のみ反映",
+    "statTempAvg": "平均気温",
+    "statHumidity": "湿度",
+    "statRain": "降水",
+    "statTempHigh": "最高",
+    "weatherUnavailable": "天気データをまだ取得できていません。更新を押してください。",
+    "updatedJustNow": "たった今更新",
+    "updatedHoursAgo": "{{hours}}時間前に更新",
+    "updatedDaysAgo": "{{days}}日前に更新 — 更新を押してください"
+  },
+  "locations": {
+    "section": "スペース",
+    "meta": "植物{{n}}個 · 日当たり{{light}}/5 · 風通し{{airflow}}/5",
+    "empty": "スペースがありません。下から追加してみてください。",
+    "add": "新しいスペースを追加",
+    "removeInUse": "{{n}}個の植物がこのスペースにあります。削除しても植物は残りますが、スペース情報が空になります。この操作は元に戻せません。",
+    "removeConfirm": "本当に削除しますか？この操作は元に戻せません。"
+  },
+  "account": {
+    "section": "アカウント",
+    "anonymous": "匿名ユーザー",
+    "signOut": "ログアウト",
+    "signOutConfirm": "本当にログアウトしますか？",
+    "delete": "アカウント削除",
+    "deleteMessage": "登録した植物とすべてのお世話の記録・写真が完全に削除されます。\nこの操作は元に戻せません。",
+    "deleteProceed": "削除を進める",
+    "deleteFinalTitle": "本当に削除しますか？",
+    "deleteFinalMessage": "最後の確認です。削除後は復元できません。",
+    "deletePermanent": "完全に削除",
+    "deleteFailed": "アカウント削除に失敗しました",
+    "deleting": "アカウントを削除中…"
+  },
+  "legal": {
+    "section": "規約・ポリシー",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー",
+    "openFailedTitle": "開けませんでした",
+    "openFailedMessage": "ドキュメントを開く際に問題が発生しました。しばらくしてからもう一度お試しください。"
+  },
+  "scoreHints": {
+    "light": ["とても暗い", "暗い", "普通", "明るい", "直射日光"],
+    "airflow": ["ほとんどなし", "弱い", "普通", "よく通る", "とてもよく通る"],
+    "weather": ["ほとんど影響なし", "わずか", "普通", "かなり影響あり", "屋外と同程度"]
+  },
+  "locationForm": {
+    "editTitle": "スペースを編集",
+    "addTitle": "新しいスペースを追加",
+    "nameLabel": "名前",
+    "namePlaceholder": "例：温室棚、作業部屋",
+    "lightLabel": "日当たり",
+    "airflowLabel": "空気の循環",
+    "weatherLabel": "屋外の天気の影響",
+    "submitEdit": "編集",
+    "nameRequiredTitle": "名前が必要です",
+    "nameRequiredMessage": "スペースの名前を入力してください。",
+    "duplicateTitle": "重複",
+    "duplicateMessage": "同じ名前のスペースがすでにあります。"
+  }
+}

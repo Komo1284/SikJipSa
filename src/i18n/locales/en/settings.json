@@ -1,1 +1,90 @@
-{}
+{
+  "title": "Me",
+  "subtitle": "Change how the app looks and feels.",
+  "accentColor": "Accent color",
+  "theme": "Theme",
+  "themeMode": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": "Language",
+  "notification": {
+    "section": "Notifications",
+    "waterTitle": "Watering reminders",
+    "onAt": "On · We'll remind you at {{hour}}:00 on watering days",
+    "deniedHint": "Off · Enable it in your device settings to receive reminders",
+    "offHint": "Off · Turn it on so you never miss a watering day",
+    "openDeviceSettings": "Open device settings",
+    "allow": "Allow notifications",
+    "timeLabel": "Reminder time",
+    "hourLabel": "{{hour}}:00"
+  },
+  "place": {
+    "section": "Where your plants live",
+    "sourcePrompt": "How should we get the location used for weather-based tips?",
+    "useGps": "Use GPS (precise)",
+    "useIp": "Estimate by city (approximate)",
+    "noLocation": "No location",
+    "sourceGps": "GPS · High recommendation accuracy",
+    "sourceIp": "IP · Roughly estimated by city",
+    "sourceManual": "Set manually",
+    "sourceNone": "Not set · Reflects indoor conditions only",
+    "statTempAvg": "Avg. temp",
+    "statHumidity": "Humidity",
+    "statRain": "Rain",
+    "statTempHigh": "High",
+    "weatherUnavailable": "We couldn't fetch weather data yet. Tap refresh to try again.",
+    "updatedJustNow": "Updated just now",
+    "updatedHoursAgo": "Updated {{hours}}h ago",
+    "updatedDaysAgo": "Updated {{days}}d ago — tap refresh"
+  },
+  "locations": {
+    "section": "Spaces",
+    "meta": "{{n}} plants · Light {{light}}/5 · Airflow {{airflow}}/5",
+    "empty": "No spaces yet. Add one below.",
+    "add": "Add a space",
+    "removeInUse": "{{n}} plants are in this space. If you delete it, the plants stay but their space info is cleared. This can't be undone.",
+    "removeConfirm": "Delete this for sure? This can't be undone."
+  },
+  "account": {
+    "section": "Account",
+    "anonymous": "Anonymous user",
+    "signOut": "Sign out",
+    "signOutConfirm": "Sign out for sure?",
+    "delete": "Delete account",
+    "deleteMessage": "Your plants and all care records and photos will be permanently deleted.\nThis can't be undone.",
+    "deleteProceed": "Continue deleting",
+    "deleteFinalTitle": "Delete for sure?",
+    "deleteFinalMessage": "This is your last chance. There's no recovery after deletion.",
+    "deletePermanent": "Delete permanently",
+    "deleteFailed": "Account deletion failed",
+    "deleting": "Deleting account…"
+  },
+  "legal": {
+    "section": "Terms & policies",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "openFailedTitle": "Couldn't open",
+    "openFailedMessage": "Something went wrong opening the document. Please try again in a moment."
+  },
+  "scoreHints": {
+    "light": ["Very dark", "Dark", "Moderate", "Bright", "Direct sun"],
+    "airflow": ["Almost none", "Weak", "Moderate", "Good", "Excellent"],
+    "weather": ["Almost no effect", "Slight", "Moderate", "Quite affected", "Like outdoors"]
+  },
+  "locationForm": {
+    "editTitle": "Edit space",
+    "addTitle": "Add a space",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Greenhouse cabinet, Workshop",
+    "lightLabel": "Light level",
+    "airflowLabel": "Air circulation",
+    "weatherLabel": "Outdoor weather effect",
+    "submitEdit": "Save",
+    "nameRequiredTitle": "Name required",
+    "nameRequiredMessage": "Please enter a name for the space.",
+    "duplicateTitle": "Duplicate",
+    "duplicateMessage": "A space with the same name already exists."
+  }
+}
