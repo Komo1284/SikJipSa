@@ -2,6 +2,7 @@ import { LocationFormModal } from '@/components/LocationFormModal';
 import { ThemedText } from '@/components/Typography';
 import { DesktopHeader } from '@/components/web/DesktopHeader';
 import { humanizeError } from '@/lib/errors';
+import { LEGAL_URLS } from '@/lib/legal';
 import {
   ensureNotificationPermission,
   getNotificationPermissionStatus,
@@ -19,7 +20,7 @@ import { useResponsive, useTabletContentCap } from '@/theme/responsive';
 import type { AccentKey, ThemeMode } from '@/theme/tokens';
 import type { UserLocation } from '@/types/plant';
 import { useFocusEffect } from 'expo-router';
-import { Bell, BellOff, CloudRain, Droplet as DropletIcon, MapPin, Pencil, Plus, RefreshCw, Sun, Thermometer, Trash2 } from 'lucide-react-native';
+import { Bell, BellOff, ChevronRight, CloudRain, Droplet as DropletIcon, FileText, MapPin, Pencil, Plus, RefreshCw, ShieldCheck, Sun, Thermometer, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
 import { Alert, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -120,6 +121,8 @@ export default function MeScreen() {
       <LocationsSection />
 
       <AccountSection />
+
+      <LegalSection />
     </>
   );
 
@@ -543,6 +546,49 @@ function AccountSection() {
             {deleting ? '계정 삭제 중…' : '계정 삭제'}
           </ThemedText>
         </Pressable>
+      </View>
+    </View>
+  );
+}
+
+function LegalSection() {
+  const { palette, radii } = useTheme();
+
+  const open = (url: string) =>
+    Linking.openURL(url).catch(() => Alert.alert('열 수 없어요', '문서를 여는 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.'));
+
+  const rows: { key: string; label: string; url: string; Icon: typeof FileText }[] = [
+    { key: 'terms', label: '서비스 이용약관', url: LEGAL_URLS.terms, Icon: FileText },
+    { key: 'privacy', label: '개인정보 처리방침', url: LEGAL_URLS.privacy, Icon: ShieldCheck },
+  ];
+
+  return (
+    <View style={{ marginBottom: 26 }}>
+      <ThemedText variant="tiny" family="mono" uppercase color={palette.ink3} style={{ marginBottom: 10, letterSpacing: 1 }}>
+        약관·정책
+      </ThemedText>
+      <View style={{ backgroundColor: palette.surface, borderRadius: radii.md, overflow: 'hidden' }}>
+        {rows.map((row, idx) => (
+          <Pressable
+            key={row.key}
+            onPress={() => open(row.url)}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+              paddingVertical: 14,
+              paddingHorizontal: 16,
+              borderTopWidth: idx === 0 ? 0 : 1,
+              borderColor: palette.line,
+            }}
+          >
+            <row.Icon size={18} color={palette.ink3} strokeWidth={1.8} />
+            <ThemedText variant="body" weight="medium" style={{ flex: 1 }}>
+              {row.label}
+            </ThemedText>
+            <ChevronRight size={18} color={palette.ink3} strokeWidth={1.8} />
+          </Pressable>
+        ))}
       </View>
     </View>
   );

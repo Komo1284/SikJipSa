@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/Typography';
 import { humanizeError, isUserCancelled } from '@/lib/errors';
+import { LEGAL_URLS } from '@/lib/legal';
 import { useAuthStore } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import Constants from 'expo-constants';
@@ -9,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  Linking,
   Pressable,
   View,
 } from 'react-native';
@@ -161,11 +163,23 @@ export default function Onboarding() {
         <View style={{ alignItems: 'center', marginTop: 20 }}>
           <ThemedText variant="tiny" color={palette.ink3} style={{ lineHeight: 18, textAlign: 'center' }}>
             로그인하면{' '}
-            <ThemedText variant="tiny" color={palette.ink2} weight="medium">
+            <ThemedText
+              variant="tiny"
+              color={palette.ink2}
+              weight="medium"
+              style={{ textDecorationLine: 'underline' }}
+              onPress={() => Linking.openURL(LEGAL_URLS.terms)}
+            >
               서비스 이용약관
             </ThemedText>
             {' '}및{' '}
-            <ThemedText variant="tiny" color={palette.ink2} weight="medium">
+            <ThemedText
+              variant="tiny"
+              color={palette.ink2}
+              weight="medium"
+              style={{ textDecorationLine: 'underline' }}
+              onPress={() => Linking.openURL(LEGAL_URLS.privacy)}
+            >
               개인정보 처리방침
             </ThemedText>
             에{'\n'}동의하는 것으로 간주돼요.
