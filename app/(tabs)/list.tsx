@@ -12,6 +12,7 @@ import { useResponsive } from '@/theme/responsive';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { LayoutGrid, List as ListIcon, Search, SearchX, Sprout } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, RefreshControl, ScrollView, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -24,6 +25,7 @@ export default function ListScreen() {
 }
 
 function ListMobile() {
+  const { t } = useTranslation();
   const { palette, weights } = useTheme();
   const insets = useSafeAreaInsets();
   const { isTablet } = useResponsive();
@@ -101,7 +103,7 @@ function ListMobile() {
       <View style={{ flex: 1, backgroundColor: palette.bg, paddingHorizontal: 24 }}>
         <View style={{ paddingTop: insets.top + 14 }}>
           <ThemedText variant="screenTitle" family="serif">
-            내 식물
+            {t('list.title')}
           </ThemedText>
         </View>
         {plantsLoading && !plantsLoaded ? (
@@ -119,9 +121,9 @@ function ListMobile() {
         {plantsLoading && !plantsLoaded ? null : (
         <EmptyState
           icon={<Sprout size={40} color={palette.green} strokeWidth={1.6} />}
-          title="아직 등록된 식물이 없어요"
-          description={'식물을 추가하여\n나만의 관리를 시작해보세요!'}
-          actionLabel="식물 추가하기"
+          title={t('list.emptyTitle')}
+          description={t('list.emptyDescription')}
+          actionLabel={t('list.addPlant')}
           onAction={() => router.push('/add')}
         />
         )}
@@ -133,7 +135,7 @@ function ListMobile() {
     <View style={{ paddingTop: insets.top + 14, paddingBottom: 10 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <ThemedText variant="screenTitle" family="serif">
-          내 식물{' '}
+          {t('list.title')}{' '}
           <ThemedText
             family="serif"
             italic
@@ -184,7 +186,7 @@ function ListMobile() {
           onChangeText={setQuery}
           onFocus={() => setSearchFocused(true)}
           onBlur={() => setSearchFocused(false)}
-          placeholder="식물 이름 또는 종 검색"
+          placeholder={t('list.searchPlaceholder')}
           placeholderTextColor={palette.ink3}
           returnKeyType="search"
           style={{
@@ -225,7 +227,7 @@ function ListMobile() {
                 color={active ? palette.bg : palette.ink2}
                 style={{ fontSize: 13 }}
               >
-                {f}
+                {f === '전체' ? t('list.filterAll') : f}
               </ThemedText>
               <ThemedText variant="meta" color={active ? palette.bg : palette.ink3} style={{ fontSize: 12, opacity: 0.7 }}>
                 {count}
@@ -243,11 +245,11 @@ function ListMobile() {
       <EmptyState
         compact
         icon={<SearchX size={32} color={palette.ink3} strokeWidth={1.6} />}
-        title="검색 결과가 없어요"
+        title={t('list.noResultsTitle')}
         description={
           query.trim()
-            ? '다른 이름이나 학명으로 검색해보세요.'
-            : '이 공간에는 아직 식물이 없어요.'
+            ? t('list.noResultsSearch')
+            : t('list.noResultsSpace')
         }
       />
     </View>

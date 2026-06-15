@@ -1,1 +1,11 @@
-{}
+{
+  "title": "내 식물",
+  "emptyTitle": "아직 등록된 식물이 없어요",
+  "emptyDescription": "식물을 추가하여\n나만의 관리를 시작해보세요!",
+  "addPlant": "식물 추가하기",
+  "searchPlaceholder": "식물 이름 또는 종 검색",
+  "filterAll": "전체",
+  "noResultsTitle": "검색 결과가 없어요",
+  "noResultsSearch": "다른 이름이나 학명으로 검색해보세요.",
+  "noResultsSpace": "이 공간에는 아직 식물이 없어요."
+}
