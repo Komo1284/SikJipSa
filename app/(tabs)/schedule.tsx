@@ -13,19 +13,21 @@ import { TODAY, daysBetween, formatMD, parseISODate, toISODate } from '@/utils/d
 import { useRouter } from 'expo-router';
 import { CalendarDays } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import i18n from '@/i18n';
 
 type Tab = 'water' | 'fert' | 'repot';
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: 'water', label: '물' },
-  { key: 'fert', label: '비료' },
-  { key: 'repot', label: '분갈이' },
-];
-
 export default function ScheduleScreen() {
+  const { t } = useTranslation();
   const { palette, radii } = useTheme();
+  const TABS: { key: Tab; label: string }[] = [
+    { key: 'water', label: t('schedule.tabWater') },
+    { key: 'fert', label: t('schedule.tabFert') },
+    { key: 'repot', label: t('schedule.tabRepot') },
+  ];
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const plants = usePlantStore((s) => s.plants);
@@ -52,14 +54,14 @@ export default function ScheduleScreen() {
       <View style={{ flex: 1, backgroundColor: palette.bg, paddingHorizontal: 24 }}>
         <View style={{ paddingTop: insets.top + 14 }}>
           <ThemedText variant="screenTitle" family="serif">
-            일정
+            {t('schedule.title')}
           </ThemedText>
         </View>
         <EmptyState
           icon={<CalendarDays size={40} color={palette.green} strokeWidth={1.6} />}
-          title="예정된 일정이 없어요"
-          description={'식물을 추가하면\n물주기 일정이 여기에 표시돼요.'}
-          actionLabel="식물 추가하기"
+          title={t('schedule.emptyTitle')}
+          description={t('schedule.emptyDescription')}
+          actionLabel={t('schedule.emptyAction')}
           onAction={() => router.push('/add')}
         />
       </View>
@@ -118,7 +120,7 @@ export default function ScheduleScreen() {
   if (isDesktop) {
     return (
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 28, paddingBottom: 48 }}>
-        <DesktopHeader title="일정" showSearch={false} onRefresh={loadPlants} refreshing={plantsLoading} />
+        <DesktopHeader title={t('schedule.title')} showSearch={false} onRefresh={loadPlants} refreshing={plantsLoading} />
         <View style={{ maxWidth: 720, width: '100%' }}>
           {tabBar}
           {tabContent}
@@ -131,10 +133,10 @@ export default function ScheduleScreen() {
     <View style={{ flex: 1, backgroundColor: palette.bg }}>
       <View style={[{ paddingTop: insets.top + 14, paddingHorizontal: 24 }, tabletCap]}>
         <ThemedText variant="screenTitle" family="serif">
-          일정
+          {t('schedule.title')}
         </ThemedText>
         <ThemedText variant="meta" color={palette.ink3} style={{ marginTop: 8, marginBottom: 16 }}>
-          앞으로의 돌봄 리듬을 한눈에.
+          {t('schedule.subtitle')}
         </ThemedText>
         {tabBar}
       </View>
@@ -201,6 +203,7 @@ function WaterTab({
 /* ─── 비료 탭 ────────────────────────────────────────────── */
 
 function FertTab({ plants, onOpen }: { plants: Plant[]; onOpen: (id: string) => void }) {
+  const { t } = useTranslation();
   const { palette } = useTheme();
 
   const groups = useMemo(() => {
@@ -227,7 +230,7 @@ function FertTab({ plants, onOpen }: { plants: Plant[]; onOpen: (id: string) => 
               <ScheduleRow
                 key={plant.id}
                 plant={plant}
-                chipLabel={`비료 · ${dueLabel(dueIn)}`}
+                chipLabel={t('schedule.fertChip', { due: dueLabel(dueIn) })}
                 chipTone={dueIn < 0 ? 'warn' : dueIn <= 7 ? 'fert' : 'neutral'}
                 onPress={() => onOpen(plant.id)}
               />
@@ -250,6 +253,7 @@ function RepotTab({
   repotByPlant: Record<string, string>;
   onOpen: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const { palette } = useTheme();
   const { withRecord, noRecord } = useMemo(
     () => getRepotSchedule(plants, repotByPlant),
@@ -267,14 +271,14 @@ function RepotTab({
             color={palette.ink3}
             style={{ marginBottom: 10, letterSpacing: 1 }}
           >
-            오래된 순
+            {t('schedule.repotOldestFirst')}
           </ThemedText>
           <View style={{ gap: 10 }}>
             {withRecord.map(({ plant, lastRepot, monthsAgo, urgent }) => (
               <ScheduleRow
                 key={plant.id}
                 plant={plant}
-                chipLabel={urgent ? `분갈이 · ${monthsAgo}개월 전` : `${monthsAgo}개월 전`}
+                chipLabel={urgent ? t('schedule.repotUrgentChip', { months: monthsAgo }) : t('schedule.repotMonthsAgo', { months: monthsAgo })}
                 chipTone={urgent ? 'warn' : 'neutral'}
                 trailing={
                   <ThemedText variant="tiny" family="mono" color={palette.ink3}>
@@ -297,17 +301,17 @@ function RepotTab({
             color={palette.ink3}
             style={{ marginBottom: 6, letterSpacing: 1 }}
           >
-            분갈이 기록 없음
+            {t('schedule.repotNoRecordTitle')}
           </ThemedText>
           <ThemedText variant="tiny" color={palette.ink3} style={{ marginBottom: 10, lineHeight: 16 }}>
-            기록이 없으면 분갈이 시기를 알려드릴 수 없어요. 식물을 눌러 빠른 실행 → 분갈이에서 마지막 분갈이 날짜를 남겨주세요.
+            {t('schedule.repotNoRecordDescription')}
           </ThemedText>
           <View style={{ gap: 10 }}>
             {noRecord.map((plant) => (
               <ScheduleRow
                 key={plant.id}
                 plant={plant}
-                chipLabel="기록 없음"
+                chipLabel={t('schedule.repotNoRecordChip')}
                 chipTone="neutral"
                 muted
                 onPress={() => onOpen(plant.id)}
@@ -333,8 +337,16 @@ function DayGroup({
   count: number;
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   const { palette } = useTheme();
-  const label = d < 0 ? '지남' : d === 0 ? '오늘' : d === 1 ? '내일' : `${d}일 뒤`;
+  const label =
+    d < 0
+      ? t('schedule.overdue')
+      : d === 0
+        ? t('common.today')
+        : d === 1
+          ? t('schedule.tomorrow')
+          : t('schedule.inDays', { n: d });
   return (
     <View style={{ marginBottom: 20 }}>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -424,8 +436,8 @@ function ScheduleRow({
 }
 
 function dueLabel(d: number): string {
-  if (d < 0) return `${-d}일 지남`;
-  if (d === 0) return '오늘';
-  if (d === 1) return '내일';
-  return `${d}일 뒤`;
+  if (d < 0) return i18n.t('schedule.daysOverdue', { n: -d });
+  if (d === 0) return i18n.t('common.today');
+  if (d === 1) return i18n.t('schedule.tomorrow');
+  return i18n.t('schedule.inDays', { n: d });
 }
