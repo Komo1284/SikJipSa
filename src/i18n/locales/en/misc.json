@@ -1,1 +1,8 @@
-{}
+{
+  "monthDay": "{{m}}/{{d}}",
+  "daysOverdue": "{{n}} days overdue",
+  "tomorrow": "Tomorrow",
+  "daysLater": "In {{n}} days",
+  "loginRequired": "Login required",
+  "photoReadFailed": "Couldn't read the photo file (0 bytes)"
+}

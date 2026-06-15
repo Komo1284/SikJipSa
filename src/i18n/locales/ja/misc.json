@@ -1,1 +1,8 @@
-{}
+{
+  "monthDay": "{{m}}月{{d}}日",
+  "daysOverdue": "{{n}}日経過",
+  "tomorrow": "明日",
+  "daysLater": "{{n}}日後",
+  "loginRequired": "ログインが必要です",
+  "photoReadFailed": "写真ファイルを読み込めませんでした（0バイト）"
+}
