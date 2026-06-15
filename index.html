@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>식집사 — 약관 및 정책</title>
+<style>
+  :root {
+    --bg: #f6f5f0;
+    --surface: #ffffff;
+    --ink: #1f2a1c;
+    --ink2: #4a5544;
+    --ink3: #8a917f;
+    --green: #2d4a2b;
+    --line: #e6e4da;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.7;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+  .brand {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 28px;
+    margin: 0 0 32px;
+    color: var(--green);
+  }
+  .card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .card:hover { border-color: var(--green); transform: translateY(-1px); }
+  .card h2 { font-size: 18px; margin: 0 0 4px; }
+  .card p { margin: 0; font-size: 14px; color: var(--ink3); }
+  .arrow { float: right; color: var(--ink3); font-size: 20px; }
+  footer {
+    margin-top: 40px;
+    font-size: 13px;
+    color: var(--ink3);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">식집사 · SikJipSa</div>
+    <h1>약관 및 정책</h1>
+    <a class="card" href="terms.html">
+      <span class="arrow">›</span>
+      <h2>서비스 이용약관</h2>
+      <p>식집사 서비스 이용에 관한 조건과 절차</p>
+    </a>
+    <a class="card" href="privacy.html">
+      <span class="arrow">›</span>
+      <h2>개인정보 처리방침</h2>
+      <p>수집하는 정보와 이용·보관·삭제 방식</p>
+    </a>
+    <footer>문의 · iot@eztake.com</footer>
+  </div>
+</body>
+</html>
