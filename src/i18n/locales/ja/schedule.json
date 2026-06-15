@@ -1,1 +1,21 @@
-{}
+{
+  "title": "スケジュール",
+  "subtitle": "これからのお世話のリズムをひと目で。",
+  "emptyTitle": "予定されたスケジュールはありません",
+  "emptyDescription": "植物を追加すると\n水やりのスケジュールがここに表示されます。",
+  "emptyAction": "植物を追加する",
+  "tabWater": "水",
+  "tabFert": "肥料",
+  "tabRepot": "植え替え",
+  "overdue": "期限切れ",
+  "tomorrow": "明日",
+  "inDays": "{{n}}日後",
+  "daysOverdue": "{{n}}日経過",
+  "fertChip": "肥料 · {{due}}",
+  "repotOldestFirst": "古い順",
+  "repotUrgentChip": "植え替え · {{months}}ヶ月前",
+  "repotMonthsAgo": "{{months}}ヶ月前",
+  "repotNoRecordTitle": "植え替えの記録なし",
+  "repotNoRecordDescription": "記録がないと植え替えの時期をお知らせできません。植物をタップして、クイック操作 → 植え替えから最後の植え替え日を入力してください。",
+  "repotNoRecordChip": "記録なし"
+}

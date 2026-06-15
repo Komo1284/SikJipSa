@@ -1,1 +1,21 @@
-{}
+{
+  "title": "Schedule",
+  "subtitle": "See your upcoming care rhythm at a glance.",
+  "emptyTitle": "No upcoming schedule",
+  "emptyDescription": "Add a plant and its\nwatering schedule will show up here.",
+  "emptyAction": "Add a plant",
+  "tabWater": "Water",
+  "tabFert": "Fertilizer",
+  "tabRepot": "Repot",
+  "overdue": "Overdue",
+  "tomorrow": "Tomorrow",
+  "inDays": "In {{n}} days",
+  "daysOverdue": "{{n}} days overdue",
+  "fertChip": "Fertilizer · {{due}}",
+  "repotOldestFirst": "Oldest first",
+  "repotUrgentChip": "Repot · {{months}} months ago",
+  "repotMonthsAgo": "{{months}} months ago",
+  "repotNoRecordTitle": "No repotting record",
+  "repotNoRecordDescription": "Without a record, we can't tell you when to repot. Tap the plant and leave the last repotting date in Quick Actions → Repot.",
+  "repotNoRecordChip": "No record"
+}
