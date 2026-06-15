@@ -67,7 +67,8 @@
           "kakaoAppKey": "c4a67adeae4c366973ccba084ba425e1"
         }
       ],
-      "./plugins/withModularHeaders"
+      "./plugins/withModularHeaders",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true

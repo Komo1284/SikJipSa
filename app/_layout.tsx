@@ -1,3 +1,4 @@
+import '@/i18n';
 import { ToastHost } from '@/components/ToastHost';
 import { DesktopShell } from '@/components/web/DesktopShell';
 import {

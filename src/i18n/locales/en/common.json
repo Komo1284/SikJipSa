@@ -1,0 +1,21 @@
+{
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "confirm": "OK",
+  "close": "Close",
+  "edit": "Edit",
+  "add": "Add",
+  "back": "Back",
+  "done": "Done",
+  "next": "Next",
+  "retry": "Retry",
+  "loading": "Loading…",
+  "saving": "Saving…",
+  "search": "Search",
+  "settings": "Settings",
+  "openSettings": "Open Settings",
+  "irreversible": "This action can't be undone.",
+  "today": "Today",
+  "refresh": "Refresh"
+}

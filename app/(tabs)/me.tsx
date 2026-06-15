@@ -1,6 +1,7 @@
 import { LocationFormModal } from '@/components/LocationFormModal';
 import { ThemedText } from '@/components/Typography';
 import { DesktopHeader } from '@/components/web/DesktopHeader';
+import { useLanguage } from '@/i18n/useLanguage';
 import { humanizeError } from '@/lib/errors';
 import { LEGAL_URLS } from '@/lib/legal';
 import {
@@ -43,6 +44,8 @@ export default function MeScreen() {
   const insets = useSafeAreaInsets();
   const tabletCap = useTabletContentCap();
   const { isDesktop } = useResponsive();
+  const { language, setLanguage, options: languageOptions } = useLanguage();
+  const languageItems = languageOptions.map((o) => ({ key: o.code, label: o.label }));
 
   const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <View style={{ marginBottom: 26 }}>
@@ -112,6 +115,10 @@ export default function MeScreen() {
 
       <Section title="테마">
         <Seg items={MODES} value={mode} onChange={setMode} />
+      </Section>
+
+      <Section title="언어">
+        <Seg items={languageItems} value={language} onChange={(c) => { setLanguage(c); }} />
       </Section>
 
       <PlaceSection />
