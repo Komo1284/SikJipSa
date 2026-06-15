@@ -1,1 +1,78 @@
-{}
+{
+  "notifications": {
+    "title": "お知らせ",
+    "emptyTitle": "新しいお知らせはありません",
+    "emptyDescription": "今日お世話する植物があれば、ここに表示されます。",
+    "water": "水やり",
+    "fert": "肥料",
+    "repot": "植え替え",
+    "daysOverdue": "{{n}}日経過",
+    "tomorrow": "明日",
+    "daysLater": "{{n}}日後",
+    "monthsAgo": "{{n}}か月前"
+  },
+  "careLog": {
+    "water": {
+      "title": "水やり",
+      "verb": "水やりしました",
+      "placeholder": "かんたんなメモ"
+    },
+    "fert": {
+      "title": "肥料",
+      "verb": "肥料をあげました",
+      "placeholder": "例：ハイポネックス1000倍"
+    },
+    "prune": {
+      "title": "剪定",
+      "verb": "剪定しました",
+      "placeholder": "例：長いつるを15cmカット"
+    },
+    "repot": {
+      "title": "植え替え",
+      "verb": "植え替えしました",
+      "placeholder": "例：ひとまわり大きな鉢へ／水苔ミックス"
+    },
+    "whenLabel": "いつ行いましたか？",
+    "yesterday": "昨日",
+    "dayBeforeYesterday": "おととい",
+    "daysAgo": "{{n}}日前",
+    "pickAnotherDate": "別の日付を選ぶ",
+    "openCalendar": "カレンダーを開く",
+    "memoLabel": "メモ（任意）"
+  },
+  "syncBanner": {
+    "offlinePending": "オフライン — 記録{{n}}件が接続を待っています",
+    "offlineNoPending": "オフライン — 記録は保存され、接続されたら送信します",
+    "syncing": "同期中 — 残り{{n}}件"
+  },
+  "calendar": {
+    "dayLabels": ["日", "月", "火", "水", "木", "金", "土"],
+    "monthNames": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+    "monthHeader": "{{year}}年{{month}}"
+  },
+  "tabBar": {
+    "home": "ホーム",
+    "plants": "植物",
+    "schedule": "予定",
+    "me": "マイページ"
+  },
+  "taskRow": {
+    "water": "水やり · {{label}}"
+  },
+  "waterButton": {
+    "justWatered": "水やり直後",
+    "water": "水やり"
+  },
+  "sidebar": {
+    "home": "ホーム",
+    "myPlants": "マイ植物",
+    "schedule": "予定",
+    "settings": "設定",
+    "spaces": "スペース",
+    "all": "すべて",
+    "addPlant": "植物を追加"
+  },
+  "desktopHeader": {
+    "searchPlaceholder": "名前や学名で検索…"
+  }
+}

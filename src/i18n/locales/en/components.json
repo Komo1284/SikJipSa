@@ -1,1 +1,78 @@
-{}
+{
+  "notifications": {
+    "title": "Notifications",
+    "emptyTitle": "No new notifications",
+    "emptyDescription": "Plants that need care today will show up here.",
+    "water": "Water",
+    "fert": "Fertilize",
+    "repot": "Repot",
+    "daysOverdue": "{{n}} days overdue",
+    "tomorrow": "Tomorrow",
+    "daysLater": "In {{n}} days",
+    "monthsAgo": "{{n}} months ago"
+  },
+  "careLog": {
+    "water": {
+      "title": "Water",
+      "verb": "Watered",
+      "placeholder": "A quick note"
+    },
+    "fert": {
+      "title": "Fertilize",
+      "verb": "Fertilized",
+      "placeholder": "e.g. Hyponex 1:1000"
+    },
+    "prune": {
+      "title": "Prune",
+      "verb": "Pruned",
+      "placeholder": "e.g. Trimmed long vines by 15cm"
+    },
+    "repot": {
+      "title": "Repot",
+      "verb": "Repotted",
+      "placeholder": "e.g. One size up / sphagnum mix"
+    },
+    "whenLabel": "When did you do it?",
+    "yesterday": "Yesterday",
+    "dayBeforeYesterday": "2 days ago",
+    "daysAgo": "{{n}} days ago",
+    "pickAnotherDate": "Pick another date",
+    "openCalendar": "Open calendar",
+    "memoLabel": "Note (optional)"
+  },
+  "syncBanner": {
+    "offlinePending": "Offline — {{n}} records are waiting to sync",
+    "offlineNoPending": "Offline — records are saved and will sync once you're back online",
+    "syncing": "Syncing — {{n}} left"
+  },
+  "calendar": {
+    "dayLabels": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "monthNames": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "monthHeader": "{{month}} {{year}}"
+  },
+  "tabBar": {
+    "home": "Home",
+    "plants": "Plants",
+    "schedule": "Schedule",
+    "me": "Me"
+  },
+  "taskRow": {
+    "water": "Water · {{label}}"
+  },
+  "waterButton": {
+    "justWatered": "Just watered",
+    "water": "Water"
+  },
+  "sidebar": {
+    "home": "Home",
+    "myPlants": "My Plants",
+    "schedule": "Schedule",
+    "settings": "Settings",
+    "spaces": "Spaces",
+    "all": "All",
+    "addPlant": "Add plant"
+  },
+  "desktopHeader": {
+    "searchPlaceholder": "Search by name or botanical name…"
+  }
+}
